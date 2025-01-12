@@ -143,13 +143,16 @@ def get_image_mbta() -> Image.Image:
     lechmere_predictions = [("Lechmere", "#FFAA00", time) for time in get_predictions("2698", "80", 1)]
 
     time_str = datetime.datetime.now().strftime("%H:%M")
-    draw.text((0, 1), f"MBTA    {time_str:>5}", font=font, fill="#FFAA00")
+    draw.text((1, 1), "MBTA", font=font, fill="#FFAA00")
+    draw.text((39, 1), f"{time_str:>5}", font=font, fill="#FFAA00")
 
     predictions = [*heath_predictions, *medfd_predictions, *sullivan_predictions, *davis_predictions, *arlington_predictions, *lechmere_predictions]
     predictions.sort(key=lambda x: x[2])
 
     for i, (label, color, wait) in list(enumerate(predictions))[:6]:
         time_str = str(int(wait / datetime.timedelta(minutes=1)))
-        draw.text((0, 12 + 9 * i), f"{label:<8} {time_str:>2} m", font=font, fill=color)
+        draw.text((1, 12 + 9 * i), f"{label:<8}", font=font, fill=color)
+        draw.text((47, 12 + 9 * i), f"{time_str:>2}", font=font, fill=color)
+        draw.text((59, 12 + 9 * i), "m", font=font, fill=color)
 
     return image

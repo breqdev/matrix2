@@ -31,15 +31,16 @@ def get_image_bluebikes() -> Image.Image:
         status[sta_id] = sta_status
 
     time_str = datetime.datetime.now().strftime("%H:%M")
-    draw.text((0, 1), f"Bikes   {time_str:>5}", font=font, fill="#2CA3E1")
+    draw.text((1, 1), "Bikes", font=font, fill="#2CA3E1")
+    draw.text((39, 1), f"{time_str:>5}", font=font, fill="#2CA3E1")
 
     for i, (sta_id, info) in enumerate(status.items()):
-        draw.text((0, 10 + 18 * i), text=STATIONS[sta_id], font=font, fill="#999999")
-        image.paste(Image.open("icons/bike.png"), (0, 18 + 18 * i))
-        draw.text((11, 18 + 18 * i), text=f"{info['num_bikes_available']:0>2}", font=font, fill="#2CA3E1")
-        image.paste(Image.open("icons/ebike.png"), (24, 18 + 18 * i))
-        draw.text((30, 18 + 18 * i), text=f"{info['num_ebikes_available']:0>2}", font=font, fill="#b6d3d4")
-        image.paste(Image.open("icons/parking.png"), (44, 18 + 18 * i))
-        draw.text((52, 18 + 18 * i), text=f"{info['num_docks_available']:0>2}", font=font, fill="#4254f5")
+        draw.text((1, 10 + 18 * i), text=STATIONS[sta_id], font=font, fill="#999999")
+        image.paste(Image.open("icons/bike.png"), (1, 18 + 18 * i))
+        draw.text((12, 18 + 18 * i), text=f"{info['num_bikes_available']:0>2}", font=font, fill="#2CA3E1")
+        image.paste(Image.open("icons/ebike.png"), (25, 18 + 18 * i))
+        draw.text((31, 18 + 18 * i), text=f"{info['num_ebikes_available']:0>2}", font=font, fill="#b6d3d4")
+        image.paste(Image.open("icons/parking.png"), (45, 18 + 18 * i))
+        draw.text((53, 18 + 18 * i), text=f"{info['num_docks_available']:0>2}", font=font, fill="#4254f5")
 
     return image

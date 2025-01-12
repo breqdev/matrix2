@@ -1,4 +1,5 @@
 import time
+import datetime
 
 from PIL import Image
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
@@ -25,17 +26,20 @@ try:
     while True:
         tick += 1
 
-        match tick % 4:
-            case 0:
-                image: Image.Image | None = get_image_mbta()
-            case 1:
-                image = get_image_spotify()
-            case 2:
-                image = get_image_weather()
-            case 3:
-                image = get_image_bluebikes()
-            case _:
-                image = None
+        image: Image.Image | None = None
+
+        if datetime.datetime.now().strftime("%H:%M") in ["11:11", "23:11"]:
+            image = get_image_fish()
+        else:
+            match tick % 4:
+                case 0:
+                    image = get_image_mbta()
+                case 1:
+                    image = get_image_spotify()
+                case 2:
+                    image = get_image_weather()
+                case 3:
+                    image = get_image_bluebikes()
 
         if not image:
             continue

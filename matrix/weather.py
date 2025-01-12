@@ -25,7 +25,8 @@ def get_image_weather() -> Image.Image:
 
     date_str = datetime.datetime.now().strftime("%m/%d")
     time_str = datetime.datetime.now().strftime("%H:%M")
-    draw.text((0, 1), f"{date_str:<5}   {time_str:>5}", font=font, fill="#ffffff")
+    draw.text((1, 1), f"{date_str:<5}", font=font, fill="#ffffff")
+    draw.text((39, 1), f"{time_str:>5}", font=font, fill="#ffffff")
 
     data = requests.get(weather_url).json()
 
@@ -112,8 +113,10 @@ def get_image_weather() -> Image.Image:
     draw.text((57, 27), "C", font=bigfont, fill="#ffffff")
 
     draw.line((4, 51, 6, 49, 8, 51), fill="#ffffff")
-    draw.text((14, 47), f"{temp_max_f:>2}°F  {temp_max_c:>2}°C", font=font, fill="#ffffff")
+    draw.text((14, 47), f"{temp_max_f:>2}°F", font=font, fill="#ffffff")
+    draw.text((40, 47), f"{temp_max_c:>2}°C", font=font, fill="#ffffff")
     draw.line((4, 57, 6, 59, 8, 57), fill="#ffffff")
-    draw.text((14, 55), f"{temp_min_f:>2}°F  {temp_min_c:>2}°C", font=font, fill="#ffffff")
+    draw.text((14, 55), f"{temp_min_f:>2}°F", font=font, fill="#ffffff")
+    draw.text((40, 55), f"{temp_min_c:>2}°C", font=font, fill="#ffffff")
 
     return image
