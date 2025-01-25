@@ -9,12 +9,6 @@ from spotipy.oauth2 import SpotifyOAuth
 
 scope = "user-read-currently-playing user-read-playback-state"
 
-cache_dir = '.cache'
-if not os.path.exists(cache_dir):
-    os.makedirs(cache_dir)
-
-os.chmod(cache_dir, 0o777)
-
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope, open_browser=False))
 
 

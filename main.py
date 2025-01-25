@@ -1,5 +1,6 @@
 import time
 import datetime
+import logging
 
 from PIL import Image
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
@@ -13,13 +14,17 @@ from matrix.fish import get_image_fish
 from matrix.mbta import get_image_mbta
 from matrix.spotify import get_image_spotify
 from matrix.weather import get_image_weather
+from matrix.no_connection import get_image_no_connection
 
 
 matrix_options = RGBMatrixOptions()
 matrix_options.rows = 64
 matrix_options.cols = 64
+matrix_options.drop_privileges = False
 
 matrix = RGBMatrix(options=matrix_options)
+
+logger = logging.getLogger(__name__)
 
 try:
     tick = 0
@@ -28,18 +33,22 @@ try:
 
         image: Image.Image | None = None
 
-        if datetime.datetime.now().strftime("%H:%M") in ["11:11", "23:11"]:
-            image = get_image_fish()
-        else:
-            match tick % 4:
-                case 0:
-                    image = get_image_mbta()
-                case 1:
-                    image = get_image_spotify()
-                case 2:
-                    image = get_image_weather()
-                case 3:
-                    image = get_image_bluebikes()
+        try:
+            if datetime.datetime.now().strftime("%H:%M") in ["11:11", "23:11"]:
+                image = get_image_fish()
+            else:
+                match tick % 4:
+                    case 0:
+                        image = get_image_mbta()
+                    case 1:
+                        image = get_image_spotify()
+                    case 2:
+                        image = get_image_weather()
+                    case 3:
+                        image = get_image_bluebikes()
+        except Exception as e:
+            logger.exception("Exception during rendering", exc_info=e)
+            image = get_image_no_connection()
 
         if not image:
             continue
