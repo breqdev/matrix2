@@ -1,7 +1,6 @@
 from typing import Optional
 from PIL import Image
 import requests
-import os
 import io
 
 import spotipy
@@ -9,14 +8,30 @@ from spotipy.oauth2 import SpotifyOAuth
 
 scope = "user-read-currently-playing user-read-playback-state"
 
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope, open_browser=False))
+# Listed in order of precedence
+SPOTIFY_ACCOUNTS = [
+    "Brooke",
+    "Ava",
+]
+
+spotify_clients: dict[str, spotipy.Spotify] = {}
+
+
+for account in SPOTIFY_ACCOUNTS:
+    print(f"Logging in {account}...")
+    auth_manager = SpotifyOAuth(scope=scope, open_browser=False, cache_path=f".spotipy-cache-${account}")
+    sp = spotipy.Spotify(auth_manager=auth_manager)
+    spotify_clients[account] = sp
 
 
 def get_image_spotify() -> Optional[Image.Image]:
     image = Image.new("RGB", (64, 64))
 
-    state = sp.current_user_playing_track()
-    if state is None:
+    for sp in spotify_clients.values():
+        state = sp.current_user_playing_track()
+        if state:
+            break
+    else:
         return None
 
     cover_url = state["item"]["album"]["images"][0]["url"]

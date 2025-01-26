@@ -4,7 +4,7 @@ import datetime
 
 from PIL import Image, ImageDraw
 
-from matrix.fonts import font
+from matrix.fonts import font, smallfont
 
 API_KEY = os.environ["MBTA_TOKEN"]
 
@@ -154,5 +154,11 @@ def get_image_mbta() -> Image.Image:
         draw.text((1, 12 + 9 * i), f"{label:<8}", font=font, fill=color)
         draw.text((47, 12 + 9 * i), f"{time_str:>2}", font=font, fill=color)
         draw.text((59, 12 + 9 * i), "m", font=font, fill=color)
+
+    # TODO: diversions, something like
+    # draw.text((1, 40), "No Green Line", font=smallfont, fill="#ff0000")
+    # draw.text((1, 46), "from Medfd/Tufts", font=smallfont, fill="#ff0000")
+    # draw.text((1, 52), "to North Station", font=smallfont, fill="#ff0000")
+    # draw.text((1, 58), "Use Shuttle Bus", font=smallfont, fill="#ff0000")
 
     return image
