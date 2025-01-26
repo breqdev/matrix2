@@ -149,6 +149,14 @@ def get_image_mbta() -> Image.Image:
     predictions = [*heath_predictions, *medfd_predictions, *sullivan_predictions, *davis_predictions, *arlington_predictions, *lechmere_predictions]
     predictions.sort(key=lambda x: x[2])
 
+    if len(predictions) == 0:
+        image.paste(Image.open("icons/train_sleeping.png"), (16, 11))
+
+        draw.text((7, 45), "trains are", font=font, fill="#FFAA00")
+        draw.text((7, 54), " sleeping", font=font, fill="#FFAA00")
+
+        return image
+
     for i, (label, color, wait) in list(enumerate(predictions))[:6]:
         time_str = str(int(wait / datetime.timedelta(minutes=1)))
         draw.text((1, 12 + 9 * i), f"{label:<8}", font=font, fill=color)
