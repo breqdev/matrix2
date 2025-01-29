@@ -29,7 +29,7 @@ def get_image_spotify() -> Optional[Image.Image]:
 
     for sp in spotify_clients.values():
         state = sp.current_user_playing_track()
-        if state:
+        if state and state["item"]:
             break
     else:
         return None
