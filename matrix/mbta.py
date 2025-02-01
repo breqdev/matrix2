@@ -1,14 +1,18 @@
 import os
 import requests
 import datetime
+from typing import Literal
 
 from PIL import Image, ImageDraw
 
-from matrix.fonts import font, smallfont
+from matrix.fonts import font
 
 API_KEY = os.environ["MBTA_TOKEN"]
 
-def get_predictions(origin: str, route: str, direction: int) -> list[datetime.timedelta]:
+
+def get_predictions(
+    origin: str, route: str, direction: int
+) -> list[tuple[datetime.timedelta, Literal["prediction", "schedule"]]]:
     predictions_response = requests.get(
         "https://api-v3.mbta.com/predictions",
         params={
@@ -28,13 +32,13 @@ def get_predictions(origin: str, route: str, direction: int) -> list[datetime.ti
 
     current_time = datetime.datetime.now()
 
-    realtime_times: list[datetime.timedelta] = []
+    results: list[tuple[datetime.timedelta, Literal["prediction", "schedule"]]] = []
 
     # Pull from realtime predictions first
     realtime_trips = set()
 
     for prediction in predictions:
-        if len(realtime_times) >= 2:
+        if len(results) >= 2:
             break
 
         trip_id = prediction["relationships"]["trip"]["data"]["id"]
@@ -56,11 +60,10 @@ def get_predictions(origin: str, route: str, direction: int) -> list[datetime.ti
         if wait_time >= datetime.timedelta(minutes=100):
             continue
 
-        realtime_times.append(wait_time)
+        results.append((wait_time, "prediction"))
 
-    if len(realtime_times) >= 2:
-        return realtime_times
-
+    if len(results) >= 2:
+        return results
 
     # Handle mapping the current date/time to the service date/time
     # The current date/time and service date/time are the same UNLESS
@@ -103,9 +106,8 @@ def get_predictions(origin: str, route: str, direction: int) -> list[datetime.ti
     schedules = schedule_response.json()["data"]
 
     # Then, pull from schedules
-    scheduled_times: list[datetime.timedelta] = []
     for schedule in schedules:
-        if len(realtime_times) + len(scheduled_times) >= 2:
+        if len(results) >= 2:
             break
 
         trip_id = schedule["relationships"]["trip"]["data"]["id"]
@@ -127,26 +129,48 @@ def get_predictions(origin: str, route: str, direction: int) -> list[datetime.ti
         if wait_time >= datetime.timedelta(minutes=100):
             continue
 
-        scheduled_times.append(wait_time)
+        results.append((wait_time, "schedule"))
 
-    return [*realtime_times, *scheduled_times]
+    return results
+
 
 def get_image_mbta() -> Image.Image:
     image = Image.new("RGB", (64, 64))
     draw = ImageDraw.Draw(image)
 
-    heath_predictions = [("Heath St", "#00ff76", time) for time in get_predictions("place-mgngl", "Green-E", 0)]
-    medfd_predictions = [("Medfd/Tu", "#00ff76", time) for time in get_predictions("place-mgngl", "Green-E", 1)]
-    sullivan_predictions = [("Sullivan", "#FFAA00", time) for time in get_predictions("2698", "89", 1)]
-    davis_predictions = [("Davis", "#FFAA00", time) for time in get_predictions("2735", "89", 0)]
-    arlington_predictions = [("Arlingtn", "#FFAA00", time) for time in get_predictions("2735", "80", 0)]
-    lechmere_predictions = [("Lechmere", "#FFAA00", time) for time in get_predictions("2698", "80", 1)]
+    heath_predictions = [
+        ("Heath St", "#00ff76", *time)
+        for time in get_predictions("place-mgngl", "Green-E", 0)
+    ]
+    medfd_predictions = [
+        ("Medfd/Tu", "#00ff76", *time)
+        for time in get_predictions("place-mgngl", "Green-E", 1)
+    ]
+    sullivan_predictions = [
+        ("Sullivan", "#FFAA00", *time) for time in get_predictions("2698", "89", 1)
+    ]
+    davis_predictions = [
+        ("Davis", "#FFAA00", *time) for time in get_predictions("2735", "89", 0)
+    ]
+    arlington_predictions = [
+        ("Arlingtn", "#FFAA00", *time) for time in get_predictions("2735", "80", 0)
+    ]
+    lechmere_predictions = [
+        ("Lechmere", "#FFAA00", *time) for time in get_predictions("2698", "80", 1)
+    ]
 
     time_str = datetime.datetime.now().strftime("%H:%M")
     draw.text((1, 1), "MBTA", font=font, fill="#FFAA00")
     draw.text((39, 1), f"{time_str:>5}", font=font, fill="#FFAA00")
 
-    predictions = [*heath_predictions, *medfd_predictions, *sullivan_predictions, *davis_predictions, *arlington_predictions, *lechmere_predictions]
+    predictions = [
+        *heath_predictions,
+        *medfd_predictions,
+        *sullivan_predictions,
+        *davis_predictions,
+        *arlington_predictions,
+        *lechmere_predictions,
+    ]
     predictions.sort(key=lambda x: x[2])
 
     if len(predictions) == 0:
@@ -157,8 +181,11 @@ def get_image_mbta() -> Image.Image:
 
         return image
 
-    for i, (label, color, wait) in list(enumerate(predictions))[:6]:
+    for i, (label, color, wait, source) in list(enumerate(predictions))[:6]:
         time_str = str(int(wait / datetime.timedelta(minutes=1)))
+        if source == "schedule":
+            # show scheduled trips in gray to disambiguate
+            color = "#888888"
         draw.text((1, 12 + 9 * i), f"{label:<8}", font=font, fill=color)
         draw.text((47, 12 + 9 * i), f"{time_str:>2}", font=font, fill=color)
         draw.text((59, 12 + 9 * i), "m", font=font, fill=color)
