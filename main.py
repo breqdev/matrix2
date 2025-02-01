@@ -15,6 +15,7 @@ from matrix.mbta import get_image_mbta
 from matrix.spotify import get_image_spotify
 from matrix.weather import get_image_weather
 from matrix.no_connection import get_image_no_connection
+from matrix.transit import get_image_transit
 
 
 matrix_options = RGBMatrixOptions()
@@ -46,6 +47,7 @@ try:
                         image = get_image_weather()
                     case 3:
                         image = get_image_bluebikes()
+                # image = get_image_transit(tick % 2)
         except Exception as e:
             logger.exception("Exception during rendering", exc_info=e)
             image = get_image_no_connection()
