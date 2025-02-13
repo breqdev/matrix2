@@ -9,6 +9,7 @@ dependencies = [
     "requests==2.32.3",
     "spotipy==2.19.0",
     "python-dotenv==1.0.1",
+    "datadog==0.51.0",
 ]
 
 [build-system]
