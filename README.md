@@ -15,3 +15,13 @@
 ## Make a Fish ([makea.fish](http://makea.fish/))
 
 ![](previews/fish.png)
+
+# Development
+Set up a virtual environment and install the requirements:
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -e .
+```
+
+Best of luck after that :)
