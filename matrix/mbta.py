@@ -2,6 +2,7 @@ import os
 import requests
 import datetime
 from typing import Literal
+from concurrent.futures import ThreadPoolExecutor
 
 from PIL import Image, ImageDraw
 
@@ -96,7 +97,7 @@ def get_predictions(
             "page[limit]": "3",
             "filter[date]": service_date.strftime("%Y-%m-%d"),
             "filter[min_time]": f"{service_hour:02}:{service_minute:02}",
-            "filter[max_time]": f"{service_hour+2:02}:{service_minute:02}",
+            "filter[max_time]": f"{service_hour + 2:02}:{service_minute:02}",
             "api_key": API_KEY,
         },
     )
@@ -134,43 +135,36 @@ def get_predictions(
     return results
 
 
+LINE_AND_COLOR_TO_ARGS = {
+    ("Heath St", "#00ff76"): ("place-mgngl", "Green-E", 0),
+    ("Medfd/Tu", "#00ff76"): ("place-mgngl", "Green-E", 1),
+    ("Sullivan", "#FFAA00"): ("2698", "89", 1),
+    ("Davis", "#FFAA00"): ("2735", "89", 0),
+    ("Arlingtn", "#FFAA00"): ("2735", "80", 0),
+    ("Lechmere", "#FFAA00"): ("2698", "80", 1),
+}
+
+
 def get_image_mbta() -> Image.Image:
     image = Image.new("RGB", (64, 64))
     draw = ImageDraw.Draw(image)
 
-    heath_predictions = [
-        ("Heath St", "#00ff76", *time)
-        for time in get_predictions("place-mgngl", "Green-E", 0)
-    ]
-    medfd_predictions = [
-        ("Medfd/Tu", "#00ff76", *time)
-        for time in get_predictions("place-mgngl", "Green-E", 1)
-    ]
-    sullivan_predictions = [
-        ("Sullivan", "#FFAA00", *time) for time in get_predictions("2698", "89", 1)
-    ]
-    davis_predictions = [
-        ("Davis", "#FFAA00", *time) for time in get_predictions("2735", "89", 0)
-    ]
-    arlington_predictions = [
-        ("Arlingtn", "#FFAA00", *time) for time in get_predictions("2735", "80", 0)
-    ]
-    lechmere_predictions = [
-        ("Lechmere", "#FFAA00", *time) for time in get_predictions("2698", "80", 1)
-    ]
+    with ThreadPoolExecutor() as tpe:
+        predictions = [
+            (line, color, *time)
+            for (line, color), times in zip(
+                LINE_AND_COLOR_TO_ARGS,
+                tpe.map(
+                    lambda args: get_predictions(*args), LINE_AND_COLOR_TO_ARGS.values()
+                ),
+            )
+            for time in times
+        ]
 
     time_str = datetime.datetime.now().strftime("%H:%M")
     draw.text((1, 1), "MBTA", font=font, fill="#FFAA00")
     draw.text((39, 1), f"{time_str:>5}", font=font, fill="#FFAA00")
 
-    predictions = [
-        *heath_predictions,
-        *medfd_predictions,
-        *sullivan_predictions,
-        *davis_predictions,
-        *arlington_predictions,
-        *lechmere_predictions,
-    ]
     predictions.sort(key=lambda x: x[2])
 
     if len(predictions) == 0:

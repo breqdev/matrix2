@@ -1,5 +1,6 @@
 import requests
 import datetime
+from concurrent.futures import ThreadPoolExecutor
 
 from PIL import Image, ImageDraw
 
@@ -17,9 +18,17 @@ def get_image_bluebikes() -> Image.Image:
         # "S32007": "Ball Sq",
     }
 
-    all_stations = requests.get(
-        "https://gbfs.lyft.com/gbfs/1.1/bos/en/station_information.json"
-    ).json()
+    with ThreadPoolExecutor() as tpe:
+        all_stations_future = tpe.submit(
+            requests.get,
+            "https://gbfs.lyft.com/gbfs/1.1/bos/en/station_information.json",
+        )
+        all_statuses_future = tpe.submit(
+            requests.get,
+            "https://gbfs.lyft.com/gbfs/1.1/bos/en/station_status.json",
+        )
+
+    all_stations = all_stations_future.result().json()
 
     guids = {}
     for sta_id in STATIONS:
@@ -28,9 +37,7 @@ def get_image_bluebikes() -> Image.Image:
         )
         guids[sta_id] = sta_info["station_id"]
 
-    all_status = requests.get(
-        "https://gbfs.lyft.com/gbfs/1.1/bos/en/station_status.json"
-    ).json()
+    all_status = all_statuses_future.result().json()
 
     status = {}
     for sta_id in STATIONS:
