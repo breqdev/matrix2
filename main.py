@@ -9,6 +9,7 @@ from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
 from dotenv import load_dotenv
 from datadog import initialize, statsd
+from json_log_formatter import JSONFormatter
 
 load_dotenv()
 initialize(statsd_disable_buffering=False)
@@ -30,6 +31,9 @@ matrix_options.drop_privileges = False
 matrix = RGBMatrix(options=matrix_options)
 
 logger = logging.getLogger(__name__)
+handler = logging.FileHandler(filename="/var/log/matrix2.log")
+handler.setFormatter(JSONFormatter())
+logger.addHandler(handler)
 
 IMAGE_GENERATORS: dict[str, Callable[[], Image | None]] = {
     "mbta": get_image_mbta,
@@ -40,19 +44,25 @@ IMAGE_GENERATORS: dict[str, Callable[[], Image | None]] = {
 
 
 def is_eleven_eleven() -> bool:
-    return datetime.datetime.now().strftime("%H:%M") in ["11:11", "23:11"]
+    now = datetime.datetime.now()
+    return now.minute == 11 and now.hour in {11, 23}
 
 
 try:
     for image_type, get_image in cycle(IMAGE_GENERATORS.items()):
         t0 = time.time()
-        tags = [f"image:{image_type}"]
         try:
-            image = get_image_fish() if is_eleven_eleven() else get_image()
-            statsd.gauge("matrix.load_seconds", time.time() - t0, tags=tags)
+            if is_eleven_eleven():
+                image = get_image_fish()
+                image_type = "fish"
+            else:
+                image = get_image()
+            statsd.gauge(
+                "matrix.load_seconds", time.time() - t0, tags=[f"image:{image_type}"]
+            )
         except Exception as e:
             logger.exception("Exception during rendering", exc_info=e)
-            statsd.increment("matrix.exception", tags=tags)
+            statsd.increment("matrix.exception", tags=[f"image:{image_type}"])
             image = get_image_no_connection()
 
         if not image:
