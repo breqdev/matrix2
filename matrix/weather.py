@@ -12,6 +12,11 @@ zip_code = os.getenv("ZIP_CODE", "02145")
 
 weather_url = weather_base_url + "appid=" + weather_api_key + "&zip=" + zip_code
 
+TIME_DATE_COLOR = "#aaaaaa"
+HIGH_COLOR = "#ffa024"
+LOW_COLOR = "#5cc9ff"
+
+
 def k_to_f(k: float) -> float:
     return (k - 273.15) * 9 / 5 + 32
 
@@ -19,14 +24,15 @@ def k_to_f(k: float) -> float:
 def k_to_c(k: float) -> float:
     return k - 273.15
 
+
 def get_image_weather() -> Image.Image:
     image = Image.new("RGB", (64, 64))
     draw = ImageDraw.Draw(image)
 
     date_str = datetime.datetime.now().strftime("%m/%d")
     time_str = datetime.datetime.now().strftime("%H:%M")
-    draw.text((1, 1), f"{date_str:<5}", font=font, fill="#ffffff")
-    draw.text((39, 1), f"{time_str:>5}", font=font, fill="#ffffff")
+    draw.text((1, 1), f"{date_str:<5}", font=font, fill=TIME_DATE_COLOR)
+    draw.text((39, 1), f"{time_str:>5}", font=font, fill=TIME_DATE_COLOR)
 
     data = requests.get(weather_url).json()
 
@@ -104,19 +110,19 @@ def get_image_weather() -> Image.Image:
     is_daytime = icon_code[-1] == "d"
     icon_name = get_icon(data["weather"][0]["id"], is_daytime)
 
-    icon = Image.open(os.path.join("weather-pixel-icons", "32", f"{icon_name}.xbm"))
+    icon = Image.open(os.path.join("icons", "weather", f"{icon_name}.png"))
 
     image.paste(icon, (1, 11))
-    draw.text((36, 13), f"{temp_f:>2}°", font=bigfont, fill="#ffffff")
-    draw.text((57, 13), "F", font=bigfont, fill="#ffffff")
-    draw.text((36, 27), f"{temp_c:>2}°", font=bigfont, fill="#ffffff")
-    draw.text((57, 27), "C", font=bigfont, fill="#ffffff")
+    draw.text((39, 14), f"{temp_f:>2}°", font=bigfont, fill="#ffffff")
+    draw.text((58, 19), "F", font=font, fill=TIME_DATE_COLOR)
+    draw.text((39, 28), f"{temp_c:>2}°", font=bigfont, fill="#ffffff")
+    draw.text((58, 33), "C", font=font, fill=TIME_DATE_COLOR)
 
-    draw.line((4, 51, 6, 49, 8, 51), fill="#ffffff")
-    draw.text((14, 47), f"{temp_max_f:>2}°F", font=font, fill="#ffffff")
-    draw.text((40, 47), f"{temp_max_c:>2}°C", font=font, fill="#ffffff")
-    draw.line((4, 57, 6, 59, 8, 57), fill="#ffffff")
-    draw.text((14, 55), f"{temp_min_f:>2}°F", font=font, fill="#ffffff")
-    draw.text((40, 55), f"{temp_min_c:>2}°C", font=font, fill="#ffffff")
+    draw.line((4, 51, 6, 49, 8, 51), fill=HIGH_COLOR)
+    draw.text((14, 47), f"{temp_max_f:>2}°F", font=font, fill=HIGH_COLOR)
+    draw.text((40, 47), f"{temp_max_c:>2}°C", font=font, fill=HIGH_COLOR)
+    draw.line((4, 57, 6, 59, 8, 57), fill=LOW_COLOR)
+    draw.text((14, 55), f"{temp_min_f:>2}°F", font=font, fill=LOW_COLOR)
+    draw.text((40, 55), f"{temp_min_c:>2}°C", font=font, fill=LOW_COLOR)
 
     return image
