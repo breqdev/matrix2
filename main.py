@@ -13,6 +13,9 @@ from dotenv import load_dotenv
 from datadog import initialize, statsd
 from json_log_formatter import JSONFormatter
 
+load_dotenv()
+initialize(statsd_disable_buffering=False)
+
 # project
 from matrix.bluebikes import get_image_bluebikes
 from matrix.fish import get_image_fish
@@ -21,9 +24,6 @@ from matrix.spotify import get_image_spotify
 from matrix.weather import get_image_weather
 from matrix.no_connection import get_image_no_connection
 from matrix.menu import draw_menu
-
-load_dotenv()
-initialize(statsd_disable_buffering=False)
 
 
 matrix_options = RGBMatrixOptions()

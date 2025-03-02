@@ -1,5 +1,11 @@
+# stdlib
+from dataclasses import dataclass
+
+# 3p
+from gpiozero import RotaryEncoder, Button
 from PIL import Image, ImageDraw
 
+# project
 from matrix.fonts import font
 
 
@@ -24,7 +30,7 @@ def handle_rotation_counter_clockwise():
     SELECTED_OPTION = (SELECTED_OPTION - 1 + len(OPTIONS)) % len(OPTIONS)
 
 
-def draw_menu(encoder) -> Image.Image:
+def draw_menu(encoder: RotaryEncoder) -> Image.Image:
     global SELECTED_OPTION
 
     image = Image.new("RGB", (64, 64))

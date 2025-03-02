@@ -4,6 +4,7 @@ import datetime
 
 from PIL import Image, ImageDraw
 
+from matrix.cache import ttl_cache
 from matrix.fonts import font, bigfont
 
 weather_api_key = os.environ["OPENWEATHERMAP_KEY"]
@@ -25,6 +26,12 @@ def k_to_c(k: float) -> float:
     return k - 273.15
 
 
+@ttl_cache(seconds=600)
+def get_weather_data():
+    return requests.get(weather_url).json()
+
+
+@ttl_cache(seconds=5)
 def get_image_weather() -> Image.Image:
     image = Image.new("RGB", (64, 64))
     draw = ImageDraw.Draw(image)
@@ -34,7 +41,7 @@ def get_image_weather() -> Image.Image:
     draw.text((1, 1), f"{date_str:<5}", font=font, fill=TIME_DATE_COLOR)
     draw.text((39, 1), f"{time_str:>5}", font=font, fill=TIME_DATE_COLOR)
 
-    data = requests.get(weather_url).json()
+    data = get_weather_data()
 
     temp: float = data["main"]["temp"]
     temp_f = int(k_to_f(temp))

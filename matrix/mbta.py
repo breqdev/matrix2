@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from PIL import Image, ImageDraw
 
+from matrix.cache import ttl_cache
 from matrix.fonts import font
 
 API_KEY = os.environ["MBTA_TOKEN"]
@@ -145,6 +146,7 @@ LINE_AND_COLOR_TO_ARGS = {
 }
 
 
+@ttl_cache(30)
 def get_image_mbta() -> Image.Image:
     image = Image.new("RGB", (64, 64))
     draw = ImageDraw.Draw(image)

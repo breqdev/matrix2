@@ -2,8 +2,11 @@ import datetime
 
 from PIL import Image, ImageDraw
 
+from matrix.cache import ttl_cache
 from matrix.fonts import font, bigfont, smallfont
 
+
+@ttl_cache(60)
 def get_image_no_connection() -> Image.Image:
     image = Image.new("RGB", (64, 64))
     draw = ImageDraw.Draw(image)

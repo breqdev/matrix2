@@ -6,6 +6,8 @@ import io
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
+from matrix.cache import ttl_cache
+
 scope = "user-read-currently-playing user-read-playback-state"
 
 # Listed in order of precedence
@@ -19,11 +21,14 @@ spotify_clients: dict[str, spotipy.Spotify] = {}
 
 for account in SPOTIFY_ACCOUNTS:
     print(f"Logging in {account}...")
-    auth_manager = SpotifyOAuth(scope=scope, open_browser=False, cache_path=f".spotipy-cache-${account}")
+    auth_manager = SpotifyOAuth(
+        scope=scope, open_browser=False, cache_path=f".spotipy-cache-${account}"
+    )
     sp = spotipy.Spotify(auth_manager=auth_manager)
     spotify_clients[account] = sp
 
 
+@ttl_cache(seconds=15)
 def get_image_spotify() -> Optional[Image.Image]:
     image = Image.new("RGB", (64, 64))
 

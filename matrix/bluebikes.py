@@ -4,9 +4,11 @@ from concurrent.futures import ThreadPoolExecutor
 
 from PIL import Image, ImageDraw
 
+from matrix.cache import ttl_cache
 from matrix.fonts import font
 
 
+@ttl_cache(seconds=60)
 def get_image_bluebikes() -> Image.Image:
     image = Image.new("RGB", (64, 64))
     draw = ImageDraw.Draw(image)
