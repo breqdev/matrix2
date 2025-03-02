@@ -69,7 +69,7 @@ try:
             if button.is_active:
                 button.wait_for_inactive()
                 print("Moving to display page")
-                state = "display"
+                menu = False
         else:
             image_type, get_image = next(GENERATORS)
 
@@ -101,7 +101,7 @@ try:
             if button.is_active:
                 button.wait_for_inactive()
                 print("Moving to menu page")
-                state = "menu"
+                menu = True
 
 
 finally:
