@@ -7,6 +7,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
 from matrix.cache import ttl_cache
+from matrix.timed import timed
 
 scope = "user-read-currently-playing user-read-playback-state"
 
@@ -27,8 +28,11 @@ for account in SPOTIFY_ACCOUNTS:
     sp = spotipy.Spotify(auth_manager=auth_manager)
     spotify_clients[account] = sp
 
+SPOTIFY_REFRESH_INTERVAL = 15
 
-@ttl_cache(seconds=15)
+
+@ttl_cache(seconds=SPOTIFY_REFRESH_INTERVAL + 1)
+@timed("spotify")
 def get_image_spotify() -> Optional[Image.Image]:
     image = Image.new("RGB", (64, 64))
 

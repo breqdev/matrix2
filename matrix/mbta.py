@@ -8,6 +8,7 @@ from PIL import Image, ImageDraw
 
 from matrix.cache import ttl_cache
 from matrix.fonts import font
+from matrix.timed import timed
 
 API_KEY = os.environ["MBTA_TOKEN"]
 
@@ -145,8 +146,11 @@ LINE_AND_COLOR_TO_ARGS = {
     ("Lechmere", "#FFAA00"): ("2698", "80", 1),
 }
 
+MBTA_REFRESH_INTERVAL = 30
 
-@ttl_cache(30)
+
+@ttl_cache(seconds=MBTA_REFRESH_INTERVAL + 1)
+@timed("mbta")
 def get_image_mbta() -> Image.Image:
     image = Image.new("RGB", (64, 64))
     draw = ImageDraw.Draw(image)

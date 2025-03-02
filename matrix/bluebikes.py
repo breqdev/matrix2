@@ -6,9 +6,14 @@ from PIL import Image, ImageDraw
 
 from matrix.cache import ttl_cache
 from matrix.fonts import font
+from matrix.timed import timed
 
 
-@ttl_cache(seconds=60)
+BLUEBIKES_REFRESH_INTERVAL = 60
+
+
+@ttl_cache(seconds=BLUEBIKES_REFRESH_INTERVAL + 1)
+@timed("bluebikes")
 def get_image_bluebikes() -> Image.Image:
     image = Image.new("RGB", (64, 64))
     draw = ImageDraw.Draw(image)

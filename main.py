@@ -7,10 +7,11 @@ import logging
 
 # 3p
 from PIL.Image import Image
+from matrix.app import App, Config
 from rgbmatrix import RGBMatrix, RGBMatrixOptions  # type: ignore
 from gpiozero import RotaryEncoder, Button
 from dotenv import load_dotenv
-from datadog import initialize, statsd
+from datadog import initialize
 from json_log_formatter import JSONFormatter
 
 load_dotenv()
@@ -41,22 +42,19 @@ handler = logging.FileHandler(filename="/var/log/matrix2.log")
 handler.setFormatter(JSONFormatter())
 logger.addHandler(handler)
 
-IMAGE_GENERATORS: dict[str, Callable[[], Image | None]] = {
-    "mbta": get_image_mbta,
-    "spotify": get_image_spotify,
-    "weather": get_image_weather,
-    "bluebikes": get_image_bluebikes,
-}
-GENERATORS = cycle(IMAGE_GENERATORS.items())
 
-
-def is_eleven_eleven() -> bool:
-    now = datetime.datetime.now()
-    return now.minute == 11 and now.hour in {11, 23}
-
+try:
+    app = App(Config(), dial, button, logger)
+    prev: Image | None = None
+    for screen in app:
+        if prev is not screen:
+            matrix.SetImage(screen.convert("RGB"))
+            prev = screen
+finally:
+    matrix.Clear()
+raise SystemExit(0)
 
 menu = False
-
 
 try:
     while True:

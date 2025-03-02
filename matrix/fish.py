@@ -3,8 +3,13 @@ import io
 
 from PIL import Image, ImageDraw
 
+from matrix.cache import ttl_cache
 from matrix.fonts import font
+from matrix.timed import timed
 
+
+@ttl_cache(seconds=5)
+@timed("fish")
 def get_image_fish() -> Image.Image:
     image = Image.new("RGB", (64, 64))
     draw = ImageDraw.Draw(image)

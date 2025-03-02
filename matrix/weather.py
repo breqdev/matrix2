@@ -6,6 +6,7 @@ from PIL import Image, ImageDraw
 
 from matrix.cache import ttl_cache
 from matrix.fonts import font, bigfont
+from matrix.timed import timed
 
 weather_api_key = os.environ["OPENWEATHERMAP_KEY"]
 weather_base_url = "https://api.openweathermap.org/data/2.5/weather?"
@@ -31,7 +32,11 @@ def get_weather_data():
     return requests.get(weather_url).json()
 
 
-@ttl_cache(seconds=5)
+WEATHER_REFRESH_INTERVAL = 5
+
+
+@ttl_cache(seconds=WEATHER_REFRESH_INTERVAL + 1)
+@timed("weather")
 def get_image_weather() -> Image.Image:
     image = Image.new("RGB", (64, 64))
     draw = ImageDraw.Draw(image)
