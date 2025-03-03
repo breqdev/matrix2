@@ -31,7 +31,7 @@ class Menu:
     options: list[str] = field(init=False)
     option_displays: list[Callable[[], Image.Image]] = field(init=False)
     selected_option: int = 0  # which option is selected
-    is_option_selected: bool = False  # are we in the main menu or in a sub-menu
+    is_option_selected: bool = False  # true if we are in a sub-menu
 
     def __post_init__(self):
         self.options = [
