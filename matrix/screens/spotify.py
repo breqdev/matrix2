@@ -6,8 +6,8 @@ import io
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
-from matrix.cache import ttl_cache
-from matrix.timed import timed
+from matrix.utils.cache import ttl_cache
+from matrix.utils.timed import timed
 
 scope = "user-read-currently-playing user-read-playback-state"
 
@@ -22,7 +22,9 @@ spotify_clients: dict[str, spotipy.Spotify] = {}
 
 for account in SPOTIFY_ACCOUNTS:
     print(f"Logging in {account}...")
-    auth_manager = SpotifyOAuth(scope=scope, open_browser=False, cache_path=f".spotipy-cache-${account}")
+    auth_manager = SpotifyOAuth(
+        scope=scope, open_browser=False, cache_path=f".spotipy-cache-${account}"
+    )
     sp = spotipy.Spotify(auth_manager=auth_manager)
     spotify_clients[account] = sp
 

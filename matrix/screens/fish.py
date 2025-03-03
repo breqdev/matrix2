@@ -3,9 +3,9 @@ import io
 
 from PIL import Image, ImageDraw
 
-from matrix.cache import ttl_cache
-from matrix.fonts import font
-from matrix.timed import timed
+from matrix.utils.cache import ttl_cache
+from matrix.resources.fonts import font
+from matrix.utils.timed import timed
 
 
 @ttl_cache(seconds=5)

@@ -1,11 +1,11 @@
-from matrix.mbta import get_predictions
+from matrix.screens.mbta import get_predictions
 
 import requests
 import datetime
 
 from PIL import Image, ImageDraw
 
-from matrix.fonts import font
+from matrix.resources.fonts import font
 
 
 def get_image_transit(page: int) -> Image.Image:

@@ -2,8 +2,8 @@ import datetime
 
 from PIL import Image, ImageDraw
 
-from matrix.cache import ttl_cache
-from matrix.fonts import font, bigfont, smallfont
+from matrix.utils.cache import ttl_cache
+from matrix.resources.fonts import font, bigfont, smallfont
 
 
 @ttl_cache(60)

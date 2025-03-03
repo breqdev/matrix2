@@ -6,16 +6,18 @@ from concurrent.futures import ThreadPoolExecutor
 
 from PIL import Image, ImageDraw
 
-from matrix.cache import DEFAULT_IMAGE_TTL, ttl_cache
-from matrix.fonts import font
-from matrix.timed import timed
+from matrix.utils.cache import DEFAULT_IMAGE_TTL, ttl_cache
+from matrix.resources.fonts import font
+from matrix.utils.timed import timed
 
 API_KEY = os.environ["MBTA_TOKEN"]
 
 PredictionType: TypeAlias = Literal["prediction", "schedule"]
 
 
-def get_predictions(origin: str, route: str, direction: int) -> list[tuple[timedelta, PredictionType]]:
+def get_predictions(
+    origin: str, route: str, direction: int
+) -> list[tuple[timedelta, PredictionType]]:
     predictions_response = requests.get(
         "https://api-v3.mbta.com/predictions",
         params={
@@ -151,7 +153,9 @@ def get_all_predictions() -> list[tuple[str, str, timedelta, PredictionType]]:
             (line, color, *time)
             for (line, color), times in zip(
                 LINE_AND_COLOR_TO_ARGS,
-                tpe.map(lambda args: get_predictions(*args), LINE_AND_COLOR_TO_ARGS.values()),
+                tpe.map(
+                    lambda args: get_predictions(*args), LINE_AND_COLOR_TO_ARGS.values()
+                ),
             )
             for time in times
         ]

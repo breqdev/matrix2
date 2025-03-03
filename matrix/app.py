@@ -11,14 +11,14 @@ from PIL.Image import Image
 from gpiozero import RotaryEncoder, Button
 
 # project
-from matrix.bluebikes import get_image_bluebikes
-from matrix.cache import DEFAULT_IMAGE_TTL
-from matrix.fish import get_image_fish
-from matrix.mbta import get_image_mbta
+from matrix.screens.bluebikes import get_image_bluebikes
+from matrix.utils.cache import DEFAULT_IMAGE_TTL
+from matrix.screens.fish import get_image_fish
+from matrix.screens.mbta import get_image_mbta
 from matrix.menu import Menu
-from matrix.no_connection import get_image_no_connection
-from matrix.spotify import get_image_spotify
-from matrix.weather import get_image_weather
+from matrix.screens.no_connection import get_image_no_connection
+from matrix.screens.spotify import get_image_spotify
+from matrix.screens.weather import get_image_weather
 from matrix.web_ui import run_web_ui
 from matrix.config import Config
 

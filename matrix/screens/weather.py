@@ -4,9 +4,9 @@ import datetime
 
 from PIL import Image, ImageDraw
 
-from matrix.cache import ttl_cache
-from matrix.fonts import font, bigfont
-from matrix.timed import timed
+from matrix.utils.cache import ttl_cache
+from matrix.resources.fonts import font, bigfont
+from matrix.utils.timed import timed
 
 weather_api_key = os.environ["OPENWEATHERMAP_KEY"]
 weather_base_url = "https://api.openweathermap.org/data/2.5/weather?"

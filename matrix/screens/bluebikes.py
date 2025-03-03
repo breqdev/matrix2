@@ -5,9 +5,9 @@ from concurrent.futures import ThreadPoolExecutor
 
 from PIL import Image, ImageDraw
 
-from matrix.cache import DEFAULT_IMAGE_TTL, ttl_cache
-from matrix.fonts import font
-from matrix.timed import timed
+from matrix.utils.cache import DEFAULT_IMAGE_TTL, ttl_cache
+from matrix.resources.fonts import font
+from matrix.utils.timed import timed
 
 
 @ttl_cache(seconds=59)
@@ -42,12 +42,18 @@ def get_image_bluebikes() -> Image.Image:
 
     guids = {}
     for sta_id in STATIONS:
-        sta_info = next(s for s in all_stations["data"]["stations"] if s["short_name"] == sta_id)
+        sta_info = next(
+            s for s in all_stations["data"]["stations"] if s["short_name"] == sta_id
+        )
         guids[sta_id] = sta_info["station_id"]
 
     status = {}
     for sta_id in STATIONS:
-        sta_status = next(s for s in all_status["data"]["stations"] if s["station_id"] == guids[sta_id])
+        sta_status = next(
+            s
+            for s in all_status["data"]["stations"]
+            if s["station_id"] == guids[sta_id]
+        )
         status[sta_id] = sta_status
 
     time_str = datetime.datetime.now().strftime("%H:%M")

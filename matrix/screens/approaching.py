@@ -2,7 +2,7 @@ import datetime
 
 from PIL import Image, ImageDraw
 
-from matrix.fonts import font
+from matrix.resources.fonts import font
 
 
 def get_image_approaching() -> Image.Image:

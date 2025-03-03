@@ -8,8 +8,8 @@ from gpiozero import RotaryEncoder, Button
 from PIL import Image, ImageDraw
 
 # project
-from matrix.fonts import font, bigfont
-from matrix.network import get_network_info
+from matrix.resources.fonts import font, bigfont
+from matrix.utils.network import get_network_info
 from matrix.config import Config
 
 BLANK_IMAGE = Image.new("RGB", (64, 64))
