@@ -10,21 +10,24 @@ class Screen(ABC):
         self.cached_data = None
 
         self.has_data = threading.Event()
+        self.cancel_timer = threading.Event()
 
-        # use this thread to fetch the initial data immediately
-        self.startup_thread = threading.Thread(target=self.handle_timer)
-        self.startup_thread.start()
-
-        # then, run with a timer
-        self.timer = threading.Timer(self.CACHE_TTL, function=self.handle_timer)
-        self.timer.start()
+        self.thread = threading.Thread(target=self.background_fetcher)
+        self.thread.start()
 
     def __del__(self):
-        self.timer.cancel()
+        self.cancel_timer.set()
 
-    def handle_timer(self):
-        self.cached_data = self.fetch_data()
-        self.has_data.set()
+    def background_fetcher(self):
+        while True:
+            try:
+                self.cached_data = self.fetch_data()
+                self.has_data.set()
+            except Exception as e:
+                print(e)
+
+            if self.cancel_timer.wait(timeout=self.CACHE_TTL):
+                return
 
     def fetch_data(self):
         """Fetch the latest data for this screen."""
