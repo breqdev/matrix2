@@ -13,6 +13,16 @@ from matrix.fonts import font
 BLANK_IMAGE = Image.new("RGB", (64, 64))
 
 
+@lru_cache()
+def unimplemented():
+    image = Image.new("RGB", (64, 64))
+    draw = ImageDraw.Draw(image)
+
+    draw.text((0, 1), text="Unimplemented", font=font, fill="#00ffff")
+
+    return image
+
+
 @dataclass
 class Menu:
     dial: RotaryEncoder
@@ -25,17 +35,18 @@ class Menu:
 
     def __post_init__(self):
         self.options = [
+            "Home",
+            "Screen Off",
             "Brightness",
             "Scenes",
             "Network",
-            "Display Off",
-            "Home",
         ]
         self.option_displays = [
+            unimplemented,  # placeholder, Home has custom logic
+            self.draw_display_off,
             self.draw_brightness,
             self.draw_scenes,
             self.draw_network,
-            self.draw_display_off,
         ]
 
     def handle_rotation_clockwise(self):
@@ -74,20 +85,11 @@ class Menu:
 
         return image
 
-    @lru_cache()
-    def unimplemented(self):
-        image = Image.new("RGB", (64, 64))
-        draw = ImageDraw.Draw(image)
-
-        draw.text((0, 1), text="Unimplemented", font=font, fill="#00ffff")
-
-        return image
-
     def draw_scenes(self) -> Image.Image:
-        return self.unimplemented()
+        return unimplemented()
 
     def draw_network(self) -> Image.Image:
-        return self.unimplemented()
+        return unimplemented()
 
     def draw_display_off(self) -> Image.Image:
         return BLANK_IMAGE
@@ -97,11 +99,15 @@ class Menu:
         self.button.wait_for_active(timeout=0.05)
         if not self.button.is_active:
             return False
-
         self.button.wait_for_inactive()
-        if self.selected_option == 4:
+
+        # Home button
+        if self.selected_option == 0:
             return True
+
         self.is_option_selected = not self.is_option_selected
-        if self.selected_option == 3 and not self.is_option_selected:
+
+        # waking up from screen off
+        if self.selected_option == 1 and not self.is_option_selected:
             return True
         return False
