@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime
 from logging import Logger
-from time import sleep
+import time
 
 # 3p
 from PIL.Image import Image
@@ -19,13 +19,8 @@ from matrix.menu import Menu
 from matrix.no_connection import get_image_no_connection
 from matrix.spotify import get_image_spotify
 from matrix.weather import get_image_weather
-
-MAX_BRIGHTNESS = 100
-
-
-@dataclass
-class Config:
-    brightness: int = MAX_BRIGHTNESS
+from matrix.web_ui import run_web_ui
+from matrix.config import Config
 
 
 @dataclass
@@ -43,7 +38,7 @@ class RefreshingImage:
     def refresh(self):
         while True:
             self.fetch()
-            sleep(self.fetch_interval)
+            time.sleep(self.fetch_interval)
 
 
 def is_eleven_eleven() -> bool:
@@ -64,9 +59,10 @@ class App:
     background_executor: ThreadPoolExecutor = field(init=False)
     screen_index: int = 0
     screens: list[RefreshingImage] = field(init=False)
+    next_refresh_time = time.time() + screen_refresh_rate
 
     def __post_init__(self):
-        self.menu = Menu(self.dial, self.button)
+        self.menu = Menu(self.dial, self.button, self.config)
         self.background_executor = ThreadPoolExecutor()
         self.screens = [
             RefreshingImage(get_image_mbta),
@@ -79,9 +75,12 @@ class App:
             self.background_executor.submit(screen.refresh)
 
         self.background_executor.submit(self.rotate_screen)
+        self.background_executor.submit(run_web_ui)
 
         self.dial.when_rotated_clockwise = self.handle_rotation_clockwise
-        self.dial.when_rotated_counter_clockwise = self.handle_rotation_counter_clockwise
+        self.dial.when_rotated_counter_clockwise = (
+            self.handle_rotation_counter_clockwise
+        )
 
     def get_screen(self, index: int) -> Image:
         if all(screen.image is None for screen in self.screens):
@@ -94,18 +93,23 @@ class App:
             self.menu.handle_rotation_clockwise()
         else:
             self.screen_index += 1
+            self.next_refresh_time = time.time() + 10
 
     def handle_rotation_counter_clockwise(self):
         if self.in_menu:
             self.menu.handle_rotation_counter_clockwise()
         else:
             self.screen_index -= 1
+            self.next_refresh_time = time.time() + 10
 
     def rotate_screen(self) -> Image:
         while True:
-            if not self.in_menu:
-                self.handle_rotation_clockwise()
-            sleep(self.screen_refresh_rate)
+            self.screen_index += 1
+            self.next_refresh_time = time.time() + 5
+
+            while time.time() < self.next_refresh_time:
+                # another thread may modify next_refresh_time
+                time.sleep(0.1)
 
     def wait_for_button(self, timeout: float = 0.05):
         self.button.wait_for_active(timeout=timeout)
