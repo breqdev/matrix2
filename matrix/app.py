@@ -1,139 +1,70 @@
 # stdlib
-from collections.abc import Callable
-from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass, field
-from datetime import datetime
 from logging import Logger
-import time
-
-# 3p
-from PIL.Image import Image
-from gpiozero import RotaryEncoder, Button
+import threading
 
 # project
-from matrix.screens.bluebikes import get_image_bluebikes
-from matrix.utils.cache import DEFAULT_IMAGE_TTL
-from matrix.screens.fish import get_image_fish
-from matrix.screens.mbta import get_image_mbta
-from matrix.menu import Menu
-from matrix.screens.no_connection import get_image_no_connection
-from matrix.screens.spotify import get_image_spotify
-from matrix.screens.weather import get_image_weather
 from matrix.web_ui import run_web_ui
-from matrix.config import Config
+from matrix.utils.hardware import Hardware
+
+from matrix.modes.mode import ModeName, BaseMode
+from matrix.modes.main import Main
+from matrix.modes.menu import Menu
+from matrix.modes.off import Off
+from matrix.modes.brightness import Brightness
+from matrix.modes.network import Network
 
 
-@dataclass
-class RefreshingImage:
-    fetcher: Callable[[], Image | None]
-    fetch_interval: int = DEFAULT_IMAGE_TTL
-    image: Image | None = None
-
-    def fetch(self):
-        self.image = self.fetcher() or self.image
-
-    def __post_init__(self):
-        self.fetch()
-
-    def refresh(self):
-        while True:
-            self.fetch()
-            time.sleep(self.fetch_interval)
-
-
-def is_eleven_eleven() -> bool:
-    now = datetime.now()
-    return now.minute == 11 and now.hour in {11, 23}
-
-
-@dataclass
 class App:
-    config: Config
-    dial: RotaryEncoder
-    button: Button
-    log: Logger
+    hardware: Hardware
+    logger: Logger
+    modes: dict[ModeName, BaseMode]
+    active_mode: ModeName
 
-    in_menu: bool = False
-    menu: Menu = field(init=False)
-    screen_refresh_rate: float = 5
-    background_executor: ThreadPoolExecutor = field(init=False)
-    screen_index: int = 0
-    screens: list[RefreshingImage] = field(init=False)
-    next_refresh_time = time.time() + screen_refresh_rate
+    def __init__(self, *, logger: Logger) -> None:
+        self.hardware = Hardware()
+        self.logger = logger
 
-    def __post_init__(self):
-        self.menu = Menu(self.dial, self.button, self.config)
-        self.background_executor = ThreadPoolExecutor()
-        self.screens = [
-            RefreshingImage(get_image_mbta),
-            RefreshingImage(get_image_spotify),
-            RefreshingImage(get_image_weather),
-            RefreshingImage(get_image_bluebikes),
-        ]
+        self.modes = {
+            ModeName.MAIN: Main(self.change_mode),
+            ModeName.MENU: Menu(self.change_mode),
+            ModeName.OFF: Off(self.change_mode),
+            ModeName.BRIGHTNESS: Brightness(self.change_mode),
+            ModeName.NETWORK: Network(self.change_mode),
+        }
+        self.active_mode = ModeName.MAIN
 
-        for screen in self.screens:
-            self.background_executor.submit(screen.refresh)
+        self.ui_thread = threading.Thread(target=run_web_ui)
+        self.ui_thread.start()
 
-        self.background_executor.submit(self.rotate_screen)
-        self.background_executor.submit(run_web_ui)
-
-        self.dial.when_rotated_clockwise = self.handle_rotation_clockwise
-        self.dial.when_rotated_counter_clockwise = (
+        self.hardware.dial.when_rotated_clockwise = self.handle_rotation_clockwise
+        self.hardware.dial.when_rotated_counter_clockwise = (
             self.handle_rotation_counter_clockwise
         )
+        self.hardware.button.when_pressed = self.handle_press
 
-    def get_screen(self, index: int) -> Image:
-        if all(screen.image is None for screen in self.screens):
-            return get_image_no_connection()
-        screens = [screen.image for screen in self.screens if screen.image is not None]
-        return screens[index % len(screens)]
+        self.signal_update = threading.Event()
+
+    def change_mode(self, mode: ModeName) -> None:
+        self.active_mode = mode
 
     def handle_rotation_clockwise(self):
-        if self.in_menu:
-            self.menu.handle_rotation_clockwise()
-        else:
-            self.screen_index += 1
-            self.next_refresh_time = time.time() + 10
+        self.modes[self.active_mode].handle_encoder_clockwise()
+        self.signal_update.set()
 
     def handle_rotation_counter_clockwise(self):
-        if self.in_menu:
-            self.menu.handle_rotation_counter_clockwise()
-        else:
-            self.screen_index -= 1
-            self.next_refresh_time = time.time() + 10
+        self.modes[self.active_mode].handle_encoder_counterclockwise()
+        self.signal_update.set()
 
-    def rotate_screen(self) -> Image:
-        while True:
-            self.screen_index += 1
-            self.next_refresh_time = time.time() + 5
+    def handle_press(self):
+        self.modes[self.active_mode].handle_encoder_push()
+        self.signal_update.set()
 
-            while time.time() < self.next_refresh_time:
-                # another thread may modify next_refresh_time
-                time.sleep(0.1)
-
-    def wait_for_button(self, timeout: float = 0.05):
-        self.button.wait_for_active(timeout=timeout)
-        if self.button.is_active:
-            self.button.wait_for_inactive()
-            self.in_menu = True
-
-    def __next__(self) -> Image:
+    def run(self):
         try:
-            if self.in_menu:
-                exit_menu = self.menu.wait_for_button()
-                if exit_menu:
-                    self.in_menu = False
-                else:
-                    return self.menu.draw()
-
-            self.wait_for_button()
-            if is_eleven_eleven():
-                return get_image_fish()
-
-            return self.get_screen(self.screen_index)
-        except Exception:
-            self.log.exception("Exception during rendering")
-            return get_image_no_connection()
-
-    def __iter__(self):
-        return self
+            while True:
+                image = self.modes[self.active_mode].get_image()
+                self.hardware.matrix.SetImage(image.convert("RGB"))
+                if self.signal_update.wait(timeout=1):
+                    self.signal_update.clear()
+        finally:
+            self.hardware.matrix.Clear()
