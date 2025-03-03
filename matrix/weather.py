@@ -27,16 +27,13 @@ def k_to_c(k: float) -> float:
     return k - 273.15
 
 
-@ttl_cache(seconds=600)
+@ttl_cache(seconds=601)
+@timed("weather")
 def get_weather_data():
     return requests.get(weather_url).json()
 
 
-WEATHER_REFRESH_INTERVAL = 5
-
-
-@ttl_cache(seconds=WEATHER_REFRESH_INTERVAL + 1)
-@timed("weather")
+@ttl_cache(seconds=5)
 def get_image_weather() -> Image.Image:
     image = Image.new("RGB", (64, 64))
     draw = ImageDraw.Draw(image)

@@ -1,0 +1,6 @@
+*.egg-info
+*.pyc
+fonts
+icons
+previews
+venv

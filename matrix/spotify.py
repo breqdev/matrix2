@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any
 from PIL import Image
 import requests
 import io
@@ -22,26 +22,28 @@ spotify_clients: dict[str, spotipy.Spotify] = {}
 
 for account in SPOTIFY_ACCOUNTS:
     print(f"Logging in {account}...")
-    auth_manager = SpotifyOAuth(
-        scope=scope, open_browser=False, cache_path=f".spotipy-cache-${account}"
-    )
+    auth_manager = SpotifyOAuth(scope=scope, open_browser=False, cache_path=f".spotipy-cache-${account}")
     sp = spotipy.Spotify(auth_manager=auth_manager)
     spotify_clients[account] = sp
 
-SPOTIFY_REFRESH_INTERVAL = 15
 
-
-@ttl_cache(seconds=SPOTIFY_REFRESH_INTERVAL + 1)
+@ttl_cache(seconds=16)
 @timed("spotify")
-def get_image_spotify() -> Optional[Image.Image]:
-    image = Image.new("RGB", (64, 64))
-
+def get_spotify_data() -> Any | None:
     for sp in spotify_clients.values():
         state = sp.current_user_playing_track()
         if state and state["item"]:
-            break
-    else:
-        return None
+            return state
+    return None
+
+
+@ttl_cache(seconds=5)
+def get_image_spotify() -> Image.Image | None:
+    image = Image.new("RGB", (64, 64))
+
+    state = get_spotify_data()
+    if not state:
+        return
 
     cover_url = state["item"]["album"]["images"][0]["url"]
     image_data = requests.get(cover_url).content

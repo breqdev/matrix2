@@ -6,6 +6,8 @@ from typing import ParamSpec, TypeVar
 T = TypeVar("T")
 P = ParamSpec("P")
 
+DEFAULT_IMAGE_TTL = 5
+
 
 def ttl_cache(seconds: int):
     """Cache function result for `seconds` time period"""

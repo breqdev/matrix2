@@ -1,5 +1,7 @@
 # stdlib
-from dataclasses import dataclass
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from functools import lru_cache
 
 # 3p
 from gpiozero import RotaryEncoder, Button
@@ -8,47 +10,98 @@ from PIL import Image, ImageDraw
 # project
 from matrix.fonts import font
 
-
-OPTIONS = [
-    "Brightness",
-    "Scenes",
-    "Network",
-    "Power Off",
-    "Home",
-]
-
-SELECTED_OPTION = 0
+BLANK_IMAGE = Image.new("RGB", (64, 64))
 
 
-def handle_rotation_clockwise():
-    global SELECTED_OPTION
-    SELECTED_OPTION = (SELECTED_OPTION + 1) % len(OPTIONS)
+@dataclass
+class Menu:
+    dial: RotaryEncoder
+    button: Button
 
+    options: list[str] = field(init=False)
+    option_displays: list[Callable[[], Image.Image]] = field(init=False)
+    selected_option: int = 0  # which option is selected
+    is_option_selected: bool = False  # are we in the main menu or in a sub-menu
 
-def handle_rotation_counter_clockwise():
-    global SELECTED_OPTION
-    SELECTED_OPTION = (SELECTED_OPTION - 1 + len(OPTIONS)) % len(OPTIONS)
+    def __post_init__(self):
+        self.options = [
+            "Brightness",
+            "Scenes",
+            "Network",
+            "Display Off",
+            "Home",
+        ]
+        self.option_displays = [
+            self.draw_brightness,
+            self.draw_scenes,
+            self.draw_network,
+            self.draw_display_off,
+        ]
 
+    def handle_rotation_clockwise(self):
+        if not self.is_option_selected:
+            self.selected_option = (self.selected_option + 1) % len(self.options)
 
-def draw_menu(encoder: RotaryEncoder) -> Image.Image:
-    global SELECTED_OPTION
+    def handle_rotation_counter_clockwise(self):
+        if not self.is_option_selected:
+            self.selected_option = (self.selected_option - 1 + len(self.options)) % len(self.options)
 
-    image = Image.new("RGB", (64, 64))
-    draw = ImageDraw.Draw(image)
+    def draw(self) -> Image.Image:
+        if self.is_option_selected:
+            return self.option_displays[self.selected_option]()
+        return self.draw_main_menu()
 
-    encoder.when_rotated_clockwise = handle_rotation_clockwise
-    encoder.when_rotated_counter_clockwise = handle_rotation_counter_clockwise
+    def draw_main_menu(self) -> Image.Image:
+        image = Image.new("RGB", (64, 64))
+        draw = ImageDraw.Draw(image)
 
-    draw.text((0, 1), text="  Settings   ", font=font, fill="#00ffff")
+        draw.text((0, 1), text="  Settings   ", font=font, fill="#00ffff")
 
-    for i, name in enumerate(OPTIONS):
-        if SELECTED_OPTION == i:
-            color = "#ffffff"
-        else:
-            color = "#888888"
-        draw.text((1, 12 + 10 * i), text=">", font=font, fill=color)
-        draw.text((12, 12 + 10 * i), text=name, font=font, fill=color)
+        for i, name in enumerate(self.options):
+            color = "#ffffff" if self.selected_option == i else "#888888"
+            draw.text((1, 12 + 10 * i), text=">", font=font, fill=color)
+            draw.text((12, 12 + 10 * i), text=name, font=font, fill=color)
 
-    draw.rectangle((0, 10 + 10 * SELECTED_OPTION, 63, 10 + 10 * SELECTED_OPTION + 9))
+        draw.rectangle((0, 10 + 10 * self.selected_option, 63, 10 + 10 * self.selected_option + 9))
 
-    return image
+        return image
+
+    def draw_brightness(self) -> Image.Image:
+        image = Image.new("RGB", (64, 64))
+        draw = ImageDraw.Draw(image)
+
+        draw.text((0, 1), text="Brightness", font=font, fill="#00ffff")
+
+        return image
+
+    @lru_cache()
+    def unimplemented(self):
+        image = Image.new("RGB", (64, 64))
+        draw = ImageDraw.Draw(image)
+
+        draw.text((0, 1), text="Unimplemented", font=font, fill="#00ffff")
+
+        return image
+
+    def draw_scenes(self) -> Image.Image:
+        return self.unimplemented()
+
+    def draw_network(self) -> Image.Image:
+        return self.unimplemented()
+
+    def draw_display_off(self) -> Image.Image:
+        return BLANK_IMAGE
+
+    def wait_for_button(self) -> bool:
+        """Poll for a button press, returning True we should exit the menu."""
+        self.button.wait_for_active(timeout=0.05)
+        if not self.button.is_active:
+            return False
+
+        self.button.wait_for_inactive()
+        if self.selected_option == 4:
+            return True
+        self.is_option_selected = not self.is_option_selected
+        if self.selected_option == 3 and not self.is_option_selected:
+            return True
+        return False
