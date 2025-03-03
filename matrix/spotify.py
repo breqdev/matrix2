@@ -1,10 +1,13 @@
-from typing import Optional
+from typing import Any
 from PIL import Image
 import requests
 import io
 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+
+from matrix.cache import ttl_cache
+from matrix.timed import timed
 
 scope = "user-read-currently-playing user-read-playback-state"
 
@@ -24,15 +27,23 @@ for account in SPOTIFY_ACCOUNTS:
     spotify_clients[account] = sp
 
 
-def get_image_spotify() -> Optional[Image.Image]:
-    image = Image.new("RGB", (64, 64))
-
+@ttl_cache(seconds=16)
+@timed("spotify")
+def get_spotify_data() -> Any | None:
     for sp in spotify_clients.values():
         state = sp.current_user_playing_track()
         if state and state["item"]:
-            break
-    else:
-        return None
+            return state
+    return None
+
+
+@ttl_cache(seconds=5)
+def get_image_spotify() -> Image.Image | None:
+    image = Image.new("RGB", (64, 64))
+
+    state = get_spotify_data()
+    if not state:
+        return
 
     cover_url = state["item"]["album"]["images"][0]["url"]
     image_data = requests.get(cover_url).content

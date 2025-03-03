@@ -1,19 +1,21 @@
 import os
 import requests
-import datetime
-from typing import Literal
+from datetime import datetime, timedelta
+from typing import Literal, TypeAlias
 from concurrent.futures import ThreadPoolExecutor
 
 from PIL import Image, ImageDraw
 
+from matrix.cache import DEFAULT_IMAGE_TTL, ttl_cache
 from matrix.fonts import font
+from matrix.timed import timed
 
 API_KEY = os.environ["MBTA_TOKEN"]
 
+PredictionType: TypeAlias = Literal["prediction", "schedule"]
 
-def get_predictions(
-    origin: str, route: str, direction: int
-) -> list[tuple[datetime.timedelta, Literal["prediction", "schedule"]]]:
+
+def get_predictions(origin: str, route: str, direction: int) -> list[tuple[timedelta, PredictionType]]:
     predictions_response = requests.get(
         "https://api-v3.mbta.com/predictions",
         params={
@@ -31,9 +33,9 @@ def get_predictions(
 
     predictions = predictions_response.json()["data"]
 
-    current_time = datetime.datetime.now()
+    current_time = datetime.now()
 
-    results: list[tuple[datetime.timedelta, Literal["prediction", "schedule"]]] = []
+    results: list[tuple[timedelta, PredictionType]] = []
 
     # Pull from realtime predictions first
     realtime_trips = set()
@@ -49,16 +51,14 @@ def get_predictions(
             continue
 
         realtime_trips.add(trip_id)
-        departure_time = datetime.datetime.strptime(
-            departure_time, "%Y-%m-%dT%H:%M:%S%z"
-        )
+        departure_time = datetime.strptime(departure_time, "%Y-%m-%dT%H:%M:%S%z")
 
         departure_time = departure_time.replace(tzinfo=None)
         wait_time = departure_time - current_time
 
-        if wait_time <= datetime.timedelta(minutes=0):
+        if wait_time <= timedelta(minutes=0):
             continue
-        if wait_time >= datetime.timedelta(minutes=100):
+        if wait_time >= timedelta(minutes=100):
             continue
 
         results.append((wait_time, "prediction"))
@@ -75,10 +75,10 @@ def get_predictions(
     # We have to rawdog the date representation here bc datetime, quite
     # rationally, won't represent hours above 24 for us
 
-    wall_time = datetime.datetime.now().replace(tzinfo=None)
+    wall_time = datetime.now().replace(tzinfo=None)
 
     if wall_time.hour < 3:
-        service_date = wall_time.date() - datetime.timedelta(days=1)
+        service_date = wall_time.date() - timedelta(days=1)
         service_hour = wall_time.hour + 24
         service_minute = wall_time.minute
     else:
@@ -118,16 +118,14 @@ def get_predictions(
         departure_time = schedule["attributes"]["departure_time"]
         if departure_time is None:
             continue
-        departure_time = datetime.datetime.strptime(
-            departure_time, "%Y-%m-%dT%H:%M:%S%z"
-        )
+        departure_time = datetime.strptime(departure_time, "%Y-%m-%dT%H:%M:%S%z")
 
         departure_time = departure_time.replace(tzinfo=None)
         wait_time = departure_time - current_time
 
-        if wait_time <= datetime.timedelta(minutes=0):
+        if wait_time <= timedelta(minutes=0):
             continue
-        if wait_time >= datetime.timedelta(minutes=100):
+        if wait_time >= timedelta(minutes=100):
             continue
 
         results.append((wait_time, "schedule"))
@@ -145,27 +143,30 @@ LINE_AND_COLOR_TO_ARGS = {
 }
 
 
-def get_image_mbta() -> Image.Image:
-    image = Image.new("RGB", (64, 64))
-    draw = ImageDraw.Draw(image)
-
+@ttl_cache(seconds=31)
+@timed("mbta")
+def get_all_predictions() -> list[tuple[str, str, timedelta, PredictionType]]:
     with ThreadPoolExecutor() as tpe:
         predictions = [
             (line, color, *time)
             for (line, color), times in zip(
                 LINE_AND_COLOR_TO_ARGS,
-                tpe.map(
-                    lambda args: get_predictions(*args), LINE_AND_COLOR_TO_ARGS.values()
-                ),
+                tpe.map(lambda args: get_predictions(*args), LINE_AND_COLOR_TO_ARGS.values()),
             )
             for time in times
         ]
+    predictions.sort(key=lambda x: x[2])
+    return predictions
 
-    time_str = datetime.datetime.now().strftime("%H:%M")
+
+@ttl_cache(seconds=DEFAULT_IMAGE_TTL)
+def get_image_mbta() -> Image.Image:
+    image = Image.new("RGB", (64, 64))
+    draw = ImageDraw.Draw(image)
+    predictions = get_all_predictions()
+    time_str = datetime.now().strftime("%H:%M")
     draw.text((1, 1), "MBTA", font=font, fill="#FFAA00")
     draw.text((39, 1), f"{time_str:>5}", font=font, fill="#FFAA00")
-
-    predictions.sort(key=lambda x: x[2])
 
     if len(predictions) == 0:
         image.paste(Image.open("icons/train_sleeping.png"), (16, 11))
@@ -176,7 +177,7 @@ def get_image_mbta() -> Image.Image:
         return image
 
     for i, (label, color, wait, source) in list(enumerate(predictions))[:6]:
-        time_str = str(int(wait / datetime.timedelta(minutes=1)))
+        time_str = str(int(wait / timedelta(minutes=1)))
         if source == "schedule":
             # show scheduled trips in gray to disambiguate
             color = "#888888"
