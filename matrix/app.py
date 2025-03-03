@@ -23,7 +23,7 @@ class App:
             ModeName.MAIN: Main(self.change_mode),
             ModeName.MENU: Menu(self.change_mode),
             ModeName.OFF: Off(self.change_mode),
-            ModeName.BRIGHTNESS: Brightness(self.change_mode),
+            ModeName.BRIGHTNESS: Brightness(self.change_mode, hardware=self.hardware),
             ModeName.NETWORK: Network(self.change_mode),
         }
         self.active_mode: ModeName = ModeName.MAIN
@@ -32,7 +32,9 @@ class App:
         self.ui_thread.start()
 
         self.hardware.dial.when_rotated_clockwise = self.handle_rotation_clockwise
-        self.hardware.dial.when_rotated_counter_clockwise = self.handle_rotation_counter_clockwise
+        self.hardware.dial.when_rotated_counter_clockwise = (
+            self.handle_rotation_counter_clockwise
+        )
         self.hardware.button.when_pressed = self.handle_press
 
         self.signal_update = threading.Event()
