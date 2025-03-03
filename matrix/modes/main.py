@@ -41,7 +41,7 @@ class Main(BaseMode):
         self.next_refresh_time = time.time() + 10
 
     def handle_encoder_counterclockwise(self):
-        self.screen_index -= 1
+        self.screen_index += len(self.screens) - 1
         self.next_refresh_time = time.time() + 10
 
     def handle_encoder_push(self):
