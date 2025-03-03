@@ -12,7 +12,7 @@ class QRCode(Screen):
 
         qr = qrcode.QRCode(
             version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            error_correction=qrcode.ERROR_CORRECT_L,
             box_size=2,
             border=1,
         )

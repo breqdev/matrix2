@@ -4,12 +4,6 @@ from matrix.resources.fonts import font, bigfont
 
 
 class Brightness(BaseMode):
-    def handle_encoder_clockwise(self):
-        pass
-
-    def handle_encoder_counterclockwise(self):
-        pass
-
     def handle_encoder_push(self):
         self.change_mode(ModeName.MAIN)
 

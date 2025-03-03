@@ -15,31 +15,24 @@ from matrix.modes.network import Network
 
 
 class App:
-    hardware: Hardware
-    logger: Logger
-    modes: dict[ModeName, BaseMode]
-    active_mode: ModeName
-
     def __init__(self, *, logger: Logger) -> None:
         self.hardware = Hardware()
         self.logger = logger
 
-        self.modes = {
+        self.modes: dict[ModeName, BaseMode] = {
             ModeName.MAIN: Main(self.change_mode),
             ModeName.MENU: Menu(self.change_mode),
             ModeName.OFF: Off(self.change_mode),
             ModeName.BRIGHTNESS: Brightness(self.change_mode),
             ModeName.NETWORK: Network(self.change_mode),
         }
-        self.active_mode = ModeName.MAIN
+        self.active_mode: ModeName = ModeName.MAIN
 
         self.ui_thread = threading.Thread(target=run_web_ui)
         self.ui_thread.start()
 
         self.hardware.dial.when_rotated_clockwise = self.handle_rotation_clockwise
-        self.hardware.dial.when_rotated_counter_clockwise = (
-            self.handle_rotation_counter_clockwise
-        )
+        self.hardware.dial.when_rotated_counter_clockwise = self.handle_rotation_counter_clockwise
         self.hardware.button.when_pressed = self.handle_press
 
         self.signal_update = threading.Event()

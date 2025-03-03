@@ -25,11 +25,9 @@ class BaseMode(ABC):
     def handle_encoder_push(self) -> None:
         pass
 
-    @abstractmethod
     def handle_encoder_clockwise(self) -> None:
         pass
 
-    @abstractmethod
     def handle_encoder_counterclockwise(self) -> None:
         pass
 
