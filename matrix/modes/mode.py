@@ -4,7 +4,7 @@ from typing import Callable
 import enum
 
 
-class ModeType(enum.Enum):
+class ModeType(enum.StrEnum):
     MAIN = enum.auto()
     MENU = enum.auto()
     OFF = enum.auto()
