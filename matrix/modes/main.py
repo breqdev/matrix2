@@ -67,11 +67,8 @@ class Main(BaseMode):
 
             try:
                 result = screen.get_image()
-            except Exception as e:
-                logger.exception(
-                    f"Exception drawing image for {screen.__class__.__name__}",
-                    exc_info=e,
-                )
+            except Exception:
+                logger.exception(f"Exception drawing image for {screen.__class__.__name__}")
                 continue
 
             if result is not None:

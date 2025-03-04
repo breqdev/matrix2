@@ -1,12 +1,22 @@
+from collections.abc import Callable
+import logging
 import threading
 import io
 from PIL import Image
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, request
+from werkzeug import serving
+
+logger = logging.getLogger(__name__)
+
+serving._log_add_style = False
 
 
 class WebUI:
     def __init__(
-        self, on_rotation_clockwise, on_rotation_counterclockwise, on_press
+        self,
+        on_rotation_clockwise: Callable[[], None],
+        on_rotation_counterclockwise: Callable[[], None],
+        on_press: Callable[[], None],
     ) -> None:
         self.frame_get = threading.Condition()
         self.frame: bytes | None = None
@@ -15,6 +25,7 @@ class WebUI:
 
         @self.app.route("/")
         def index():
+            logger.info("New connection from %s via '%s'", request.remote_addr, request.user_agent)
             return render_template("index.html")
 
         @self.app.route("/preview")
@@ -27,6 +38,7 @@ class WebUI:
                         self.frame_get.wait()
 
                     frame = self.frame
+                    assert frame
                     yield frame + b"\r\n--frame\r\nContent-Type: image/png\r\n\r\n"
 
             return Response(
