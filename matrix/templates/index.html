@@ -4,9 +4,64 @@
     <meta charset="UTF-8" />
     <title>matrix2</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      h1 {
+        text-align: center;
+        margin: 0;
+      }
+
+      .preview {
+        aspect-ratio: 1 / 1;
+        image-rendering: pixelated;
+        width: 100%;
+        background-color: black;
+      }
+
+      .actions {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      .actions button {
+        font-size: 24px;
+      }
+    </style>
   </head>
 
   <body>
     <h1>matrix2</h1>
+
+    <img class="preview" src="/preview" />
+
+    <div class="actions">
+      <button id="counterclockwise">←</button>
+      <button id="press">◯</button>
+      <button id="clockwise">→</button>
+    </div>
+
+    <script>
+      document
+        .querySelector("#counterclockwise")
+        .addEventListener("click", () => {
+          fetch("/actions/counterclockwise", { method: "POST" });
+        });
+
+      document.querySelector("#clockwise").addEventListener("click", () => {
+        fetch("/actions/clockwise", { method: "POST" });
+      });
+
+      document.querySelector("#press").addEventListener("click", () => {
+        fetch("/actions/press", { method: "POST" });
+      });
+    </script>
   </body>
 </html>

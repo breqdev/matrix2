@@ -3,7 +3,7 @@ from logging import Logger
 import threading
 
 # project
-from matrix.web_ui import run_web_ui
+from matrix.web_ui import WebUI
 from matrix.utils.hardware import Hardware
 
 from matrix.modes.mode import ModeName, BaseMode
@@ -28,12 +28,15 @@ class App:
         }
         self.active_mode: ModeName = ModeName.MAIN
 
-        self.ui_thread = threading.Thread(target=run_web_ui)
-        self.ui_thread.start()
+        self.ui = WebUI(
+            on_rotation_clockwise=self.handle_rotation_clockwise,
+            on_rotation_counterclockwise=self.handle_rotation_counterclockwise,
+            on_press=self.handle_press,
+        )
 
         self.hardware.dial.when_rotated_clockwise = self.handle_rotation_clockwise
         self.hardware.dial.when_rotated_counter_clockwise = (
-            self.handle_rotation_counter_clockwise
+            self.handle_rotation_counterclockwise
         )
         self.hardware.button.when_pressed = self.handle_press
 
@@ -46,7 +49,7 @@ class App:
         self.modes[self.active_mode].handle_encoder_clockwise()
         self.signal_update.set()
 
-    def handle_rotation_counter_clockwise(self):
+    def handle_rotation_counterclockwise(self):
         self.modes[self.active_mode].handle_encoder_counterclockwise()
         self.signal_update.set()
 
@@ -58,6 +61,7 @@ class App:
         try:
             while True:
                 image = self.modes[self.active_mode].get_image()
+                self.ui.send_frame(image)
                 self.hardware.matrix.SetImage(image.convert("RGB"))
                 if self.signal_update.wait(timeout=1):
                     self.signal_update.clear()
