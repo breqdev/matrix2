@@ -2,8 +2,12 @@ from abc import ABC, abstractmethod
 from PIL import Image
 import threading
 import time
+import logging
 
 from datadog.dogstatsd.base import statsd
+
+
+logger = logging.getLogger(__name__)
 
 
 class Screen(ABC):
@@ -33,7 +37,7 @@ class Screen(ABC):
                 )
                 self.has_data.set()
             except Exception as e:
-                print(e)
+                logger.exception("Error while fetching data", exc_info=e)
 
             if self.cancel_timer.wait(timeout=self.CACHE_TTL):
                 return

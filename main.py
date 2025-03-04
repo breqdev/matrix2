@@ -13,11 +13,11 @@ initialize(statsd_disable_buffering=False)
 from matrix.app import App
 
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, handlers=[])
 handler = logging.FileHandler(filename="/var/log/matrix2.log")
 handler.setFormatter(JSONFormatter())
-logger.addHandler(handler)
+# Add our handler to the root logger
+logging.getLogger("").addHandler(handler)
 
-app = App(logger=logger)
+app = App()
 app.run()

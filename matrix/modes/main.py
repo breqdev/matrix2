@@ -1,6 +1,7 @@
 # stdlib
 from datetime import datetime
 import time
+import logging
 
 # project
 from matrix.screens.screen import Screen
@@ -10,6 +11,8 @@ from matrix.screens.mbta import MBTA
 from matrix.screens.spotify import Spotify
 from matrix.screens.weather import Weather
 from matrix.modes.mode import BaseMode, ModeType
+
+logger = logging.getLogger(__name__)
 
 
 def is_eleven_eleven() -> bool:
@@ -24,8 +27,8 @@ class Main(BaseMode):
 
     next_refresh_time = time.time() + screen_refresh_rate
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, change_mode):
+        super().__init__(change_mode)
 
         self.screens = [
             MBTA(),
@@ -60,7 +63,17 @@ class Main(BaseMode):
             self.screen_index += 1
 
         while True:
-            result = self.screens[self.screen_index % len(self.screens)].get_image()
+            screen = self.screens[self.screen_index % len(self.screens)]
+
+            try:
+                result = screen.get_image()
+            except Exception as e:
+                logger.exception(
+                    f"Exception drawing image for {screen.__class__.__name__}",
+                    exc_info=e,
+                )
+                continue
+
             if result is not None:
                 return result
 

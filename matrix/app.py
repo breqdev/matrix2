@@ -1,10 +1,11 @@
 # stdlib
-from logging import Logger
 import threading
+import logging
 
 # project
 from matrix.web_ui import WebUI
 from matrix.utils.hardware import Hardware
+from matrix.utils.no_connection import get_image_no_connection
 
 from matrix.modes.mode import ModeType, BaseMode
 from matrix.modes.main import Main
@@ -14,10 +15,12 @@ from matrix.modes.brightness import Brightness
 from matrix.modes.network import Network
 
 
+logger = logging.getLogger(__name__)
+
+
 class App:
-    def __init__(self, *, logger: Logger) -> None:
+    def __init__(self) -> None:
         self.hardware = Hardware()
-        self.logger = logger
 
         self.modes: dict[ModeType, BaseMode] = {
             ModeType.MAIN: Main(self.change_mode),
@@ -60,7 +63,12 @@ class App:
     def run(self):
         try:
             while True:
-                image = self.modes[self.active_mode].get_image()
+                try:
+                    image = self.modes[self.active_mode].get_image()
+                except Exception as e:
+                    logger.exception("Exception when drawing image", exc_info=e)
+                    image = get_image_no_connection()
+
                 self.ui.send_frame(image)
                 self.hardware.matrix.SetImage(image.convert("RGB"))
                 if self.signal_update.wait(timeout=1):
