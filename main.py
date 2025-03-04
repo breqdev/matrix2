@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO, handlers=[])
 handler = logging.FileHandler(filename="/var/log/matrix2.log")
 handler.setFormatter(JSONFormatter())
 # Add our handler to the root logger
-logging.getLogger("").addHandler(handler)
+logging.root.addHandler(handler)
 
 app = App()
 app.run()
