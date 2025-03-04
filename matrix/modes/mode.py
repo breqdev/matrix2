@@ -5,11 +5,11 @@ import enum
 
 
 class ModeType(enum.Enum):
-    MAIN = "main"
-    MENU = "menu"
-    OFF = "off"
-    BRIGHTNESS = "brightness"
-    NETWORK = "network"
+    MAIN = enum.auto()
+    MENU = enum.auto()
+    OFF = enum.auto()
+    BRIGHTNESS = enum.auto()
+    NETWORK = enum.auto()
 
 
 class BaseMode(ABC):
