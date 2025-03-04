@@ -6,9 +6,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 from PIL import Image, ImageDraw
 
-from matrix.utils.cache import DEFAULT_IMAGE_TTL, ttl_cache
 from matrix.resources.fonts import font
-from matrix.utils.timed import timed
+from matrix.screens.screen import Screen
 
 API_KEY = os.environ["MBTA_TOKEN"]
 
@@ -145,54 +144,54 @@ LINE_AND_COLOR_TO_ARGS = {
 }
 
 
-@ttl_cache(seconds=31)
-@timed("mbta")
-def get_all_predictions() -> list[tuple[str, str, timedelta, PredictionType]]:
-    with ThreadPoolExecutor() as tpe:
-        predictions = [
-            (line, color, *time)
-            for (line, color), times in zip(
-                LINE_AND_COLOR_TO_ARGS,
-                tpe.map(
-                    lambda args: get_predictions(*args), LINE_AND_COLOR_TO_ARGS.values()
-                ),
-            )
-            for time in times
-        ]
-    predictions.sort(key=lambda x: x[2])
-    return predictions
+class MBTA(Screen):
+    CACHE_TTL = 30
 
+    def fetch_data(self):
+        with ThreadPoolExecutor() as tpe:
+            predictions = [
+                (line, color, *time)
+                for (line, color), times in zip(
+                    LINE_AND_COLOR_TO_ARGS,
+                    tpe.map(
+                        lambda args: get_predictions(*args),
+                        LINE_AND_COLOR_TO_ARGS.values(),
+                    ),
+                )
+                for time in times
+            ]
+        predictions.sort(key=lambda x: x[2])
+        return predictions
 
-@ttl_cache(seconds=DEFAULT_IMAGE_TTL)
-def get_image_mbta() -> Image.Image:
-    image = Image.new("RGB", (64, 64))
-    draw = ImageDraw.Draw(image)
-    predictions = get_all_predictions()
-    time_str = datetime.now().strftime("%H:%M")
-    draw.text((1, 1), "MBTA", font=font, fill="#FFAA00")
-    draw.text((39, 1), f"{time_str:>5}", font=font, fill="#FFAA00")
+    def get_image(self):
+        image = Image.new("RGB", (64, 64))
+        draw = ImageDraw.Draw(image)
+        predictions = self.data
+        time_str = datetime.now().strftime("%H:%M")
+        draw.text((1, 1), "MBTA", font=font, fill="#FFAA00")
+        draw.text((39, 1), f"{time_str:>5}", font=font, fill="#FFAA00")
 
-    if len(predictions) == 0:
-        image.paste(Image.open("icons/train_sleeping.png"), (16, 11))
+        if len(predictions) == 0:
+            image.paste(Image.open("icons/train_sleeping.png"), (16, 11))
 
-        draw.text((7, 45), "trains are", font=font, fill="#FFAA00")
-        draw.text((7, 54), " sleeping", font=font, fill="#FFAA00")
+            draw.text((7, 45), "trains are", font=font, fill="#FFAA00")
+            draw.text((7, 54), " sleeping", font=font, fill="#FFAA00")
+
+            return image
+
+        for i, (label, color, wait, source) in list(enumerate(predictions))[:6]:
+            time_str = str(int(wait / timedelta(minutes=1)))
+            if source == "schedule":
+                # show scheduled trips in gray to disambiguate
+                color = "#888888"
+            draw.text((1, 12 + 9 * i), f"{label:<8}", font=font, fill=color)
+            draw.text((47, 12 + 9 * i), f"{time_str:>2}", font=font, fill=color)
+            draw.text((59, 12 + 9 * i), "m", font=font, fill=color)
+
+        # TODO: diversions, something like
+        # draw.text((1, 40), "No Green Line", font=smallfont, fill="#ff0000")
+        # draw.text((1, 46), "from Medfd/Tufts", font=smallfont, fill="#ff0000")
+        # draw.text((1, 52), "to North Station", font=smallfont, fill="#ff0000")
+        # draw.text((1, 58), "Use Shuttle Bus", font=smallfont, fill="#ff0000")
 
         return image
-
-    for i, (label, color, wait, source) in list(enumerate(predictions))[:6]:
-        time_str = str(int(wait / timedelta(minutes=1)))
-        if source == "schedule":
-            # show scheduled trips in gray to disambiguate
-            color = "#888888"
-        draw.text((1, 12 + 9 * i), f"{label:<8}", font=font, fill=color)
-        draw.text((47, 12 + 9 * i), f"{time_str:>2}", font=font, fill=color)
-        draw.text((59, 12 + 9 * i), "m", font=font, fill=color)
-
-    # TODO: diversions, something like
-    # draw.text((1, 40), "No Green Line", font=smallfont, fill="#ff0000")
-    # draw.text((1, 46), "from Medfd/Tufts", font=smallfont, fill="#ff0000")
-    # draw.text((1, 52), "to North Station", font=smallfont, fill="#ff0000")
-    # draw.text((1, 58), "Use Shuttle Bus", font=smallfont, fill="#ff0000")
-
-    return image
