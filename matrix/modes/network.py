@@ -1,18 +1,18 @@
 from collections.abc import Callable
 from typing import NamedTuple
 from PIL import Image, ImageDraw
-from matrix.modes.mode import BaseMode, ModeName
+from matrix.modes.mode import BaseMode, ModeType
 from matrix.resources.fonts import font
 import subprocess
 
 
 class Network(BaseMode):
-    def __init__(self, change_mode: Callable[[ModeName], None]) -> None:
+    def __init__(self, change_mode: Callable[[ModeType], None]) -> None:
         super().__init__(change_mode)
         self.network_info = get_network_info()
 
     def handle_encoder_push(self):
-        self.change_mode(ModeName.MAIN)
+        self.change_mode(ModeType.MAIN)
 
     def get_image(self) -> Image.Image:
         image = Image.new("RGB", (64, 64))

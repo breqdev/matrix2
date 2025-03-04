@@ -6,7 +6,7 @@ import threading
 from matrix.web_ui import WebUI
 from matrix.utils.hardware import Hardware
 
-from matrix.modes.mode import ModeName, BaseMode
+from matrix.modes.mode import ModeType, BaseMode
 from matrix.modes.main import Main
 from matrix.modes.menu import Menu
 from matrix.modes.off import Off
@@ -19,14 +19,14 @@ class App:
         self.hardware = Hardware()
         self.logger = logger
 
-        self.modes: dict[ModeName, BaseMode] = {
-            ModeName.MAIN: Main(self.change_mode),
-            ModeName.MENU: Menu(self.change_mode),
-            ModeName.OFF: Off(self.change_mode),
-            ModeName.BRIGHTNESS: Brightness(self.change_mode, hardware=self.hardware),
-            ModeName.NETWORK: Network(self.change_mode),
+        self.modes: dict[ModeType, BaseMode] = {
+            ModeType.MAIN: Main(self.change_mode),
+            ModeType.MENU: Menu(self.change_mode),
+            ModeType.OFF: Off(self.change_mode),
+            ModeType.BRIGHTNESS: Brightness(self.change_mode, hardware=self.hardware),
+            ModeType.NETWORK: Network(self.change_mode),
         }
-        self.active_mode: ModeName = ModeName.MAIN
+        self.active_mode: ModeType = ModeType.MAIN
 
         self.ui = WebUI(
             on_rotation_clockwise=self.handle_rotation_clockwise,
@@ -42,7 +42,7 @@ class App:
 
         self.signal_update = threading.Event()
 
-    def change_mode(self, mode: ModeName) -> None:
+    def change_mode(self, mode: ModeType) -> None:
         self.active_mode = mode
 
     def handle_rotation_clockwise(self):

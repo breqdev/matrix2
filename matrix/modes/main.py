@@ -9,7 +9,7 @@ from matrix.screens.fish import MakeAFish
 from matrix.screens.mbta import MBTA
 from matrix.screens.spotify import Spotify
 from matrix.screens.weather import Weather
-from matrix.modes.mode import BaseMode, ModeName
+from matrix.modes.mode import BaseMode, ModeType
 
 
 def is_eleven_eleven() -> bool:
@@ -45,7 +45,7 @@ class Main(BaseMode):
         self.next_refresh_time = time.time() + 10
 
     def handle_encoder_push(self):
-        self.change_mode(ModeName.MENU)
+        self.change_mode(ModeType.MENU)
 
     def get_image(self):
         if is_eleven_eleven():

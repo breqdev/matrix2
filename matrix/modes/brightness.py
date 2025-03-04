@@ -1,5 +1,5 @@
 from PIL import Image, ImageDraw
-from matrix.modes.mode import BaseMode, ModeName
+from matrix.modes.mode import BaseMode, ModeType
 from matrix.resources.fonts import font, bigfont
 from matrix.utils.hardware import Hardware
 
@@ -13,7 +13,7 @@ class Brightness(BaseMode):
         self.matrix = hardware.matrix
 
     def handle_encoder_push(self):
-        self.change_mode(ModeName.MAIN)
+        self.change_mode(ModeType.MAIN)
 
     def handle_encoder_clockwise(self):
         if self.matrix.brightness + BRIGHTNESS_STEP >= 100:

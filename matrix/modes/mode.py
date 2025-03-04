@@ -4,7 +4,7 @@ from typing import Callable
 import enum
 
 
-class ModeName(enum.Enum):
+class ModeType(enum.Enum):
     MAIN = "main"
     MENU = "menu"
     OFF = "off"
@@ -13,11 +13,11 @@ class ModeName(enum.Enum):
 
 
 class BaseMode(ABC):
-    change_mode: Callable[[ModeName], None]
+    change_mode: Callable[[ModeType], None]
 
     def __init__(
         self,
-        change_mode: Callable[[ModeName], None],
+        change_mode: Callable[[ModeType], None],
     ) -> None:
         self.change_mode = change_mode
 

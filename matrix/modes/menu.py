@@ -1,22 +1,22 @@
 from dataclasses import dataclass
 from PIL import Image, ImageDraw
 from matrix.resources.fonts import font
-from matrix.modes.mode import BaseMode, ModeName
+from matrix.modes.mode import BaseMode, ModeType
 
 
 @dataclass
 class MenuOption:
     name: str
-    next_mode: ModeName
+    next_mode: ModeType
 
 
 class Menu(BaseMode):
     options: list[MenuOption] = [
-        MenuOption("Home", ModeName.MAIN),
-        MenuOption("Screen Off", ModeName.OFF),
-        MenuOption("Brightness", ModeName.BRIGHTNESS),
-        MenuOption("Scenes", ModeName.MAIN),
-        MenuOption("Network", ModeName.NETWORK),
+        MenuOption("Home", ModeType.MAIN),
+        MenuOption("Screen Off", ModeType.OFF),
+        MenuOption("Brightness", ModeType.BRIGHTNESS),
+        MenuOption("Scenes", ModeType.MAIN),
+        MenuOption("Network", ModeType.NETWORK),
     ]
     selected_option: int = 0  # which option is selected
 
