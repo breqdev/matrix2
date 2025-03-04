@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 from PIL import Image
 import threading
+import time
+
+from datadog.dogstatsd.base import statsd
 
 
 class Screen(ABC):
@@ -21,7 +24,13 @@ class Screen(ABC):
     def background_fetcher(self):
         while True:
             try:
+                t0 = time.time()
                 self.cached_data = self.fetch_data()
+                statsd.gauge(
+                    "matrix.load_seconds",
+                    time.time() - t0,
+                    tags=[f"image:{self.__class__.__name__}"],
+                )
                 self.has_data.set()
             except Exception as e:
                 print(e)
