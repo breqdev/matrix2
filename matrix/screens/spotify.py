@@ -38,19 +38,17 @@ class Spotify(Screen):
         for sp in self.spotify_clients.values():
             state = sp.current_user_playing_track()
             if state and state["item"]:
-                return state
+                cover_url = state["item"]["album"]["images"][0]["url"]
+                image_data = requests.get(cover_url).content
+                return Image.open(io.BytesIO(image_data)).resize((64, 64))
+
         return None
 
     def get_image(self):
         image = Image.new("RGB", (64, 64))
 
-        state = self.data
-        if not state:
+        if self.data is None:
             return None
 
-        cover_url = state["item"]["album"]["images"][0]["url"]
-        image_data = requests.get(cover_url).content
-
-        image.paste(Image.open(io.BytesIO(image_data)).resize((64, 64)))
-
+        image.paste(self.data)
         return image
