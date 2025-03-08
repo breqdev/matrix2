@@ -6,6 +6,8 @@ from matrix.resources.fonts import font
 import subprocess
 import qrcode
 
+from matrix.utils.line_wrap import line_wrap
+
 
 class Network(BaseMode):
     def __init__(self, change_mode: Callable[[ModeType], None]) -> None:
@@ -47,12 +49,14 @@ class Network(BaseMode):
             draw.line((0, 8, 64, 8), fill="#888888")
 
             draw.text((1, 12), text="SSID", font=font, fill="#888888")
-            draw.text((1, 20), text=self.network_info.ssid, font=font, fill="#ffffff")
 
-            draw.text((1, 30), text="IP Address", font=font, fill="#888888")
-            draw.text(
-                (1, 38), text=self.network_info.ip_addr, font=font, fill="#ffffff"
-            )
+            line_y = 20
+            for line in line_wrap(self.network_info.ssid, max_width=12):
+                draw.text((1, line_y), text=line, font=font, fill="#ffffff")
+                line_y += 8
+            line_y += 2
+            draw.text((1, line_y), text="IP Address", font=font, fill="#888888")
+            draw.text((1, line_y + 8), text=self.network_info.ip_addr, font=font, fill="#ffffff")
 
             # draw.text((1, 48), text="IP Address", font=font, fill="#888888")
             # draw.text((1, 56), text=self.network_info.ip_addr, font=font, fill="#ffffff")
