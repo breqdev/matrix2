@@ -63,8 +63,8 @@ class App:
             while True:
                 try:
                     image = self.modes[self.active_mode].get_image()
-                except Exception:
-                    logger.exception("Exception when drawing image")
+                except Exception as e:
+                    logger.exception("Exception when drawing image: %s", e)
                     image = get_image_no_connection()
 
                 self.ui.send_frame(image)

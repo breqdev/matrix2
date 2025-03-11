@@ -36,8 +36,8 @@ class Screen(ABC):
                     tags=[f"image:{self.__class__.__name__}"],
                 )
                 self.has_data.set()
-            except Exception:
-                logger.exception("Error while fetching data")
+            except Exception as e:
+                logger.exception("Error while fetching data: %s", e)
 
             if self.cancel_timer.wait(timeout=self.CACHE_TTL):
                 return
