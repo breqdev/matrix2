@@ -60,6 +60,7 @@ class App:
 
     def run(self):
         try:
+            prev_image = None
             while True:
                 try:
                     image = self.modes[self.active_mode].get_image()
@@ -67,8 +68,10 @@ class App:
                     logger.exception("Exception when drawing image: %s", e)
                     image = get_image_no_connection()
 
-                self.ui.send_frame(image)
-                self.hardware.matrix.SetImage(image.convert("RGB"))
+                if image != prev_image:  # Only send the image if it's different
+                    self.ui.send_frame(image)
+                    self.hardware.matrix.SetImage(image.convert("RGB"))
+                    prev_image = image
                 if self.signal_update.wait(timeout=1):
                     self.signal_update.clear()
         finally:

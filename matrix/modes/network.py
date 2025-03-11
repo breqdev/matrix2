@@ -1,7 +1,6 @@
-from collections.abc import Callable
 from typing import NamedTuple
 from PIL import Image, ImageDraw
-from matrix.modes.mode import BaseMode, ModeType
+from matrix.modes.mode import BaseMode, ChangeMode, ModeType
 from matrix.resources.fonts import font
 import subprocess
 import qrcode
@@ -10,7 +9,7 @@ from matrix.utils.line_wrap import line_wrap
 
 
 class Network(BaseMode):
-    def __init__(self, change_mode: Callable[[ModeType], None]) -> None:
+    def __init__(self, change_mode: ChangeMode) -> None:
         super().__init__(change_mode)
         self.network_info = get_network_info()
 

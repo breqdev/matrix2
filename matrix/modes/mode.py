@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from PIL import Image
-from typing import Callable
+from typing import Callable, TypeAlias
 import enum
 
 
@@ -12,13 +12,13 @@ class ModeType(enum.StrEnum):
     NETWORK = enum.auto()
 
 
-class BaseMode(ABC):
-    change_mode: Callable[[ModeType], None]
+ChangeMode: TypeAlias = Callable[[ModeType], None]
 
-    def __init__(
-        self,
-        change_mode: Callable[[ModeType], None],
-    ) -> None:
+
+class BaseMode(ABC):
+    change_mode: ChangeMode
+
+    def __init__(self, change_mode: ChangeMode) -> None:
         self.change_mode = change_mode
 
     @abstractmethod

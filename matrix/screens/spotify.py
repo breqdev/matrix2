@@ -52,3 +52,7 @@ class Spotify(Screen):
 
         image.paste(self.data)
         return image
+
+    @property
+    def is_active(self):
+        return self.data is not None

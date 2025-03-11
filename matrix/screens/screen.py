@@ -25,6 +25,10 @@ class Screen(ABC):
     def __del__(self):
         self.cancel_timer.set()
 
+    @property
+    def is_active(self):
+        return True
+
     def background_fetcher(self):
         while True:
             try:

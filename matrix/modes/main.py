@@ -1,4 +1,5 @@
 # stdlib
+from collections.abc import Callable
 from datetime import datetime
 import time
 import logging
@@ -10,7 +11,7 @@ from matrix.screens.fish import MakeAFish
 from matrix.screens.mbta import MBTA
 from matrix.screens.spotify import Spotify
 from matrix.screens.weather import Weather
-from matrix.modes.mode import BaseMode, ModeType
+from matrix.modes.mode import BaseMode, ChangeMode, ModeType
 
 logger = logging.getLogger(__name__)
 
@@ -22,29 +23,27 @@ def is_eleven_eleven() -> bool:
 
 class Main(BaseMode):
     screen_refresh_rate: float = 5
-    screen_index: int = 0
-    screens: list[Screen]
 
-    next_refresh_time = time.time() + screen_refresh_rate
-
-    def __init__(self, change_mode):
+    def __init__(self, change_mode: ChangeMode):
         super().__init__(change_mode)
 
-        self.screens = [
+        self.screens: list[Screen] = [
             MBTA(),
             Spotify(),
             Weather(),
             BlueBikes(),
         ]
+        self.screen_index: int = 0
 
         self.fish: MakeAFish | None = None
+        self.next_refresh_time = time.time() + self.screen_refresh_rate
 
     def handle_encoder_clockwise(self):
         self.screen_index += 1
         self.next_refresh_time = time.time() + 10
 
     def handle_encoder_counterclockwise(self):
-        self.screen_index += len(self.screens) - 1
+        self.screen_index -= 1
         self.next_refresh_time = time.time() + 10
 
     def handle_encoder_push(self):
@@ -62,17 +61,14 @@ class Main(BaseMode):
             self.next_refresh_time = time.time() + 5
             self.screen_index += 1
 
+        active_screens = [s for s in self.screens if s.is_active]
         while True:
-            screen = self.screens[self.screen_index % len(self.screens)]
+            screen = active_screens[self.screen_index % len(active_screens)]
 
             try:
-                result = screen.get_image()
+                if result := screen.get_image():
+                    return result
             except Exception as e:
                 logger.exception("Exception drawing image for %s: %s", screen.__class__.__name__, e)
-                continue
 
-            if result is not None:
-                return result
-
-            # the previous one decided to skip, move on
             self.screen_index += 1
