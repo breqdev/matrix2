@@ -54,7 +54,8 @@ class Main(BaseMode):
             if self.fish is None:
                 self.fish = MakeAFish()
             return self.fish.get_image()
-        else:
+        elif self.fish:
+            self.fish.cancel()
             self.fish = None
 
         if time.time() > self.next_refresh_time:

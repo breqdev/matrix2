@@ -22,8 +22,11 @@ class Screen(ABC):
         self.thread = threading.Thread(target=self.background_fetcher)
         self.thread.start()
 
-    def __del__(self):
+    def cancel(self):
         self.cancel_timer.set()
+
+    def __del__(self):
+        self.cancel()
 
     @property
     def is_active(self):
