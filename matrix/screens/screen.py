@@ -10,12 +10,13 @@ from datadog.dogstatsd.base import statsd
 
 logger = logging.getLogger(__name__)
 
+REQUEST_DEFAULT_TIMEOUT = 15
+CACHE_TTL = 60
+
 T = TypeVar("T")
 
 
 class Screen(ABC, Generic[T]):
-    CACHE_TTL = 60
-
     def __init__(self):
         self.cached_data: T
 
@@ -49,7 +50,7 @@ class Screen(ABC, Generic[T]):
             except Exception as e:
                 logger.exception("Error while fetching data: %s", e)
 
-            if self.cancel_timer.wait(timeout=self.CACHE_TTL):
+            if self.cancel_timer.wait(timeout=CACHE_TTL):
                 return
 
     @abstractmethod

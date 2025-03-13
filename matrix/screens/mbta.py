@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font
-from matrix.screens.screen import Screen
+from matrix.screens.screen import Screen, REQUEST_DEFAULT_TIMEOUT
 
 API_KEY = os.environ["MBTA_TOKEN"]
 
@@ -26,6 +26,7 @@ def get_predictions(origin: str, route: str, direction: int) -> list[tuple[timed
             "page[limit]": "3",
             "api_key": API_KEY,
         },
+        timeout=REQUEST_DEFAULT_TIMEOUT,
     )
 
     predictions_response.raise_for_status()
@@ -99,6 +100,7 @@ def get_predictions(origin: str, route: str, direction: int) -> list[tuple[timed
             "filter[max_time]": f"{service_hour + 2:02}:{service_minute:02}",
             "api_key": API_KEY,
         },
+        timeout=REQUEST_DEFAULT_TIMEOUT,
     )
 
     schedule_response.raise_for_status()

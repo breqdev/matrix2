@@ -5,7 +5,7 @@ import io
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
-from matrix.screens.screen import Screen
+from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
 
 scope = "user-read-currently-playing user-read-playback-state"
 
@@ -39,7 +39,7 @@ class Spotify(Screen[Image.Image | None]):
             state = sp.current_user_playing_track()
             if state and state["item"]:
                 cover_url = state["item"]["album"]["images"][0]["url"]
-                image_data = requests.get(cover_url).content
+                image_data = requests.get(cover_url, timeout=REQUEST_DEFAULT_TIMEOUT).content
                 return Image.open(io.BytesIO(image_data)).resize((64, 64))
 
         return None

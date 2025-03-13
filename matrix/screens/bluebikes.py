@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font
-from matrix.screens.screen import Screen
+from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
 
 
 class BlueBikes(Screen[tuple[Any, Any]]):
@@ -17,10 +17,12 @@ class BlueBikes(Screen[tuple[Any, Any]]):
             all_stations_future = tpe.submit(
                 requests.get,
                 "https://gbfs.lyft.com/gbfs/1.1/bos/en/station_information.json",
+                timeout=REQUEST_DEFAULT_TIMEOUT,
             )
             all_statuses_future = tpe.submit(
                 requests.get,
                 "https://gbfs.lyft.com/gbfs/1.1/bos/en/station_status.json",
+                timeout=REQUEST_DEFAULT_TIMEOUT,
             )
 
         return all_stations_future.result().json(), all_statuses_future.result().json()

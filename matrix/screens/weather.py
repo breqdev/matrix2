@@ -6,7 +6,7 @@ import datetime
 from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font, bigfont
-from matrix.screens.screen import Screen
+from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
 
 weather_api_key = os.environ["OPENWEATHERMAP_KEY"]
 weather_base_url = "https://api.openweathermap.org/data/2.5/weather?"
@@ -41,7 +41,7 @@ class Weather(Screen[WeatherData]):
     CACHE_TTL = 600
 
     def fetch_data(self):
-        return requests.get(weather_url).json()
+        return requests.get(weather_url, timeout=REQUEST_DEFAULT_TIMEOUT).json()
 
     def get_image(self):
         image = Image.new("RGB", (64, 64))
