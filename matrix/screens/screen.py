@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Generic, TypeVar
 from PIL import Image
 import threading
 import time
@@ -9,12 +10,14 @@ from datadog.dogstatsd.base import statsd
 
 logger = logging.getLogger(__name__)
 
+T = TypeVar("T")
 
-class Screen(ABC):
+
+class Screen(ABC, Generic[T]):
     CACHE_TTL = 60
 
     def __init__(self):
-        self.cached_data = None
+        self.cached_data: T
 
         self.has_data = threading.Event()
         self.cancel_timer = threading.Event()
@@ -49,9 +52,9 @@ class Screen(ABC):
             if self.cancel_timer.wait(timeout=self.CACHE_TTL):
                 return
 
-    def fetch_data(self):
+    @abstractmethod
+    def fetch_data(self) -> T:
         """Fetch the latest data for this screen."""
-        pass
 
     @property
     def data(self):

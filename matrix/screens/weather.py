@@ -1,4 +1,5 @@
 import os
+from typing import TypedDict
 import requests
 import datetime
 
@@ -26,7 +27,17 @@ def k_to_c(k: float) -> float:
     return k - 273.15
 
 
-class Weather(Screen):
+class WeatherPrediction(TypedDict):
+    id: int
+    icon: str
+
+
+class WeatherData(TypedDict):
+    main: dict[str, float]
+    weather: list[WeatherPrediction]
+
+
+class Weather(Screen[WeatherData]):
     CACHE_TTL = 600
 
     def fetch_data(self):

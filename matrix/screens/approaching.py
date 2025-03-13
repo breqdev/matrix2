@@ -6,7 +6,10 @@ from matrix.resources.fonts import font
 from matrix.screens.screen import Screen
 
 
-class Approaching(Screen):
+class Approaching(Screen[None]):
+    def fetch_data(self):
+        pass
+
     def get_image(self):
         image = Image.new("RGB", (64, 64))
         draw = ImageDraw.Draw(image)

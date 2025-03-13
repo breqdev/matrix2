@@ -16,7 +16,7 @@ SPOTIFY_ACCOUNTS = [
 ]
 
 
-class Spotify(Screen):
+class Spotify(Screen[Image.Image | None]):
     CACHE_TTL = 15
     has_login = False
     spotify_clients: dict[str, spotipy.Spotify] = {}
@@ -45,13 +45,11 @@ class Spotify(Screen):
         return None
 
     def get_image(self):
-        image = Image.new("RGB", (64, 64))
-
-        if self.data is None:
-            return None
-
-        image.paste(self.data)
-        return image
+        if data := self.data:
+            image = Image.new("RGB", (64, 64))
+            image.paste(data)
+            return image
+        return None
 
     @property
     def is_active(self):

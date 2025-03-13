@@ -7,7 +7,7 @@ from matrix.resources.fonts import font
 from matrix.screens.screen import Screen
 
 
-class MakeAFish(Screen):
+class MakeAFish(Screen[Image.Image]):
     CACHE_TTL = 5
 
     def fetch_data(self):

@@ -14,9 +14,7 @@ API_KEY = os.environ["MBTA_TOKEN"]
 PredictionType: TypeAlias = Literal["prediction", "schedule"]
 
 
-def get_predictions(
-    origin: str, route: str, direction: int
-) -> list[tuple[timedelta, PredictionType]]:
+def get_predictions(origin: str, route: str, direction: int) -> list[tuple[timedelta, PredictionType]]:
     predictions_response = requests.get(
         "https://api-v3.mbta.com/predictions",
         params={
@@ -143,8 +141,10 @@ LINE_AND_COLOR_TO_ARGS = {
     ("Lechmere", "#FFAA00"): ("2698", "80", 1),
 }
 
+MbtaData: TypeAlias = list[tuple[str, str, timedelta, PredictionType]]
 
-class MBTA(Screen):
+
+class MBTA(Screen[MbtaData]):
     CACHE_TTL = 30
 
     def fetch_data(self):
