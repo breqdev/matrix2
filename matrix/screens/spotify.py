@@ -53,4 +53,4 @@ class Spotify(Screen[Image.Image | None]):
 
     @property
     def is_active(self):
-        return self.data is not None
+        return self.is_enabled and self.data is not None

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from PIL import Image, ImageDraw
 from matrix.resources.fonts import font
-from matrix.modes.mode import BaseMode, ModeType
+from matrix.modes.mode import BaseMode, ChangeMode, ModeType
 
 
 @dataclass
@@ -11,14 +11,17 @@ class MenuOption:
 
 
 class Menu(BaseMode):
-    options: list[MenuOption] = [
-        MenuOption("Home", ModeType.MAIN),
-        MenuOption("Screen Off", ModeType.OFF),
-        MenuOption("Brightness", ModeType.BRIGHTNESS),
-        MenuOption("Scenes", ModeType.MAIN),
-        MenuOption("Network", ModeType.NETWORK),
-    ]
-    selected_option: int = 0  # which option is selected
+    def __init__(self, change_mode: ChangeMode) -> None:
+        super().__init__(change_mode)
+
+        self.options: list[MenuOption] = [
+            MenuOption("Home", ModeType.MAIN),
+            MenuOption("Screen Off", ModeType.OFF),
+            MenuOption("Brightness", ModeType.BRIGHTNESS),
+            MenuOption("Config", ModeType.CONFIG),
+            MenuOption("Network", ModeType.NETWORK),
+        ]
+        self.selected_option: int = 0  # which option is selected
 
     def handle_encoder_push(self):
         self.change_mode(self.options[self.selected_option].next_mode)
@@ -27,9 +30,7 @@ class Menu(BaseMode):
         self.selected_option = (self.selected_option + 1) % len(self.options)
 
     def handle_encoder_counterclockwise(self):
-        self.selected_option = (self.selected_option - 1 + len(self.options)) % len(
-            self.options
-        )
+        self.selected_option = (self.selected_option - 1) % len(self.options)
 
     def get_image(self) -> Image.Image:
         image = Image.new("RGB", (64, 64))
