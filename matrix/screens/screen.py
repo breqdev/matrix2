@@ -26,6 +26,8 @@ class Screen(ABC, Generic[T]):
         self.thread = threading.Thread(target=self.background_fetcher)
         self.thread.start()
 
+        self.is_enabled = True
+
     def cancel(self):
         self.cancel_timer.set()
 
@@ -34,7 +36,8 @@ class Screen(ABC, Generic[T]):
 
     @property
     def is_active(self):
-        return True
+        """Return if the screen should be displayed"""
+        return self.is_enabled
 
     def background_fetcher(self):
         while True:

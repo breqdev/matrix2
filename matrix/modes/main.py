@@ -1,16 +1,11 @@
 # stdlib
-from collections.abc import Callable
 from datetime import datetime
 import time
 import logging
 
 # project
 from matrix.screens.screen import Screen
-from matrix.screens.bluebikes import BlueBikes
 from matrix.screens.fish import MakeAFish
-from matrix.screens.mbta import MBTA
-from matrix.screens.spotify import Spotify
-from matrix.screens.weather import Weather
 from matrix.modes.mode import BaseMode, ChangeMode, ModeType
 
 logger = logging.getLogger(__name__)
@@ -24,15 +19,10 @@ def is_eleven_eleven() -> bool:
 class Main(BaseMode):
     screen_refresh_rate: float = 5
 
-    def __init__(self, change_mode: ChangeMode):
+    def __init__(self, change_mode: ChangeMode, screens: list[Screen]) -> None:
         super().__init__(change_mode)
 
-        self.screens: list[Screen] = [
-            MBTA(),
-            Spotify(),
-            Weather(),
-            BlueBikes(),
-        ]
+        self.screens = screens
         self.screen_index: int = 0
 
         self.fish: MakeAFish | None = None

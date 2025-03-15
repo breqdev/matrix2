@@ -3,6 +3,12 @@ import threading
 import logging
 
 # project
+from matrix.modes.screens import Screens
+from matrix.screens.bluebikes import BlueBikes
+from matrix.screens.mbta import MBTA
+from matrix.screens.screen import Screen
+from matrix.screens.spotify import Spotify
+from matrix.screens.weather import Weather
 from matrix.web_ui import WebUI
 from matrix.utils.hardware import Hardware
 from matrix.utils.no_connection import get_image_no_connection
@@ -21,10 +27,16 @@ logger = logging.getLogger(__name__)
 class App:
     def __init__(self) -> None:
         self.hardware = Hardware()
-
+        screens: list[Screen] = [
+            MBTA(),
+            Spotify(),
+            Weather(),
+            BlueBikes(),
+        ]
         self.modes: dict[ModeType, BaseMode] = {
-            ModeType.MAIN: Main(self.change_mode),
+            ModeType.MAIN: Main(self.change_mode, screens),
             ModeType.MENU: Menu(self.change_mode),
+            ModeType.SCREENS: Screens(self.change_mode, screens),
             ModeType.OFF: Off(self.change_mode),
             ModeType.BRIGHTNESS: Brightness(self.change_mode, hardware=self.hardware),
             ModeType.NETWORK: Network(self.change_mode),
