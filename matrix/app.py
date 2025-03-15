@@ -3,7 +3,7 @@ import threading
 import logging
 
 # project
-from matrix.modes.config import Config
+from matrix.modes.screens import Screens
 from matrix.screens.bluebikes import BlueBikes
 from matrix.screens.mbta import MBTA
 from matrix.screens.screen import Screen
@@ -36,7 +36,7 @@ class App:
         self.modes: dict[ModeType, BaseMode] = {
             ModeType.MAIN: Main(self.change_mode, screens),
             ModeType.MENU: Menu(self.change_mode),
-            ModeType.CONFIG: Config(self.change_mode, screens),
+            ModeType.SCREENS: Screens(self.change_mode, screens),
             ModeType.OFF: Off(self.change_mode),
             ModeType.BRIGHTNESS: Brightness(self.change_mode, hardware=self.hardware),
             ModeType.NETWORK: Network(self.change_mode),

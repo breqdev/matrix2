@@ -18,7 +18,7 @@ class Menu(BaseMode):
             MenuOption("Home", ModeType.MAIN),
             MenuOption("Screen Off", ModeType.OFF),
             MenuOption("Brightness", ModeType.BRIGHTNESS),
-            MenuOption("Config", ModeType.CONFIG),
+            MenuOption("Screens", ModeType.SCREENS),
             MenuOption("Network", ModeType.NETWORK),
         ]
         self.selected_option: int = 0  # which option is selected

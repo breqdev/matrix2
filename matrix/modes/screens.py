@@ -6,7 +6,7 @@ from matrix.modes.mode import BaseMode, ChangeMode, ModeType
 from matrix.screens.screen import Screen
 
 
-class Config(BaseMode):
+class Screens(BaseMode):
     def __init__(self, change_mode: ChangeMode, screens: list[Screen]) -> None:
         super().__init__(change_mode)
         self.screens = screens

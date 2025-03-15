@@ -10,7 +10,7 @@ class ModeType(enum.StrEnum):
     OFF = enum.auto()
     BRIGHTNESS = enum.auto()
     NETWORK = enum.auto()
-    CONFIG = enum.auto()
+    SCREENS = enum.auto()
 
 
 ChangeMode: TypeAlias = Callable[[ModeType], None]
