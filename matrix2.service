@@ -1,0 +1,10 @@
+[Unit]
+Description=LED matrix driver program.
+
+[Service]
+Type=simple
+ExecStart=python3 main.py
+WorkingDirectory=/home/pi/matrix2
+
+[Install]
+WantedBy=multi-user.target
