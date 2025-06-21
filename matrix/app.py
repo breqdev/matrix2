@@ -44,11 +44,14 @@ class App:
             ModeType.MENU: Menu(self.change_mode),
             ModeType.SCREENS: Screens(self.change_mode, screens),
             ModeType.OFF: Off(self.change_mode),
-            ModeType.BRIGHTNESS: Brightness(self.change_mode, hardware=self.hardware),
         }
 
+        if self.hardware is not None:
+            self.modes[ModeType.BRIGHTNESS] = Brightness(
+                self.change_mode, hardware=self.hardware
+            )
         if sys.platform == "linux":
-            self.modes.append(Network(self.change_mode))
+            self.modes[ModeType.NETWORK] = Network(self.change_mode)
 
         self.active_mode: ModeType = ModeType.MAIN
 

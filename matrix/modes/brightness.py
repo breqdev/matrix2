@@ -12,12 +12,9 @@ BRIGHTNESS_STEP = 10
 
 
 class Brightness(BaseMode):
-    def __init__(self, change_mode: ChangeMode, *, hardware: "Hardware | None"):
+    def __init__(self, change_mode: ChangeMode, *, hardware: "Hardware"):
         super().__init__(change_mode)
-        if hardware:
-            self.matrix = hardware.matrix
-        else:
-            self.matrix = None
+        self.matrix = hardware.matrix
 
     def handle_encoder_push(self):
         self.change_mode(ModeType.MAIN)
