@@ -14,6 +14,8 @@ serving._log_add_style = False
 class WebUI:
     def __init__(
         self,
+        *,
+        port: int,
         on_rotation_clockwise: Callable[[], None],
         on_rotation_counterclockwise: Callable[[], None],
         on_press: Callable[[], None],
@@ -25,7 +27,11 @@ class WebUI:
 
         @self.app.route("/")
         def index():
-            logger.info("New connection from %s via '%s'", request.remote_addr, request.user_agent)
+            logger.info(
+                "New connection from %s via '%s'",
+                request.remote_addr,
+                request.user_agent,
+            )
             return render_template("index.html")
 
         @self.app.route("/preview")
@@ -61,11 +67,11 @@ class WebUI:
             on_press()
             return "", 204
 
-        self.thread = threading.Thread(target=self.run)
+        self.thread = threading.Thread(target=self.run, args=(port,))
         self.thread.start()
 
-    def run(self) -> None:
-        self.app.run("0.0.0.0", 80)
+    def run(self, port: int) -> None:
+        self.app.run("0.0.0.0", port)
 
     def send_frame(self, pil_frame: Image.Image) -> None:
         image_bytes = io.BytesIO()
