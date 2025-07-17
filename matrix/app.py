@@ -47,9 +47,11 @@ class App:
         }
 
         if self.hardware is not None:
-            self.modes[ModeType.BRIGHTNESS] = Brightness(
-                self.change_mode, hardware=self.hardware
-            )
+            self.modes[ModeType.BRIGHTNESS] = Brightness(self.change_mode, hardware=self.hardware)
+            self.hardware.dial.when_rotated_clockwise = self.handle_rotation_clockwise
+            self.hardware.dial.when_rotated_counter_clockwise = self.handle_rotation_counterclockwise
+            self.hardware.button.when_pressed = self.handle_press
+
         if sys.platform == "linux":
             self.modes[ModeType.NETWORK] = Network(self.change_mode)
 
@@ -61,13 +63,6 @@ class App:
             on_rotation_counterclockwise=self.handle_rotation_counterclockwise,
             on_press=self.handle_press,
         )
-
-        if self.hardware is not None:
-            self.hardware.dial.when_rotated_clockwise = self.handle_rotation_clockwise
-            self.hardware.dial.when_rotated_counter_clockwise = (
-                self.handle_rotation_counterclockwise
-            )
-            self.hardware.button.when_pressed = self.handle_press
 
         self.signal_update = threading.Event()
 
