@@ -7,8 +7,11 @@ from matrix.screens.screen import Screen
 
 
 class Approaching(Screen[None]):
-    def fetch_data(self):
-        pass
+    def fetch_data(self) -> None:
+        return None
+
+    def fallback_data(self):
+        return None
 
     def get_image(self):
         image = Image.new("RGB", (64, 64))

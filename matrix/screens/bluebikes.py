@@ -9,7 +9,7 @@ from matrix.resources.fonts import font
 from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
 
 
-class BlueBikes(Screen[tuple[Any, Any]]):
+class BlueBikes(Screen[tuple[Any, Any] | None]):
     CACHE_TTL = 60
 
     def fetch_data(self):
@@ -27,6 +27,9 @@ class BlueBikes(Screen[tuple[Any, Any]]):
 
         return all_stations_future.result().json(), all_statuses_future.result().json()
 
+    def fallback_data(self):
+        return None
+
     def get_image(self):
         image = Image.new("RGB", (64, 64))
         draw = ImageDraw.Draw(image)
@@ -38,24 +41,48 @@ class BlueBikes(Screen[tuple[Any, Any]]):
             # "S32007": "Ball Sq",
         }
 
-        all_stations, all_status = self.data
-
-        guids = {}
-        for sta_id in STATIONS:
-            sta_info = next(s for s in all_stations["data"]["stations"] if s["short_name"] == sta_id)
-            guids[sta_id] = sta_info["station_id"]
-
-        status = {}
-        for sta_id in STATIONS:
-            sta_status = next(s for s in all_status["data"]["stations"] if s["station_id"] == guids[sta_id])
-            status[sta_id] = sta_status
-
         time_str = datetime.datetime.now().strftime("%H:%M")
         draw.text((1, 1), "Bikes", font=font, fill="#2CA3E1")
         draw.text((39, 1), f"{time_str:>5}", font=font, fill="#2CA3E1")
 
+        if self.data is None:
+            time_str = datetime.datetime.now().strftime("%H:%M")
+
+            for i, sta_id in enumerate(STATIONS):
+                draw.text(
+                    (1, 10 + 18 * i), text=STATIONS[sta_id], font=font, fill="#999999"
+                )
+                image.paste(Image.open("icons/bike.png"), (1, 18 + 18 * i))
+                draw.text((12, 19 + 18 * i), text="??", font=font, fill="#2CA3E1")
+                image.paste(Image.open("icons/ebike.png"), (25, 18 + 18 * i))
+                draw.text((31, 19 + 18 * i), text="??", font=font, fill="#b6d3d4")
+                image.paste(Image.open("icons/parking.png"), (45, 18 + 18 * i))
+                draw.text((53, 19 + 18 * i), text="??", font=font, fill="#4254f5")
+
+            return image
+
+        all_stations, all_status = self.data
+
+        guids = {}
+        for sta_id in STATIONS:
+            sta_info = next(
+                s for s in all_stations["data"]["stations"] if s["short_name"] == sta_id
+            )
+            guids[sta_id] = sta_info["station_id"]
+
+        status = {}
+        for sta_id in STATIONS:
+            sta_status = next(
+                s
+                for s in all_status["data"]["stations"]
+                if s["station_id"] == guids[sta_id]
+            )
+            status[sta_id] = sta_status
+
         for i, (sta_id, info) in enumerate(status.items()):
-            draw.text((1, 10 + 18 * i), text=STATIONS[sta_id], font=font, fill="#999999")
+            draw.text(
+                (1, 10 + 18 * i), text=STATIONS[sta_id], font=font, fill="#999999"
+            )
             image.paste(Image.open("icons/bike.png"), (1, 18 + 18 * i))
             draw.text(
                 (12, 19 + 18 * i),

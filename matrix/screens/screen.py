@@ -49,9 +49,11 @@ class Screen(ABC, Generic[T]):
                     time.time() - t0,
                     tags=[f"image:{self.__class__.__name__}"],
                 )
-                self.has_data.set()
             except Exception as e:
                 logger.exception("Error while fetching data: %s", e)
+                self.cached_data = self.fallback_data()
+            finally:
+                self.has_data.set()
 
             if self.cancel_timer.wait(timeout=CACHE_TTL):
                 return
@@ -59,6 +61,11 @@ class Screen(ABC, Generic[T]):
     @abstractmethod
     def fetch_data(self) -> T:
         """Fetch the latest data for this screen."""
+
+    @abstractmethod
+    def fallback_data(self) -> T:
+        """Return fallback data if requesting data fails."""
+        pass
 
     @property
     def data(self) -> T:

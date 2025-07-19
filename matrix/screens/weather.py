@@ -37,11 +37,14 @@ class WeatherData(TypedDict):
     weather: list[WeatherPrediction]
 
 
-class Weather(Screen[WeatherData]):
+class Weather(Screen[WeatherData | None]):
     CACHE_TTL = 600
 
     def fetch_data(self):
         return requests.get(weather_url, timeout=REQUEST_DEFAULT_TIMEOUT).json()
+
+    def fallback_data(self):
+        return None
 
     def get_image(self):
         image = Image.new("RGB", (64, 64))
@@ -51,6 +54,9 @@ class Weather(Screen[WeatherData]):
         time_str = datetime.datetime.now().strftime("%H:%M")
         draw.text((1, 1), f"{date_str:<5}", font=font, fill=TIME_DATE_COLOR)
         draw.text((39, 1), f"{time_str:>5}", font=font, fill=TIME_DATE_COLOR)
+
+        if self.data is None:
+            return image
 
         data = self.data
 

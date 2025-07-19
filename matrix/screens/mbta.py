@@ -14,7 +14,9 @@ API_KEY = os.environ["MBTA_TOKEN"]
 PredictionType: TypeAlias = Literal["prediction", "schedule"]
 
 
-def get_predictions(origin: str, route: str, direction: int) -> list[tuple[timedelta, PredictionType]]:
+def get_predictions(
+    origin: str, route: str, direction: int
+) -> list[tuple[timedelta, PredictionType]]:
     predictions_response = requests.get(
         "https://api-v3.mbta.com/predictions",
         params={
@@ -23,7 +25,7 @@ def get_predictions(origin: str, route: str, direction: int) -> list[tuple[timed
             "filter[direction_id]": str(direction),
             "include": "stop",
             "sort": "arrival_time",
-            "page[limit]": "3",
+            "page[limit]": "5",
             "api_key": API_KEY,
         },
         timeout=REQUEST_DEFAULT_TIMEOUT,
@@ -138,9 +140,9 @@ LINE_AND_COLOR_TO_ARGS = {
     ("Heath St", "#00ff76"): ("place-mgngl", "Green-E", 0),
     ("Medfd/Tu", "#00ff76"): ("place-mgngl", "Green-E", 1),
     ("Sullivan", "#FFAA00"): ("2698", "89", 1),
-    ("Davis", "#FFAA00"): ("2735", "89", 0),
-    ("Arlingtn", "#FFAA00"): ("2735", "80", 0),
-    ("Lechmere", "#FFAA00"): ("2698", "80", 1),
+    # ("Davis", "#FFAA00"): ("2735", "89", 0),
+    # ("Arlingtn", "#FFAA00"): ("2735", "80", 0),
+    # ("Lechmere", "#FFAA00"): ("2698", "80", 1),
 }
 
 MbtaData: TypeAlias = list[tuple[str, str, timedelta, PredictionType]]
@@ -164,6 +166,9 @@ class MBTA(Screen[MbtaData]):
             ]
         predictions.sort(key=lambda x: x[2])
         return predictions
+
+    def fallback_data(self):
+        return []
 
     def get_image(self):
         image = Image.new("RGB", (64, 64))

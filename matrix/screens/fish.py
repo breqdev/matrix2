@@ -11,10 +11,17 @@ class MakeAFish(Screen[Image.Image]):
     CACHE_TTL = 5
 
     def fetch_data(self):
-        data = requests.get("http://makea.fish/fishimg.php?s=11&t=x6362x&f=11", timeout=REQUEST_DEFAULT_TIMEOUT).content
+        data = requests.get(
+            "http://makea.fish/fishimg.php?s=11&t=x6362x&f=11",
+            timeout=REQUEST_DEFAULT_TIMEOUT,
+        ).content
         fish = Image.open(io.BytesIO(data))
         fish.thumbnail((64, 64))
         return fish
+
+    def fallback_data(self):
+        # transparent image
+        return Image.new("RGBA", (64, 64), (0, 0, 0, 0))
 
     def get_image(self):
         image = Image.new("RGB", (64, 64))

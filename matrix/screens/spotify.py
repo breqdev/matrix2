@@ -39,9 +39,14 @@ class Spotify(Screen[Image.Image | None]):
             state = sp.current_user_playing_track()
             if state and state["item"]:
                 cover_url = state["item"]["album"]["images"][0]["url"]
-                image_data = requests.get(cover_url, timeout=REQUEST_DEFAULT_TIMEOUT).content
+                image_data = requests.get(
+                    cover_url, timeout=REQUEST_DEFAULT_TIMEOUT
+                ).content
                 return Image.open(io.BytesIO(image_data)).resize((64, 64))
 
+        return None
+
+    def fallback_data(self):
         return None
 
     def get_image(self):
