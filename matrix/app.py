@@ -1,6 +1,7 @@
 # stdlib
 import threading
 import logging
+import sys
 
 # project
 from matrix.modes.screens import Screens
@@ -10,7 +11,6 @@ from matrix.screens.screen import Screen
 from matrix.screens.spotify import Spotify
 from matrix.screens.weather import Weather
 from matrix.web_ui import WebUI
-from matrix.utils.hardware import Hardware
 from matrix.utils.no_connection import get_image_no_connection
 
 from matrix.modes.mode import ModeType, BaseMode
@@ -25,8 +25,14 @@ logger = logging.getLogger(__name__)
 
 
 class App:
-    def __init__(self) -> None:
-        self.hardware = Hardware()
+    def __init__(self, *, simulation: bool = False) -> None:
+        if simulation:
+            self.hardware = None
+        else:
+            from matrix.utils.hardware import Hardware
+
+            self.hardware = Hardware()
+
         screens: list[Screen] = [
             MBTA(),
             Spotify(),
@@ -38,20 +44,25 @@ class App:
             ModeType.MENU: Menu(self.change_mode),
             ModeType.SCREENS: Screens(self.change_mode, screens),
             ModeType.OFF: Off(self.change_mode),
-            ModeType.BRIGHTNESS: Brightness(self.change_mode, hardware=self.hardware),
-            ModeType.NETWORK: Network(self.change_mode),
         }
+
+        if self.hardware is not None:
+            self.modes[ModeType.BRIGHTNESS] = Brightness(self.change_mode, hardware=self.hardware)
+            self.hardware.dial.when_rotated_clockwise = self.handle_rotation_clockwise
+            self.hardware.dial.when_rotated_counter_clockwise = self.handle_rotation_counterclockwise
+            self.hardware.button.when_pressed = self.handle_press
+
+        if sys.platform == "linux":
+            self.modes[ModeType.NETWORK] = Network(self.change_mode)
+
         self.active_mode: ModeType = ModeType.MAIN
 
         self.ui = WebUI(
+            port=8080 if simulation else 80,
             on_rotation_clockwise=self.handle_rotation_clockwise,
             on_rotation_counterclockwise=self.handle_rotation_counterclockwise,
             on_press=self.handle_press,
         )
-
-        self.hardware.dial.when_rotated_clockwise = self.handle_rotation_clockwise
-        self.hardware.dial.when_rotated_counter_clockwise = self.handle_rotation_counterclockwise
-        self.hardware.button.when_pressed = self.handle_press
 
         self.signal_update = threading.Event()
 
@@ -82,9 +93,11 @@ class App:
 
                 if image != prev_image:  # Only send the image if it's different
                     self.ui.send_frame(image)
-                    self.hardware.matrix.SetImage(image.convert("RGB"))
+                    if self.hardware is not None:
+                        self.hardware.matrix.SetImage(image.convert("RGB"))
                     prev_image = image
                 if self.signal_update.wait(timeout=1):
                     self.signal_update.clear()
         finally:
-            self.hardware.matrix.Clear()
+            if self.hardware is not None:
+                self.hardware.matrix.Clear()

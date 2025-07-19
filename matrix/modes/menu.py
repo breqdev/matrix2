@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from PIL import Image, ImageDraw
 from matrix.resources.fonts import font
 from matrix.modes.mode import BaseMode, ChangeMode, ModeType
+import sys
 
 
 @dataclass
@@ -19,8 +20,11 @@ class Menu(BaseMode):
             MenuOption("Screen Off", ModeType.OFF),
             MenuOption("Brightness", ModeType.BRIGHTNESS),
             MenuOption("Screens", ModeType.SCREENS),
-            MenuOption("Network", ModeType.NETWORK),
         ]
+
+        if sys.platform == "linux":
+            self.options.append(MenuOption("Network", ModeType.NETWORK))
+
         self.selected_option: int = 0  # which option is selected
 
     def handle_encoder_push(self):

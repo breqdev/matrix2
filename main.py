@@ -1,23 +1,37 @@
 # stdlib
 import logging
+import argparse
 
 # 3p
+import datadog
 from dotenv import load_dotenv
-from datadog import initialize
 from json_log_formatter import VerboseJSONFormatter
 
 load_dotenv()
-initialize(statsd_disable_buffering=False)
 
 # project
 from matrix.app import App
 
 
-logging.basicConfig(level=logging.INFO)
-handler = logging.FileHandler(filename="/var/log/matrix2.log")
-handler.setFormatter(VerboseJSONFormatter())
-# Add our handler to the root logger
-logging.root.addHandler(handler)
+parser = argparse.ArgumentParser(
+    prog="matrix2",
+    description="LED matrix display driver",
+)
 
-app = App()
+parser.add_argument("--simulate", action="store_true")
+parser.add_argument("--logfile", default="/var/log/matrix2.log")
+
+args = parser.parse_args()
+
+logging.basicConfig(level=logging.INFO)
+
+if not args.simulate:
+    datadog.initialize(statsd_disable_buffering=False)
+
+    handler = logging.FileHandler(filename=args.logfile)
+    handler.setFormatter(VerboseJSONFormatter())
+    # Add our handler to the root logger
+    logging.root.addHandler(handler)
+
+app = App(simulation=args.simulate)
 app.run()

@@ -17,7 +17,7 @@ T = TypeVar("T")
 
 
 class Screen(ABC, Generic[T]):
-    def __init__(self):
+    def __init__(self) -> None:
         self.cached_data: T
 
         self.has_data = threading.Event()
@@ -28,18 +28,18 @@ class Screen(ABC, Generic[T]):
 
         self.is_enabled = True
 
-    def cancel(self):
+    def cancel(self) -> None:
         self.cancel_timer.set()
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.cancel()
 
     @property
-    def is_active(self):
+    def is_active(self) -> bool:
         """Return if the screen should be displayed"""
         return self.is_enabled
 
-    def background_fetcher(self):
+    def background_fetcher(self) -> None:
         while True:
             try:
                 t0 = time.time()
@@ -61,7 +61,7 @@ class Screen(ABC, Generic[T]):
         """Fetch the latest data for this screen."""
 
     @property
-    def data(self):
+    def data(self) -> T:
         """Return the latest cached data."""
         self.has_data.wait()
         return self.cached_data
