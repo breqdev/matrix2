@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 from PIL import Image, ImageDraw
 
-from matrix.resources.fonts import font
+from matrix.resources.fonts import font, smallfont
 from matrix.screens.screen import Screen, REQUEST_DEFAULT_TIMEOUT
 
 API_KEY = os.environ["MBTA_TOKEN"]
@@ -40,7 +40,7 @@ def get_predictions(line: Line) -> list[Prediction]:
             "filter[direction_id]": str(line.direction_id),
             "include": "stop",
             "sort": "arrival_time",
-            "page[limit]": "5",
+            "page[limit]": "10",
             "api_key": API_KEY,
         },
         timeout=REQUEST_DEFAULT_TIMEOUT,
@@ -58,7 +58,7 @@ def get_predictions(line: Line) -> list[Prediction]:
     realtime_trips = set()
 
     for prediction in predictions:
-        if len(results) >= 2:
+        if len(results) >= 6:
             break
 
         trip_id = prediction["relationships"]["trip"]["data"]["id"]
@@ -80,7 +80,7 @@ def get_predictions(line: Line) -> list[Prediction]:
 
         results.append(Prediction(line=line, eta=wait_time, type="prediction"))
 
-    if len(results) >= 2:
+    if len(results) >= 6:
         return results
 
     # Handle mapping the current date/time to the service date/time
@@ -111,7 +111,7 @@ def get_predictions(line: Line) -> list[Prediction]:
             "filter[direction_id]": str(line.direction_id),
             "include": "stop",
             "sort": "arrival_time",
-            "page[limit]": "3",
+            "page[limit]": "10",
             "filter[date]": service_date.strftime("%Y-%m-%d"),
             "filter[min_time]": f"{service_hour:02}:{service_minute:02}",
             "filter[max_time]": f"{service_hour + 2:02}:{service_minute:02}",
@@ -126,7 +126,7 @@ def get_predictions(line: Line) -> list[Prediction]:
 
     # Then, pull from schedules
     for schedule in schedules:
-        if len(results) >= 2:
+        if len(results) >= 6:
             break
 
         trip_id = schedule["relationships"]["trip"]["data"]["id"]
@@ -153,25 +153,29 @@ def get_predictions(line: Line) -> list[Prediction]:
 
 LINES = [
     Line(
-        label="Heath St",
+        label="E Heath St",
         color="#00ff76",
         stop_id="place-mgngl",
         route_id="Green-E",
         direction_id=0,
     ),
     Line(
-        label="Medfd/Tu",
+        label="E Medfd/Tuft",
         color="#00ff76",
         stop_id="place-mgngl",
         route_id="Green-E",
         direction_id=1,
     ),
     Line(
-        label="Sullivan", color="#FFAA00", stop_id="2698", route_id="89", direction_id=1
+        label="89 Sullivan",
+        color="#FFAA00",
+        stop_id="2698",
+        route_id="89",
+        direction_id=1,
     ),
-    # Line(label="Davis", color="#FFAA00",  stop_id="2735", route_id="89", direction_id=0),
-    # Line(label="Arlingtn", color="#FFAA00",  stop_id="2735", route_id="80", direction_id=0),
-    # Line(label="Lechmere", color="#FFAA00",  stop_id="2698", route_id="80", direction_id=1),
+    # Line(label="89 Davis", color="#FFAA00",  stop_id="2735", route_id="89", direction_id=0),
+    # Line(label="80 Arlington", color="#FFAA00",  stop_id="2735", route_id="80", direction_id=0),
+    # Line(label="80 Lechmere", color="#FFAA00",  stop_id="2698", route_id="80", direction_id=1),
 ]
 
 MbtaData: TypeAlias = list[Prediction]
@@ -211,20 +215,51 @@ class MBTA(Screen[MbtaData]):
 
             return image
 
-        for i, prediction in list(enumerate(predictions))[:6]:
-            time_str = str(int(prediction.eta / timedelta(minutes=1)))
+        # for i, prediction in list(enumerate(predictions))[:6]:
+        #     time_str = str(int(prediction.eta / timedelta(minutes=1)))
 
-            if prediction.type == "schedule":
-                # show scheduled trips in gray to disambiguate
-                color = "#888888"
-            else:
-                color = prediction.line.color
+        #     if prediction.type == "schedule":
+        #         # show scheduled trips in gray to disambiguate
+        #         color = "#888888"
+        #     else:
+        #         color = prediction.line.color
+
+        #     draw.text(
+        #         (1, 12 + 9 * i), f"{prediction.line.label:<8}", font=font, fill=color
+        #     )
+        #     draw.text((47, 12 + 9 * i), f"{time_str:>2}", font=font, fill=color)
+        #     draw.text((59, 12 + 9 * i), "m", font=font, fill=color)
+
+        X_MARGIN = 3
+
+        for row, line in enumerate(LINES):
+            draw.text((1, 11 + 18 * row), line.label, font=font, fill=line.color)
+            line_predictions = filter(lambda p: p.line == line, predictions)
+
+            pixel_x = 1
+            for col, prediction in enumerate(line_predictions):
+                time_str = str(int(prediction.eta / timedelta(minutes=1)))
+                length = draw.textlength(time_str, font=font)
+                if pixel_x + length > 64 - (
+                    draw.textlength("min", font=font) + X_MARGIN
+                ):
+                    break
+
+                draw.text(
+                    (pixel_x, 19 + 18 * row),
+                    time_str,
+                    font=font,
+                    fill=line.color if prediction.type == "prediction" else "#888888",
+                )
+
+                pixel_x += length + X_MARGIN
 
             draw.text(
-                (1, 12 + 9 * i), f"{prediction.line.label:<8}", font=font, fill=color
+                (pixel_x, 19 + 18 * row),
+                "min",
+                font=font,
+                fill="#888888",
             )
-            draw.text((47, 12 + 9 * i), f"{time_str:>2}", font=font, fill=color)
-            draw.text((59, 12 + 9 * i), "m", font=font, fill=color)
 
         # TODO: diversions, something like
         # draw.text((1, 40), "No Green Line", font=smallfont, fill="#ff0000")

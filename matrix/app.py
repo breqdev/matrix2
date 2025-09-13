@@ -35,9 +35,9 @@ class App:
 
         screens: list[Screen] = [
             MBTA(),
-            # Spotify(),
-            # Weather(),
-            # BlueBikes(),
+            Spotify(),
+            Weather(),
+            BlueBikes(),
         ]
         self.modes: dict[ModeType, BaseMode] = {
             ModeType.MAIN: Main(self.change_mode, screens),
