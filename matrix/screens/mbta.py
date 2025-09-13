@@ -3,6 +3,7 @@ import requests
 from datetime import datetime, timedelta
 from typing import Literal, TypeAlias
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
 
 from PIL import Image, ImageDraw
 
@@ -14,15 +15,29 @@ API_KEY = os.environ["MBTA_TOKEN"]
 PredictionType: TypeAlias = Literal["prediction", "schedule"]
 
 
-def get_predictions(
-    origin: str, route: str, direction: int
-) -> list[tuple[timedelta, PredictionType]]:
+@dataclass
+class Line:
+    label: str
+    color: str
+    stop_id: str
+    route_id: str
+    direction_id: int
+
+
+@dataclass
+class Prediction:
+    line: Line
+    eta: timedelta
+    type: PredictionType
+
+
+def get_predictions(line: Line) -> list[Prediction]:
     predictions_response = requests.get(
         "https://api-v3.mbta.com/predictions",
         params={
-            "filter[stop]": origin,
-            "filter[route]": route,
-            "filter[direction_id]": str(direction),
+            "filter[stop]": line.stop_id,
+            "filter[route]": line.route_id,
+            "filter[direction_id]": str(line.direction_id),
             "include": "stop",
             "sort": "arrival_time",
             "page[limit]": "5",
@@ -37,7 +52,7 @@ def get_predictions(
 
     current_time = datetime.now()
 
-    results: list[tuple[timedelta, PredictionType]] = []
+    results: list[Prediction] = []
 
     # Pull from realtime predictions first
     realtime_trips = set()
@@ -63,7 +78,7 @@ def get_predictions(
         if wait_time >= timedelta(minutes=100):
             continue
 
-        results.append((wait_time, "prediction"))
+        results.append(Prediction(line=line, eta=wait_time, type="prediction"))
 
     if len(results) >= 2:
         return results
@@ -91,9 +106,9 @@ def get_predictions(
     schedule_response = requests.get(
         "https://api-v3.mbta.com/schedules",
         params={
-            "filter[stop]": origin,
-            "filter[route]": route,
-            "filter[direction_id]": str(direction),
+            "filter[stop]": line.stop_id,
+            "filter[route]": line.route_id,
+            "filter[direction_id]": str(line.direction_id),
             "include": "stop",
             "sort": "arrival_time",
             "page[limit]": "3",
@@ -131,21 +146,35 @@ def get_predictions(
         if wait_time >= timedelta(minutes=100):
             continue
 
-        results.append((wait_time, "schedule"))
+        results.append(Prediction(line=line, eta=wait_time, type="schedule"))
 
     return results
 
 
-LINE_AND_COLOR_TO_ARGS = {
-    ("Heath St", "#00ff76"): ("place-mgngl", "Green-E", 0),
-    ("Medfd/Tu", "#00ff76"): ("place-mgngl", "Green-E", 1),
-    ("Sullivan", "#FFAA00"): ("2698", "89", 1),
-    # ("Davis", "#FFAA00"): ("2735", "89", 0),
-    # ("Arlingtn", "#FFAA00"): ("2735", "80", 0),
-    # ("Lechmere", "#FFAA00"): ("2698", "80", 1),
-}
+LINES = [
+    Line(
+        label="Heath St",
+        color="#00ff76",
+        stop_id="place-mgngl",
+        route_id="Green-E",
+        direction_id=0,
+    ),
+    Line(
+        label="Medfd/Tu",
+        color="#00ff76",
+        stop_id="place-mgngl",
+        route_id="Green-E",
+        direction_id=1,
+    ),
+    Line(
+        label="Sullivan", color="#FFAA00", stop_id="2698", route_id="89", direction_id=1
+    ),
+    # Line(label="Davis", color="#FFAA00",  stop_id="2735", route_id="89", direction_id=0),
+    # Line(label="Arlingtn", color="#FFAA00",  stop_id="2735", route_id="80", direction_id=0),
+    # Line(label="Lechmere", color="#FFAA00",  stop_id="2698", route_id="80", direction_id=1),
+]
 
-MbtaData: TypeAlias = list[tuple[str, str, timedelta, PredictionType]]
+MbtaData: TypeAlias = list[Prediction]
 
 
 class MBTA(Screen[MbtaData]):
@@ -154,17 +183,13 @@ class MBTA(Screen[MbtaData]):
     def fetch_data(self):
         with ThreadPoolExecutor() as tpe:
             predictions = [
-                (line, color, *time)
-                for (line, color), times in zip(
-                    LINE_AND_COLOR_TO_ARGS,
-                    tpe.map(
-                        lambda args: get_predictions(*args),
-                        LINE_AND_COLOR_TO_ARGS.values(),
-                    ),
+                prediction
+                for line_predictions in tpe.map(
+                    lambda line: get_predictions(line), LINES
                 )
-                for time in times
+                for prediction in line_predictions
             ]
-        predictions.sort(key=lambda x: x[2])
+        predictions.sort(key=lambda x: x.eta)
         return predictions
 
     def fallback_data(self):
@@ -186,12 +211,18 @@ class MBTA(Screen[MbtaData]):
 
             return image
 
-        for i, (label, color, wait, source) in list(enumerate(predictions))[:6]:
-            time_str = str(int(wait / timedelta(minutes=1)))
-            if source == "schedule":
+        for i, prediction in list(enumerate(predictions))[:6]:
+            time_str = str(int(prediction.eta / timedelta(minutes=1)))
+
+            if prediction.type == "schedule":
                 # show scheduled trips in gray to disambiguate
                 color = "#888888"
-            draw.text((1, 12 + 9 * i), f"{label:<8}", font=font, fill=color)
+            else:
+                color = prediction.line.color
+
+            draw.text(
+                (1, 12 + 9 * i), f"{prediction.line.label:<8}", font=font, fill=color
+            )
             draw.text((47, 12 + 9 * i), f"{time_str:>2}", font=font, fill=color)
             draw.text((59, 12 + 9 * i), "m", font=font, fill=color)
 

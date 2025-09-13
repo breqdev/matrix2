@@ -35,9 +35,9 @@ class App:
 
         screens: list[Screen] = [
             MBTA(),
-            Spotify(),
-            Weather(),
-            BlueBikes(),
+            # Spotify(),
+            # Weather(),
+            # BlueBikes(),
         ]
         self.modes: dict[ModeType, BaseMode] = {
             ModeType.MAIN: Main(self.change_mode, screens),
@@ -47,9 +47,13 @@ class App:
         }
 
         if self.hardware is not None:
-            self.modes[ModeType.BRIGHTNESS] = Brightness(self.change_mode, hardware=self.hardware)
+            self.modes[ModeType.BRIGHTNESS] = Brightness(
+                self.change_mode, hardware=self.hardware
+            )
             self.hardware.dial.when_rotated_clockwise = self.handle_rotation_clockwise
-            self.hardware.dial.when_rotated_counter_clockwise = self.handle_rotation_counterclockwise
+            self.hardware.dial.when_rotated_counter_clockwise = (
+                self.handle_rotation_counterclockwise
+            )
             self.hardware.button.when_pressed = self.handle_press
 
         if sys.platform == "linux":
