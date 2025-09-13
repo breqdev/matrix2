@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 from typing import Literal, TypeAlias
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-import colorsys
 
 from PIL import Image, ImageDraw
 
@@ -208,10 +207,9 @@ MbtaData: TypeAlias = list[Prediction]
 
 
 def darken_hex(color: str):
-    r, g, b = (int(color.lstrip("#")[i + 1 : i + 3], 16) / 255 for i in range(3))
-    h, s, v = colorsys.rgb_to_hsv(r, g, b)
-    r, g, b = colorsys.hsv_to_rgb(h, s, v * 0.7)
-    return f"#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}"
+    r, g, b = (int(color.lstrip("#")[i * 2 : i * 2 + 2], 16) for i in range(3))
+    x = 0.5
+    return f"#{int(r*x):02x}{int(g*x):02x}{int(b*x):02x}"
 
 
 class MBTA(Screen[MbtaData]):
