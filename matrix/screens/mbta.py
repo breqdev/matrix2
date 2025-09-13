@@ -161,14 +161,14 @@ LINES = [
         route_id="Green-E",
         direction_id=0,
     ),
-    Line(
-        symbol="E",
-        label="Medfd/Tuft",
-        color="#00ff76",
-        stop_id="place-mgngl",
-        route_id="Green-E",
-        direction_id=1,
-    ),
+    # Line(
+    #     symbol="E",
+    #     label="Medfd/Tuft",
+    #     color="#00ff76",
+    #     stop_id="place-mgngl",
+    #     route_id="Green-E",
+    #     direction_id=1,
+    # ),
     Line(
         symbol="89",
         label="Sullivan",
@@ -201,6 +201,22 @@ LINES = [
     #     route_id="80",
     #     direction_id=1,
     # ),
+    # Line(
+    #     symbol="101",
+    #     label="Sullivan",
+    #     color="#FFAA00",
+    #     stop_id="5299",
+    #     route_id="101",
+    #     direction_id=1,
+    # ),
+    Line(
+        symbol="101",
+        label="Malden",
+        color="#FFAA00",
+        stop_id="5308",
+        route_id="101",
+        direction_id=0,
+    ),
 ]
 
 MbtaData: TypeAlias = list[Prediction]
