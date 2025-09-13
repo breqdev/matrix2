@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from typing import Literal, TypeAlias
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+import colorsys
 
 from PIL import Image, ImageDraw
 
@@ -206,6 +207,13 @@ LINES = [
 MbtaData: TypeAlias = list[Prediction]
 
 
+def darken_hex(color: str):
+    r, g, b = (int(color.lstrip("#")[i + 1 : i + 3], 16) / 255 for i in range(3))
+    h, s, v = colorsys.rgb_to_hsv(r, g, b)
+    r, g, b = colorsys.hsv_to_rgb(h, s, v * 0.7)
+    return f"#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}"
+
+
 class MBTA(Screen[MbtaData]):
     CACHE_TTL = 30
 
@@ -261,7 +269,8 @@ class MBTA(Screen[MbtaData]):
             length = draw.textlength(line.symbol, font=smallfont)
 
             draw.rectangle(
-                (1, 9 + 19 * row, 1 + length + 2, 17 + 19 * row), outline="#888888"
+                (1, 9 + 19 * row, 1 + length + 2, 17 + 19 * row),
+                outline=darken_hex(line.color),
             )
             draw.point((1, 9 + 19 * row), fill="#000000")
             draw.point((1, 17 + 19 * row), fill="#000000")
@@ -275,7 +284,7 @@ class MBTA(Screen[MbtaData]):
             )
             line_predictions = filter(lambda p: p.line == line, predictions)
 
-            pixel_x = 1
+            pixel_x = 2
             for col, prediction in enumerate(line_predictions):
                 time_str = str(int(prediction.eta / timedelta(minutes=1)))
                 length = draw.textlength(time_str, font=font)
