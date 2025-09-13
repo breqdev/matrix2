@@ -17,6 +17,7 @@ PredictionType: TypeAlias = Literal["prediction", "schedule"]
 
 @dataclass
 class Line:
+    symbol: str
     label: str
     color: str
     stop_id: str
@@ -153,29 +154,53 @@ def get_predictions(line: Line) -> list[Prediction]:
 
 LINES = [
     Line(
-        label="E Heath St",
+        symbol="E",
+        label="Heath St",
         color="#00ff76",
         stop_id="place-mgngl",
         route_id="Green-E",
         direction_id=0,
     ),
     Line(
-        label="E Medfd/Tuft",
+        symbol="E",
+        label="Medfd/Tuft",
         color="#00ff76",
         stop_id="place-mgngl",
         route_id="Green-E",
         direction_id=1,
     ),
     Line(
-        label="89 Sullivan",
+        symbol="89",
+        label="Sullivan",
         color="#FFAA00",
         stop_id="2698",
         route_id="89",
         direction_id=1,
     ),
-    # Line(label="89 Davis", color="#FFAA00",  stop_id="2735", route_id="89", direction_id=0),
-    # Line(label="80 Arlington", color="#FFAA00",  stop_id="2735", route_id="80", direction_id=0),
-    # Line(label="80 Lechmere", color="#FFAA00",  stop_id="2698", route_id="80", direction_id=1),
+    # Line(
+    #     symbol="89",
+    #     label="Davis",
+    #     color="#FFAA00",
+    #     stop_id="2735",
+    #     route_id="89",
+    #     direction_id=0,
+    # ),
+    # Line(
+    #     symbol="80",
+    #     label="Arlington",
+    #     color="#FFAA00",
+    #     stop_id="2735",
+    #     route_id="80",
+    #     direction_id=0,
+    # ),
+    # Line(
+    #     symbol="80",
+    #     label="Lechmere",
+    #     color="#FFAA00",
+    #     stop_id="2698",
+    #     route_id="80",
+    #     direction_id=1,
+    # ),
 ]
 
 MbtaData: TypeAlias = list[Prediction]
@@ -233,7 +258,21 @@ class MBTA(Screen[MbtaData]):
         X_MARGIN = 3
 
         for row, line in enumerate(LINES):
-            draw.text((1, 11 + 18 * row), line.label, font=font, fill=line.color)
+            length = draw.textlength(line.symbol, font=smallfont)
+
+            draw.rectangle(
+                (1, 9 + 18 * row, 1 + length + 2, 17 + 18 * row), outline=line.color
+            )
+            draw.point((1, 9 + 18 * row), fill="#000000")
+            draw.point((1, 17 + 18 * row), fill="#000000")
+            draw.point((1 + length + 2, 9 + 18 * row), fill="#000000")
+            draw.point((1 + length + 2, 17 + 18 * row), fill="#000000")
+
+            draw.text((3, 11 + 18 * row), line.symbol, font=smallfont, fill=line.color)
+
+            draw.text(
+                (7 + length, 11 + 18 * row), line.label, font=font, fill=line.color
+            )
             line_predictions = filter(lambda p: p.line == line, predictions)
 
             pixel_x = 1
