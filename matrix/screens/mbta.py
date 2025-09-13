@@ -261,17 +261,17 @@ class MBTA(Screen[MbtaData]):
             length = draw.textlength(line.symbol, font=smallfont)
 
             draw.rectangle(
-                (1, 9 + 18 * row, 1 + length + 2, 17 + 18 * row), outline=line.color
+                (1, 9 + 19 * row, 1 + length + 2, 17 + 19 * row), outline="#888888"
             )
-            draw.point((1, 9 + 18 * row), fill="#000000")
-            draw.point((1, 17 + 18 * row), fill="#000000")
-            draw.point((1 + length + 2, 9 + 18 * row), fill="#000000")
-            draw.point((1 + length + 2, 17 + 18 * row), fill="#000000")
+            draw.point((1, 9 + 19 * row), fill="#000000")
+            draw.point((1, 17 + 19 * row), fill="#000000")
+            draw.point((1 + length + 2, 9 + 19 * row), fill="#000000")
+            draw.point((1 + length + 2, 17 + 19 * row), fill="#000000")
 
-            draw.text((3, 11 + 18 * row), line.symbol, font=smallfont, fill=line.color)
+            draw.text((3, 11 + 19 * row), line.symbol, font=smallfont, fill=line.color)
 
             draw.text(
-                (6 + length, 10 + 18 * row), line.label, font=font, fill=line.color
+                (6 + length, 10 + 19 * row), line.label, font=font, fill=line.color
             )
             line_predictions = filter(lambda p: p.line == line, predictions)
 
@@ -285,7 +285,7 @@ class MBTA(Screen[MbtaData]):
                     break
 
                 draw.text(
-                    (pixel_x, 19 + 18 * row),
+                    (pixel_x, 19 + 19 * row),
                     time_str,
                     font=font,
                     fill=line.color if prediction.type == "prediction" else "#888888",
@@ -294,7 +294,7 @@ class MBTA(Screen[MbtaData]):
                 pixel_x += length + X_MARGIN
 
             draw.text(
-                (pixel_x, 19 + 18 * row),
+                (pixel_x, 19 + 19 * row),
                 "min",
                 font=font,
                 fill="#888888",
