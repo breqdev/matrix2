@@ -271,7 +271,7 @@ class MBTA(Screen[MbtaData]):
             draw.text((3, 11 + 18 * row), line.symbol, font=smallfont, fill=line.color)
 
             draw.text(
-                (7 + length, 11 + 18 * row), line.label, font=font, fill=line.color
+                (6 + length, 10 + 18 * row), line.label, font=font, fill=line.color
             )
             line_predictions = filter(lambda p: p.line == line, predictions)
 
