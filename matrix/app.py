@@ -102,7 +102,7 @@ class App:
                     if self.hardware is not None:
                         self.hardware.matrix.SetImage(image.convert("RGB"))
                     prev_image = image
-                if self.signal_update.wait(timeout=1 / 30):
+                if self.signal_update.wait(timeout=1 / 10):
                     self.signal_update.clear()
         finally:
             if self.hardware is not None:
