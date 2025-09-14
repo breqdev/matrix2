@@ -10,6 +10,7 @@ from matrix.screens.mbta import MBTA
 from matrix.screens.screen import Screen
 from matrix.screens.spotify import Spotify
 from matrix.screens.weather import Weather
+from matrix.screens.forecast import Forecast
 from matrix.web_ui import WebUI
 from matrix.utils.no_connection import get_image_no_connection
 
@@ -37,6 +38,7 @@ class App:
             MBTA(),
             Spotify(),
             Weather(),
+            # Forecast(),
             BlueBikes(),
         ]
         self.modes: dict[ModeType, BaseMode] = {
@@ -100,7 +102,7 @@ class App:
                     if self.hardware is not None:
                         self.hardware.matrix.SetImage(image.convert("RGB"))
                     prev_image = image
-                if self.signal_update.wait(timeout=1):
+                if self.signal_update.wait(timeout=1 / 30):
                     self.signal_update.clear()
         finally:
             if self.hardware is not None:

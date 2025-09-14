@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 from PIL import Image, ImageDraw
 
-from matrix.resources.fonts import font, smallfont
+from matrix.resources.fonts import font, smallfont, bigfont
 from matrix.screens.screen import Screen, REQUEST_DEFAULT_TIMEOUT
 
 API_KEY = os.environ["MBTA_TOKEN"]
@@ -231,6 +231,10 @@ def darken_hex(color: str):
 class MBTA(Screen[MbtaData]):
     CACHE_TTL = 30
 
+    def __init__(self):
+        super().__init__()
+        self.scroll_idx = 0
+
     def fetch_data(self):
         with ThreadPoolExecutor() as tpe:
             predictions = [
@@ -279,7 +283,16 @@ class MBTA(Screen[MbtaData]):
 
         X_MARGIN = 3
 
-        for row, line in enumerate(LINES):
+        has_alert = True
+        lines_displayed = 2 if has_alert else 3
+
+        ALERT_EXAMPLES = [
+            "Rt. 66 detoured. Inb.: connect at Harvard St @ Coolidge St Harvard St @ Marion St. Outb.: connect at Harvard St opp Vernon St & Brighton Ave",
+            "Silver Line - SL4 is experiencing delays of up to 20 minutes due to traffic",
+            "Rt. 34E detoured. The nearest inb. connections are 710 East St opp Kendall St or Washington St opp Washington Green. The nearest outb. conne",
+        ]
+
+        for row, line in enumerate(LINES[:lines_displayed]):
             length = draw.textlength(line.symbol, font=smallfont)
 
             draw.rectangle(
@@ -323,10 +336,17 @@ class MBTA(Screen[MbtaData]):
                 fill="#888888",
             )
 
-        # TODO: diversions, something like
-        # draw.text((1, 40), "No Green Line", font=smallfont, fill="#ff0000")
-        # draw.text((1, 46), "from Medfd/Tufts", font=smallfont, fill="#ff0000")
-        # draw.text((1, 52), "to North Station", font=smallfont, fill="#ff0000")
-        # draw.text((1, 58), "Use Shuttle Bus", font=smallfont, fill="#ff0000")
+        if has_alert:
+            alert_text = ALERT_EXAMPLES[0]
+
+            image.paste(Image.open("icons/alert.png"), (1, 46))
+
+            draw.line((9, 47, 60, 47), fill="#888888")
+
+            draw.text((12, 50), "89 Bus Alert", font=smallfont, fill="#888888")
+
+            draw.text((1 - self.scroll_idx, 57), alert_text, font=font, fill="#ff0000")
+            self.scroll_idx += 1
+            self.scroll_idx %= draw.textlength(alert_text, font=font)
 
         return image
