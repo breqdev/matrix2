@@ -281,7 +281,7 @@ LINES = [
     ),
 ]
 
-MbtaData: TypeAlias = list[Prediction]
+MbtaData: TypeAlias = tuple[list[Prediction], str | None, Line | None]
 
 
 def darken_hex(color: str):
@@ -307,15 +307,24 @@ class MBTA(Screen[MbtaData]):
                 for prediction in line_predictions
             ]
         predictions.sort(key=lambda x: x.eta)
-        return predictions
+
+        alert = None
+        alert_line = None
+        for line in LINES[:2]:
+            alert = get_alert(line)
+            if alert is not None:
+                alert_line = line
+                break
+
+        return (predictions, alert, alert_line)
 
     def fallback_data(self):
-        return []
+        return ([], None, None)
 
     def get_image(self):
         image = Image.new("RGB", (64, 64))
         draw = ImageDraw.Draw(image)
-        predictions = self.data
+        predictions, alert, alert_line = self.data
         time_str = datetime.now().strftime("%H:%M")
         draw.text((1, 1), "Transit", font=font, fill="#FFAA00")
         draw.text((39, 1), f"{time_str:>5}", font=font, fill="#FFAA00")
@@ -329,14 +338,6 @@ class MBTA(Screen[MbtaData]):
             return image
 
         X_MARGIN = 3
-
-        alert = None
-        alert_line = None
-        for line in LINES[:2]:
-            alert = get_alert(line)
-            if alert is not None:
-                alert_line = line
-                break
 
         lines_displayed = 2 if alert else 3
 
