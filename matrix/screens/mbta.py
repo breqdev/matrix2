@@ -337,7 +337,8 @@ class MBTA(Screen[MbtaData]):
             )
 
         if has_alert:
-            alert_text = ALERT_EXAMPLES[0]
+            alert_text = ALERT_EXAMPLES[1] + "  "
+            textlength = draw.textlength(alert_text, font=font)
 
             image.paste(Image.open("icons/alert.png"), (1, 46))
 
@@ -346,7 +347,13 @@ class MBTA(Screen[MbtaData]):
             draw.text((12, 50), "89 Bus Alert", font=smallfont, fill="#888888")
 
             draw.text((1 - self.scroll_idx, 57), alert_text, font=font, fill="#ff0000")
+            draw.text(
+                (1 - self.scroll_idx + textlength, 57),
+                alert_text,
+                font=font,
+                fill="#ff0000",
+            )
             self.scroll_idx += 1
-            self.scroll_idx %= draw.textlength(alert_text, font=font)
+            self.scroll_idx %= textlength
 
         return image
