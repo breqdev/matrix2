@@ -4,10 +4,11 @@ from datetime import datetime, timedelta
 from typing import Literal, TypeAlias
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+import re
 
 from PIL import Image, ImageDraw
 
-from matrix.resources.fonts import font, smallfont, bigfont
+from matrix.resources.fonts import font, smallfont
 from matrix.screens.screen import Screen, REQUEST_DEFAULT_TIMEOUT
 
 API_KEY = os.environ["MBTA_TOKEN"]
@@ -18,6 +19,7 @@ PredictionType: TypeAlias = Literal["prediction", "schedule"]
 @dataclass
 class Line:
     symbol: str
+    headsign: str
     label: str
     color: str
     stop_id: str
@@ -152,10 +154,63 @@ def get_predictions(line: Line) -> list[Prediction]:
     return results
 
 
+def get_alert(line: Line) -> str | None:
+    response = requests.get(
+        "https://api-v3.mbta.com/alerts",
+        params={"filter[route]": line.route_id, "api_key": API_KEY},
+        timeout=REQUEST_DEFAULT_TIMEOUT,
+    )
+
+    response.raise_for_status()
+    data = response.json()["data"]
+
+    if len(data) == 0:
+        return None
+
+    mbta_text = data[0]["attributes"]["short_header"]
+
+    # Bus alerts of the form
+    # Route 109 is experiencing delays of up to 20 minutes due to traffic
+    # can be condensed
+
+    pattern = r"Route\s+(\d+)\s+is experiencing delays of up to (\d+)\s+minutes(?:\s+due to\s+(.*))?$"
+    match = re.search(pattern, mbta_text, re.IGNORECASE)
+    if match:
+        if match.group(3):
+            # 20 minute delay (traffic)
+            # 15 minute delay (disabled bus)
+            return f"{match.group(2)}min delay ({match.group(3)})"
+        else:
+            return f"{match.group(2)}min delay"
+
+    # The part of the message before the colon can be removed
+    # Example:
+    # Green Line E branch: Delays of about 20 minutes due to a disabled auto blocking the tracks near Mission Park.
+    if ": " in mbta_text:
+        prefix, message = mbta_text.split(": ")
+        mbta_text = message
+
+    # If this alert is multiple sentences, only return the first one
+    # Example:
+    # Delays of about 15 minutes due to a disabled train at Back Bay. Trains may stand by at stations.
+    if ". " in mbta_text:
+        mbta_text = mbta_text.split(". ")[0]
+
+    # If it starts with "Delays of about X minutes due to a", replace with "Xmin delay:"
+    pattern = r"^Delays of about (\d+) minutes due to (?:a )?(.*)"
+    match = re.match(pattern, mbta_text, re.IGNORECASE)
+    if match:
+        minutes, reason = match.groups()
+        return f"{minutes}min delay: {reason}"
+
+    return mbta_text
+
+
 LINES = [
     Line(
         symbol="E",
-        label="Heath St",
+        headsign="Heath St",
+        label="GL-E",
         color="#00ff76",
         stop_id="place-mgngl",
         route_id="Green-E",
@@ -163,7 +218,8 @@ LINES = [
     ),
     # Line(
     #     symbol="E",
-    #     label="Medfd/Tuft",
+    #     headsign="Medfd/Tuft",
+    #     label="GL-E"
     #     color="#00ff76",
     #     stop_id="place-mgngl",
     #     route_id="Green-E",
@@ -171,7 +227,8 @@ LINES = [
     # ),
     Line(
         symbol="89",
-        label="Sullivan",
+        headsign="Sullivan",
+        label="89 Bus",
         color="#FFAA00",
         stop_id="2698",
         route_id="89",
@@ -179,7 +236,8 @@ LINES = [
     ),
     # Line(
     #     symbol="89",
-    #     label="Davis",
+    #     headsign="Davis",
+    #     label="89 Bus",
     #     color="#FFAA00",
     #     stop_id="2735",
     #     route_id="89",
@@ -187,7 +245,8 @@ LINES = [
     # ),
     # Line(
     #     symbol="80",
-    #     label="Arlington",
+    #     headsign="Arlington",
+    #     label="80 Bus",
     #     color="#FFAA00",
     #     stop_id="2735",
     #     route_id="80",
@@ -195,7 +254,8 @@ LINES = [
     # ),
     # Line(
     #     symbol="80",
-    #     label="Lechmere",
+    #     headsign="Lechmere",
+    #     label="80 Bus",
     #     color="#FFAA00",
     #     stop_id="2698",
     #     route_id="80",
@@ -203,7 +263,8 @@ LINES = [
     # ),
     # Line(
     #     symbol="101",
-    #     label="Sullivan",
+    #     headsign="Sullivan",
+    #     label="101 Bus",
     #     color="#FFAA00",
     #     stop_id="5299",
     #     route_id="101",
@@ -211,7 +272,8 @@ LINES = [
     # ),
     Line(
         symbol="101",
-        label="Malden",
+        headsign="Malden",
+        label="101 Bus",
         color="#FFAA00",
         stop_id="5308",
         route_id="101",
@@ -255,7 +317,7 @@ class MBTA(Screen[MbtaData]):
         draw = ImageDraw.Draw(image)
         predictions = self.data
         time_str = datetime.now().strftime("%H:%M")
-        draw.text((1, 1), "MBTA", font=font, fill="#FFAA00")
+        draw.text((1, 1), "Transit", font=font, fill="#FFAA00")
         draw.text((39, 1), f"{time_str:>5}", font=font, fill="#FFAA00")
 
         if len(predictions) == 0:
@@ -266,31 +328,17 @@ class MBTA(Screen[MbtaData]):
 
             return image
 
-        # for i, prediction in list(enumerate(predictions))[:6]:
-        #     time_str = str(int(prediction.eta / timedelta(minutes=1)))
-
-        #     if prediction.type == "schedule":
-        #         # show scheduled trips in gray to disambiguate
-        #         color = "#888888"
-        #     else:
-        #         color = prediction.line.color
-
-        #     draw.text(
-        #         (1, 12 + 9 * i), f"{prediction.line.label:<8}", font=font, fill=color
-        #     )
-        #     draw.text((47, 12 + 9 * i), f"{time_str:>2}", font=font, fill=color)
-        #     draw.text((59, 12 + 9 * i), "m", font=font, fill=color)
-
         X_MARGIN = 3
 
-        has_alert = True
-        lines_displayed = 2 if has_alert else 3
+        alert = None
+        alert_line = None
+        for line in LINES[:2]:
+            alert = get_alert(line)
+            if alert is not None:
+                alert_line = line
+                break
 
-        ALERT_EXAMPLES = [
-            "Rt. 66 detoured. Inb.: connect at Harvard St @ Coolidge St Harvard St @ Marion St. Outb.: connect at Harvard St opp Vernon St & Brighton Ave",
-            "Silver Line - SL4 is experiencing delays of up to 20 minutes due to traffic",
-            "Rt. 34E detoured. The nearest inb. connections are 710 East St opp Kendall St or Washington St opp Washington Green. The nearest outb. conne",
-        ]
+        lines_displayed = 2 if alert else 3
 
         for row, line in enumerate(LINES[:lines_displayed]):
             length = draw.textlength(line.symbol, font=smallfont)
@@ -307,7 +355,7 @@ class MBTA(Screen[MbtaData]):
             draw.text((3, 11 + 19 * row), line.symbol, font=smallfont, fill=line.color)
 
             draw.text(
-                (6 + length, 10 + 19 * row), line.label, font=font, fill=line.color
+                (6 + length, 10 + 19 * row), line.headsign, font=font, fill=line.color
             )
             line_predictions = filter(lambda p: p.line == line, predictions)
 
@@ -336,15 +384,17 @@ class MBTA(Screen[MbtaData]):
                 fill="#888888",
             )
 
-        if has_alert:
-            alert_text = ALERT_EXAMPLES[1] + "  "
+        if alert:
+            alert_text = alert + "  "
             textlength = draw.textlength(alert_text, font=font)
 
             image.paste(Image.open("icons/alert.png"), (1, 46))
 
             draw.line((9, 47, 60, 47), fill="#888888")
 
-            draw.text((12, 50), "89 Bus Alert", font=smallfont, fill="#888888")
+            draw.text(
+                (12, 50), f"{alert_line.label} Alert", font=smallfont, fill="#888888"
+            )
 
             draw.text((1 - self.scroll_idx, 57), alert_text, font=font, fill="#ff0000")
             draw.text(
