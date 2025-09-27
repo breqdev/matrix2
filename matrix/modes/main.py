@@ -48,11 +48,14 @@ class Main(BaseMode):
             self.fish.cancel()
             self.fish = None
 
-        if time.time() > self.next_refresh_time:
-            self.next_refresh_time = time.time() + 5
-            self.screen_index += 1
-
         active_screens = [s for s in self.screens if s.is_active]
+
+        if time.time() > self.next_refresh_time:
+            self.screen_index += 1
+            screen = active_screens[self.screen_index % len(active_screens)]
+            delay = screen.get_time_stretch() or 5
+            self.next_refresh_time = time.time() + delay
+
         while True:
             screen = active_screens[self.screen_index % len(active_screens)]
 
@@ -60,6 +63,8 @@ class Main(BaseMode):
                 if result := screen.get_image():
                     return result
             except Exception as e:
-                logger.exception("Exception drawing image for %s: %s", screen.__class__.__name__, e)
+                logger.exception(
+                    "Exception drawing image for %s: %s", screen.__class__.__name__, e
+                )
 
             self.screen_index += 1

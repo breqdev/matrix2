@@ -77,3 +77,11 @@ class Screen(ABC, Generic[T]):
     def get_image(self) -> Image.Image | None:
         """Render an image."""
         pass
+
+    def get_time_stretch(self) -> float | None:
+        """Screens can return a duration here to increase the amount of time displayed.
+
+        Useful for temporary conditions that require more time, such as
+        scrolling alert messages.
+        """
+        return None

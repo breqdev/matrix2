@@ -157,7 +157,11 @@ def get_predictions(line: Line) -> list[Prediction]:
 def get_alert(line: Line) -> str | None:
     response = requests.get(
         "https://api-v3.mbta.com/alerts",
-        params={"filter[route]": line.route_id, "api_key": API_KEY},
+        params={
+            "filter[route]": line.route_id,
+            "filter[datetime]": "NOW",
+            "api_key": API_KEY,
+        },
         timeout=REQUEST_DEFAULT_TIMEOUT,
     )
 
@@ -408,3 +412,9 @@ class MBTA(Screen[MbtaData]):
             self.scroll_idx %= textlength
 
         return image
+
+    def get_time_stretch(self):
+        if self.data:
+            if self.data[1]:
+                # remain on screen for 5s for alerts
+                return 10
