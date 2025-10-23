@@ -1,18 +1,12 @@
-import os
 from typing import TypedDict
 import requests
 import datetime
+from pathlib import Path
 
 from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font, bigfont
 from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
-
-weather_api_key = os.environ["OPENWEATHERMAP_KEY"]
-weather_base_url = "https://api.openweathermap.org/data/2.5/weather?"
-zip_code = os.getenv("ZIP_CODE", "02145")
-
-weather_url = weather_base_url + "appid=" + weather_api_key + "&zip=" + zip_code
 
 TIME_DATE_COLOR = "#aaaaaa"
 HIGH_COLOR = "#ffa024"
@@ -41,6 +35,12 @@ class Weather(Screen[WeatherData | None]):
     CACHE_TTL = 600
 
     def fetch_data(self):
+        weather_api_key = self.config["api_key"]
+        weather_base_url = "https://api.openweathermap.org/data/2.5/weather?"
+        zip_code = self.config["zip_code"]
+
+        weather_url = weather_base_url + "appid=" + weather_api_key + "&zip=" + zip_code
+
         return requests.get(weather_url, timeout=REQUEST_DEFAULT_TIMEOUT).json()
 
     def fallback_data(self):
@@ -134,7 +134,7 @@ class Weather(Screen[WeatherData | None]):
         is_daytime = icon_code[-1] == "d"
         icon_name = get_icon(data["weather"][0]["id"], is_daytime)
 
-        icon = Image.open(os.path.join("icons", "weather", f"{icon_name}.png"))
+        icon = Image.open(Path.cwd() / "icons" / "weather" / f"{icon_name}.png")
 
         image.paste(icon, (1, 11))
         draw.text((39, 14), f"{temp_f:>2}°", font=bigfont, fill="#ffffff")
@@ -229,7 +229,7 @@ class Weather(Screen[WeatherData | None]):
         is_daytime = icon_code[-1] == "d"
         icon_name = get_icon(data["weather"][0]["id"], is_daytime)
 
-        icon = Image.open(os.path.join("icons", "weather", f"{icon_name}.png"))
+        icon = Image.open(Path.cwd() / "icons" / "weather" / f"{icon_name}.png")
 
         image.paste(icon, (1, 0))
         draw.text((39, 0), f"{temp_f:>2}°", font=bigfont, fill="#ffffff")

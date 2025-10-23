@@ -9,12 +9,6 @@ from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
 
 scope = "user-read-currently-playing user-read-playback-state"
 
-# Listed in order of precedence
-SPOTIFY_ACCOUNTS = [
-    "Brooke",
-    "Ava",
-]
-
 
 class Spotify(Screen[Image.Image | None]):
     CACHE_TTL = 15
@@ -23,7 +17,7 @@ class Spotify(Screen[Image.Image | None]):
 
     def fetch_data(self):
         if not self.has_login:
-            for account in SPOTIFY_ACCOUNTS:
+            for account in self.config["users"]:
                 print(f"Logging in {account}...")
                 auth_manager = SpotifyOAuth(
                     scope=scope,

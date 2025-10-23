@@ -14,6 +14,7 @@ from matrix.screens.forecast import Forecast
 from matrix.web_ui import WebUI
 from matrix.utils.no_connection import get_image_no_connection
 from matrix.utils.panels import PanelSize
+from matrix.utils.config import parse_config
 
 from matrix.modes.mode import ModeType, BaseMode
 from matrix.modes.main import Main
@@ -27,22 +28,30 @@ logger = logging.getLogger(__name__)
 
 
 class App:
-    def __init__(self, *, panel: PanelSize, simulation: bool = False) -> None:
-        self.panel = panel
+    def __init__(self) -> None:
+        self.config = parse_config()
 
-        if simulation:
+        match self.config["panel"]["size"]:
+            case "64x64":
+                self.panel = PanelSize.PANEL_64x64
+            case "64x32":
+                self.panel = PanelSize.PANEL_64x32
+            case unknown:
+                raise ValueError(f"Unexpected panel size: {unknown}")
+
+        if self.config["panel"]["simulation"]:
             self.hardware = None
         else:
             from matrix.utils.hardware import Hardware
 
-            self.hardware = Hardware()
+            self.hardware = Hardware(self.panel, self.config["panel"]["brightness"])
 
         screens: list[Screen] = [
-            MBTA(),
-            Spotify(),
-            Weather(),
-            # Forecast(),
-            BlueBikes(),
+            MBTA(self.config["screens"]["mbta"]),
+            Spotify(self.config["screens"]["spotify"]),
+            Weather(self.config["screens"]["weather"]),
+            # Forecast(self.config["screens"]["forecast"]),
+            BlueBikes(self.config["screens"]["bluebikes"]),
         ]
         self.modes: dict[ModeType, BaseMode] = {
             ModeType.MAIN: Main(self.change_mode, screens),
@@ -67,7 +76,7 @@ class App:
         self.active_mode: ModeType = ModeType.MAIN
 
         self.ui = WebUI(
-            port=8080 if simulation else 80,
+            port=8080 if self.config["panel"]["simulation"] else 80,
             on_rotation_clockwise=self.handle_rotation_clockwise,
             on_rotation_counterclockwise=self.handle_rotation_counterclockwise,
             on_press=self.handle_press,

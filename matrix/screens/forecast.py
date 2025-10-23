@@ -8,11 +8,6 @@ from PIL import Image, ImageDraw
 from matrix.resources.fonts import font, bigfont, smallfont
 from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
 
-weather_api_key = os.environ["OPENWEATHERMAP_KEY"]
-weather_base_url = "https://api.openweathermap.org/data/2.5/forecast?"
-zip_code = os.getenv("ZIP_CODE", "02145")
-
-weather_url = weather_base_url + "appid=" + weather_api_key + "&zip=" + zip_code
 
 TIME_DATE_COLOR = "#aaaaaa"
 HIGH_COLOR = "#ffa024"
@@ -46,6 +41,12 @@ class Forecast(Screen[WeatherData | None]):
     CACHE_TTL = 600
 
     def fetch_data(self):
+        weather_api_key = self.config["api_key"]
+        weather_base_url = "https://api.openweathermap.org/data/2.5/forecast?"
+        zip_code = self.config["zip_code"]
+
+        weather_url = weather_base_url + "appid=" + weather_api_key + "&zip=" + zip_code
+
         return requests.get(weather_url, timeout=REQUEST_DEFAULT_TIMEOUT).json()
 
     def fallback_data(self):

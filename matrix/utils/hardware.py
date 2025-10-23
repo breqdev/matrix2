@@ -9,14 +9,14 @@ class Hardware:
     dial: RotaryEncoder
     button: Button
 
-    def __init__(self, size: PanelSize):
+    def __init__(self, size: PanelSize, brightness: int | None = None):
         matrix_options = RGBMatrixOptions()
         matrix_options.rows = size.value.rows
         matrix_options.cols = size.value.cols
         matrix_options.drop_privileges = False
 
         self.matrix = RGBMatrix(options=matrix_options)
-        self.matrix.brightness = 60
+        self.matrix.brightness = brightness or 60
 
         self.dial = RotaryEncoder(7, 19, max_steps=1024, wrap=True, bounce_time=0.1)
         self.button = Button(25, bounce_time=0.1)

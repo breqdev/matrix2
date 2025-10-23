@@ -5,3 +5,4 @@ venv
 .venv
 *.egg-info
 .spotipy-cache-*
+matrix.toml

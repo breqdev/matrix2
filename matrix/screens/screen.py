@@ -17,7 +17,8 @@ T = TypeVar("T")
 
 
 class Screen(ABC, Generic[T]):
-    def __init__(self) -> None:
+    def __init__(self, config: dict) -> None:
+        self.config = config
         self.cached_data: T
 
         self.has_data = threading.Event()
