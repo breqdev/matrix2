@@ -111,12 +111,11 @@ class BlueBikes(Screen[tuple[Any, Any] | None]):
         image = Image.new("RGB", (64, 32))
         draw = ImageDraw.Draw(image)
 
-        STATIONS = {
-            "S32022": "Cedar St",
-            "S32013": "Trum Field",
-            # "S32040": "Lowell St",
-            # "S32007": "Ball Sq",
-        }
+        STATIONS = {}
+
+        for i in range(len(self.config["stations"])):
+            station = self.config["stations"][i]
+            STATIONS[station["id"]] = station["label"]
 
         if self.data is None:
             for i, sta_id in enumerate(STATIONS):
