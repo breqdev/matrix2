@@ -39,11 +39,11 @@ class Main(BaseMode):
     def handle_encoder_push(self):
         self.change_mode(ModeType.MENU)
 
-    def get_image(self):
+    def get_image_64x64(self):
         if is_eleven_eleven():
             if self.fish is None:
                 self.fish = MakeAFish()
-            return self.fish.get_image()
+            return self.fish.get_image_64x64()
         elif self.fish:
             self.fish.cancel()
             self.fish = None
@@ -60,7 +60,37 @@ class Main(BaseMode):
             screen = active_screens[self.screen_index % len(active_screens)]
 
             try:
-                if result := screen.get_image():
+                if result := screen.get_image_64x64():
+                    return result
+            except Exception as e:
+                logger.exception(
+                    "Exception drawing image for %s: %s", screen.__class__.__name__, e
+                )
+
+            self.screen_index += 1
+
+    def get_image_64x32(self):
+        if is_eleven_eleven():
+            if self.fish is None:
+                self.fish = MakeAFish()
+            return self.fish.get_image_64x32()
+        elif self.fish:
+            self.fish.cancel()
+            self.fish = None
+
+        active_screens = [s for s in self.screens if s.is_active]
+
+        if time.time() > self.next_refresh_time:
+            self.screen_index += 1
+            screen = active_screens[self.screen_index % len(active_screens)]
+            delay = screen.get_time_stretch() or 5
+            self.next_refresh_time = time.time() + delay
+
+        while True:
+            screen = active_screens[self.screen_index % len(active_screens)]
+
+            try:
+                if result := screen.get_image_64x32():
                     return result
             except Exception as e:
                 logger.exception(

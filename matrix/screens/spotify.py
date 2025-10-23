@@ -49,10 +49,17 @@ class Spotify(Screen[Image.Image | None]):
     def fallback_data(self):
         return None
 
-    def get_image(self):
+    def get_image_64x64(self):
         if data := self.data:
             image = Image.new("RGB", (64, 64))
             image.paste(data)
+            return image
+        return None
+
+    def get_image_64x32(self):
+        if data := self.data:
+            image = Image.new("RGB", (64, 32))
+            image.paste(data.resize((32, 32)), (16, 0))
             return image
         return None
 

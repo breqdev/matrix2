@@ -325,7 +325,7 @@ class MBTA(Screen[MbtaData]):
     def fallback_data(self):
         return ([], None, None)
 
-    def get_image(self):
+    def get_image_64x64(self):
         image = Image.new("RGB", (64, 64))
         draw = ImageDraw.Draw(image)
         predictions, alert, alert_line = self.data
@@ -410,6 +410,69 @@ class MBTA(Screen[MbtaData]):
             )
             self.scroll_idx += 1
             self.scroll_idx %= textlength
+
+        return image
+
+    def get_image_64x32(self):
+        image = Image.new("RGB", (64, 32))
+        draw = ImageDraw.Draw(image)
+        predictions, alert, alert_line = self.data
+
+        if len(predictions) == 0:
+            image.paste(Image.open("icons/train_sleeping.png"), (16, 0))
+
+            return image
+
+        X_MARGIN = 3
+
+        lines_displayed = 2
+
+        for row, line in enumerate(LINES[:lines_displayed]):
+            length = draw.textlength(line.symbol, font=font)
+
+            draw.rectangle(
+                (1, 1 + 16 * row, 1 + length + 2, 10 + 16 * row),
+                outline=darken_hex(line.color),
+            )
+            draw.point((1, 1 + 16 * row), fill="#000000")
+            draw.point((1, 10 + 16 * row), fill="#000000")
+            draw.point((1 + length + 2, 1 + 16 * row), fill="#000000")
+            draw.point((1 + length + 2, 10 + 16 * row), fill="#000000")
+
+            draw.text((3, 3 + 16 * row), line.symbol, font=font, fill=line.color)
+
+            draw.text(
+                (6 + length, 1 + 16 * row),
+                line.headsign,
+                font=smallfont,
+                fill=line.color,
+            )
+            line_predictions = filter(lambda p: p.line == line, predictions)
+
+            pixel_x = 1 + length + 2 + 3
+            for col, prediction in enumerate(line_predictions):
+                time_str = str(int(prediction.eta / timedelta(minutes=1)))
+                length = draw.textlength(time_str, font=font)
+                if pixel_x + length > 64 - (
+                    draw.textlength("min", font=font) + X_MARGIN
+                ):
+                    break
+
+                draw.text(
+                    (pixel_x, 8 + 16 * row),
+                    time_str,
+                    font=font,
+                    fill=line.color if prediction.type == "prediction" else "#888888",
+                )
+
+                pixel_x += length + X_MARGIN
+
+            draw.text(
+                (pixel_x, 8 + 16 * row),
+                "min",
+                font=font,
+                fill="#888888",
+            )
 
         return image
 

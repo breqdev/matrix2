@@ -13,6 +13,7 @@ from matrix.screens.weather import Weather
 from matrix.screens.forecast import Forecast
 from matrix.web_ui import WebUI
 from matrix.utils.no_connection import get_image_no_connection
+from matrix.utils.panels import PanelSize
 
 from matrix.modes.mode import ModeType, BaseMode
 from matrix.modes.main import Main
@@ -26,7 +27,9 @@ logger = logging.getLogger(__name__)
 
 
 class App:
-    def __init__(self, *, simulation: bool = False) -> None:
+    def __init__(self, *, panel: PanelSize, simulation: bool = False) -> None:
+        self.panel = panel
+
         if simulation:
             self.hardware = None
         else:
@@ -92,10 +95,16 @@ class App:
             prev_image = None
             while True:
                 try:
-                    image = self.modes[self.active_mode].get_image()
+                    mode = self.modes[self.active_mode]
+                    match self.panel:
+                        case PanelSize.PANEL_64x64:
+                            image = mode.get_image_64x64()
+                        case PanelSize.PANEL_64x32:
+                            image = mode.get_image_64x32()
+
                 except Exception as e:
                     logger.exception("Exception when drawing image: %s", e)
-                    image = get_image_no_connection()
+                    image = get_image_no_connection(self.panel)
 
                 if image != prev_image:  # Only send the image if it's different
                     self.ui.send_frame(image)

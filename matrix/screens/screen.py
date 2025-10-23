@@ -74,7 +74,12 @@ class Screen(ABC, Generic[T]):
         return self.cached_data
 
     @abstractmethod
-    def get_image(self) -> Image.Image | None:
+    def get_image_64x64(self) -> Image.Image | None:
+        """Render an image."""
+        pass
+
+    @abstractmethod
+    def get_image_64x32(self) -> Image.Image | None:
         """Render an image."""
         pass
 

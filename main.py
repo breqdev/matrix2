@@ -11,6 +11,7 @@ load_dotenv()
 
 # project
 from matrix.app import App
+from matrix.utils.panels import PanelSize
 
 
 parser = argparse.ArgumentParser(
@@ -33,5 +34,5 @@ if not args.simulate:
     # Add our handler to the root logger
     logging.root.addHandler(handler)
 
-app = App(simulation=args.simulate)
+app = App(panel=PanelSize.PANEL_64x32, simulation=args.simulate)
 app.run()

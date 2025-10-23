@@ -33,5 +33,9 @@ class BaseMode(ABC):
         pass
 
     @abstractmethod
-    def get_image(self) -> Image.Image:
+    def get_image_64x64(self) -> Image.Image:
+        pass
+
+    @abstractmethod
+    def get_image_64x32(self) -> Image.Image:
         pass

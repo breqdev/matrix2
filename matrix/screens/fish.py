@@ -23,7 +23,7 @@ class MakeAFish(Screen[Image.Image]):
         # transparent image
         return Image.new("RGBA", (64, 64), (0, 0, 0, 0))
 
-    def get_image(self):
+    def get_image_64x64(self):
         image = Image.new("RGB", (64, 64))
         draw = ImageDraw.Draw(image)
 
@@ -33,5 +33,16 @@ class MakeAFish(Screen[Image.Image]):
 
         draw.text((20, 48), text="11:11", font=font, fill="#ffffff")
         draw.text((5, 56), text="make a fish", font=font, fill="#ffffff")
+
+        return image
+
+    def get_image_64x32(self):
+        # TODO: does the fish fit?
+        image = Image.new("RGB", (64, 32))
+        draw = ImageDraw.Draw(image)
+
+        draw.rectangle((0, 0, 64, 32), fill="#0000FF")
+
+        image.paste(self.data)
 
         return image

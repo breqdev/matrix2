@@ -31,7 +31,7 @@ class Brightness(BaseMode):
         else:
             self.matrix.brightness -= 10
 
-    def get_image(self) -> Image.Image:
+    def get_image_64x64(self) -> Image.Image:
         image = Image.new("RGB", (64, 64))
         draw = ImageDraw.Draw(image)
 
@@ -48,6 +48,22 @@ class Brightness(BaseMode):
         draw.rectangle((1, 32, 62, 40), outline="#ffffff")
         draw.rectangle(
             (1, 32, 1 + int(61 * self.matrix.brightness / 100), 40), fill="#ffffff"
+        )
+
+        return image
+
+    def get_image_64x32(self) -> Image.Image:
+        image = Image.new("RGB", (64, 32))
+        draw = ImageDraw.Draw(image)
+
+        draw.text((2, 1), text=" Brightness ", font=font, fill="#888888")
+        draw.line((0, 8, 64, 8), fill="#888888")
+
+        draw.text(
+            (32 - 3 * len(f"{self.matrix.brightness}%"), 16),
+            text=f"{self.matrix.brightness}%",
+            font=bigfont,
+            fill="#ffffff",
         )
 
         return image
