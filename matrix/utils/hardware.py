@@ -16,5 +16,5 @@ class Hardware:
         self.matrix = RGBMatrix(options=matrix_options)
         self.matrix.brightness = 60
 
-        self.dial = RotaryEncoder(8, 7, max_steps=1024, wrap=True, bounce_time=0.1)
+        self.dial = RotaryEncoder(7, 19, max_steps=1024, wrap=True, bounce_time=0.1)
         self.button = Button(25, bounce_time=0.1)
