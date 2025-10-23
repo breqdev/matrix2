@@ -14,6 +14,7 @@ class Hardware:
         matrix_options.rows = size.value.rows
         matrix_options.cols = size.value.cols
         matrix_options.drop_privileges = False
+        matrix_options.hardware_mapping = "adafruit-hat-pwm"
 
         self.matrix = RGBMatrix(options=matrix_options)
         self.matrix.brightness = brightness or 60
