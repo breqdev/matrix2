@@ -236,7 +236,7 @@ class MBTA(Screen[MbtaData]):
                 )
             )
 
-        super().__init__(config)
+        super().__init__(config, self.size)
 
     def fetch_data(self):
         api_key = self.config["api_key"]

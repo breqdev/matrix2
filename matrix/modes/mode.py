@@ -26,11 +26,6 @@ class BaseMode(ABC):
         self.change_mode = change_mode
         self.size = size
 
-    def create_image(self) -> Image.Image:
-        """Create a new RGB image with the correct size for this panel."""
-        size = self.size.value
-        return Image.new("RGB", (size.cols, size.rows))
-
     @abstractmethod
     def handle_encoder_push(self) -> None:
         pass

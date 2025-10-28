@@ -38,7 +38,7 @@ class Menu(BaseMode):
         self.selected_option = (self.selected_option - 1) % len(self.options)
 
     def get_image(self) -> Image.Image:
-        image = self.create_image()
+        image = self.size.value.image()
         draw = ImageDraw.Draw(image)
 
         draw.text((0, 1), text="  Settings   ", font=font, fill="#ffffff")

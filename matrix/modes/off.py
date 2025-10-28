@@ -6,4 +6,4 @@ class Off(BaseMode):
         self.change_mode(ModeType.MAIN)
 
     def get_image(self):
-        return self.create_image()
+        return self.size.value.image()

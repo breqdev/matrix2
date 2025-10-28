@@ -26,7 +26,7 @@ class Network(BaseMode):
         self.show_qr_code = not self.show_qr_code
 
     def get_image_64x64(self) -> Image.Image:
-        image = self.create_image()
+        image = self.size.value.image()
         draw = ImageDraw.Draw(image)
 
         if self.show_qr_code:
@@ -69,7 +69,7 @@ class Network(BaseMode):
         return image
 
     def get_image_64x32(self) -> Image.Image:
-        image = self.create_image()
+        image = self.size.value.image()
         draw = ImageDraw.Draw(image)
 
         draw.text((2, 1), text="Network Info", font=font, fill="#ffffff")

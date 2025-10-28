@@ -33,7 +33,7 @@ class Brightness(BaseMode):
             self.matrix.brightness -= 10
 
     def get_image(self) -> Image.Image:
-        image = self.create_image()
+        image = self.size.value.image()
         draw = ImageDraw.Draw(image)
 
         draw.text((2, 1), text=" Brightness ", font=font, fill="#888888")
