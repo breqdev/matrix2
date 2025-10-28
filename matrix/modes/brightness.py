@@ -48,8 +48,6 @@ class Brightness(BaseMode):
 
         if self.size == PanelSize.PANEL_64x64:
             draw.rectangle((1, 32, 62, 40), outline="#ffffff")
-            draw.rectangle(
-                (1, 32, 1 + int(61 * self.matrix.brightness / 100), 40), fill="#ffffff"
-            )
+            draw.rectangle((1, 32, 1 + int(61 * self.matrix.brightness / 100), 40), fill="#ffffff")
 
         return image

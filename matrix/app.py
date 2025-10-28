@@ -47,11 +47,11 @@ class App:
             self.hardware = Hardware(self.panel, self.config["panel"]["brightness"])
 
         screens: list[Screen] = [
-            MBTA(self.config["screens"]["mbta"]),
-            Spotify(self.config["screens"]["spotify"]),
-            Weather(self.config["screens"]["weather"]),
-            # Forecast(self.config["screens"]["forecast"]),
-            BlueBikes(self.config["screens"]["bluebikes"]),
+            MBTA(self.config["screens"]["mbta"], self.panel),
+            Spotify(self.config["screens"]["spotify"], self.panel),
+            Weather(self.config["screens"]["weather"], self.panel),
+            # Forecast(self.config["screens"]["forecast"], self.panel),
+            BlueBikes(self.config["screens"]["bluebikes"], self.panel),
         ]
         self.modes: dict[ModeType, BaseMode] = {
             ModeType.MAIN: Main(self.change_mode, self.panel, screens),
@@ -61,13 +61,9 @@ class App:
         }
 
         if self.hardware is not None:
-            self.modes[ModeType.BRIGHTNESS] = Brightness(
-                self.change_mode, self.panel, hardware=self.hardware
-            )
+            self.modes[ModeType.BRIGHTNESS] = Brightness(self.change_mode, self.panel, hardware=self.hardware)
             self.hardware.dial.when_rotated_clockwise = self.handle_rotation_clockwise
-            self.hardware.dial.when_rotated_counter_clockwise = (
-                self.handle_rotation_counterclockwise
-            )
+            self.hardware.dial.when_rotated_counter_clockwise = self.handle_rotation_counterclockwise
             self.hardware.button.when_pressed = self.handle_press
 
         if sys.platform == "linux":

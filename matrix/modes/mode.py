@@ -41,7 +41,7 @@ class BaseMode(ABC):
     def handle_encoder_counterclockwise(self) -> None:
         pass
 
-    def get_image(self) -> Image.Image:
+    def get_image(self) -> Image.Image | None:
         """Get the current image for this mode. Delegates to size-specific methods by default.
 
         Modes can either:
@@ -56,12 +56,8 @@ class BaseMode(ABC):
 
     def get_image_64x64(self) -> Image.Image:
         """Get image for 64x64 panel. Override in subclasses for size-specific rendering."""
-        raise NotImplementedError(
-            f"{self.__class__.__name__} must implement get_image_64x64() or override get_image()"
-        )
+        raise NotImplementedError(f"{self.__class__.__name__} must implement get_image_64x64() or override get_image()")
 
     def get_image_64x32(self) -> Image.Image:
         """Get image for 64x32 panel. Override in subclasses for size-specific rendering."""
-        raise NotImplementedError(
-            f"{self.__class__.__name__} must implement get_image_64x32() or override get_image()"
-        )
+        raise NotImplementedError(f"{self.__class__.__name__} must implement get_image_64x32() or override get_image()")

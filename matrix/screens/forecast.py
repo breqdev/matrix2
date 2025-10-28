@@ -69,17 +69,13 @@ class Forecast(Screen[WeatherData | None]):
         dates: dict[datetime.date, list[ForecastType]] = {}
 
         for forecast in data["list"]:
-            timestamp = datetime.datetime.fromtimestamp(
-                forecast["dt"], tz=datetime.timezone.utc
-            )
+            timestamp = datetime.datetime.fromtimestamp(forecast["dt"], tz=datetime.timezone.utc)
 
             if timestamp.date() not in dates:
                 dates[timestamp.date()] = []
             dates[timestamp.date()].append(forecast)
 
-        for i, (date, forecasts) in enumerate(
-            sorted(dates.items(), key=lambda pair: pair[0])
-        ):
+        for i, (date, forecasts) in enumerate(sorted(dates.items(), key=lambda pair: pair[0])):
             draw.text(
                 (1, 10 + i * 10),
                 date.strftime("%a") + " " + forecasts[0]["weather"][0]["description"],
@@ -106,17 +102,13 @@ class Forecast(Screen[WeatherData | None]):
         dates: dict[datetime.date, list[ForecastType]] = {}
 
         for forecast in data["list"]:
-            timestamp = datetime.datetime.fromtimestamp(
-                forecast["dt"], tz=datetime.timezone.utc
-            )
+            timestamp = datetime.datetime.fromtimestamp(forecast["dt"], tz=datetime.timezone.utc)
 
             if timestamp.date() not in dates:
                 dates[timestamp.date()] = []
             dates[timestamp.date()].append(forecast)
 
-        for i, (date, forecasts) in enumerate(
-            sorted(dates.items(), key=lambda pair: pair[0])
-        ):
+        for i, (date, forecasts) in enumerate(sorted(dates.items(), key=lambda pair: pair[0])):
             draw.text(
                 (1, 10 + i * 10),
                 date.strftime("%a") + " " + forecasts[0]["weather"][0]["description"],

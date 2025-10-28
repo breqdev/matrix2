@@ -49,9 +49,7 @@ class BlueBikes(Screen[tuple[Any, Any] | None]):
             time_str = datetime.datetime.now().strftime("%H:%M")
 
             for i, sta_id in enumerate(STATIONS):
-                draw.text(
-                    (1, 10 + 18 * i), text=STATIONS[sta_id], font=font, fill="#999999"
-                )
+                draw.text((1, 10 + 18 * i), text=STATIONS[sta_id], font=font, fill="#999999")
                 image.paste(Image.open("icons/bike.png"), (1, 18 + 18 * i))
                 draw.text((12, 19 + 18 * i), text="??", font=font, fill="#2CA3E1")
                 image.paste(Image.open("icons/ebike.png"), (25, 18 + 18 * i))
@@ -65,24 +63,16 @@ class BlueBikes(Screen[tuple[Any, Any] | None]):
 
         guids = {}
         for sta_id in STATIONS:
-            sta_info = next(
-                s for s in all_stations["data"]["stations"] if s["short_name"] == sta_id
-            )
+            sta_info = next(s for s in all_stations["data"]["stations"] if s["short_name"] == sta_id)
             guids[sta_id] = sta_info["station_id"]
 
         status = {}
         for sta_id in STATIONS:
-            sta_status = next(
-                s
-                for s in all_status["data"]["stations"]
-                if s["station_id"] == guids[sta_id]
-            )
+            sta_status = next(s for s in all_status["data"]["stations"] if s["station_id"] == guids[sta_id])
             status[sta_id] = sta_status
 
         for i, (sta_id, info) in enumerate(status.items()):
-            draw.text(
-                (1, 10 + 18 * i), text=STATIONS[sta_id], font=font, fill="#999999"
-            )
+            draw.text((1, 10 + 18 * i), text=STATIONS[sta_id], font=font, fill="#999999")
             image.paste(Image.open("icons/bike.png"), (1, 18 + 18 * i))
             draw.text(
                 (12, 19 + 18 * i),
@@ -119,9 +109,7 @@ class BlueBikes(Screen[tuple[Any, Any] | None]):
 
         if self.data is None:
             for i, sta_id in enumerate(STATIONS):
-                draw.text(
-                    (1, 1 + 16 * i), text=STATIONS[sta_id], font=font, fill="#999999"
-                )
+                draw.text((1, 1 + 16 * i), text=STATIONS[sta_id], font=font, fill="#999999")
                 image.paste(Image.open("icons/bike.png"), (1, 8 + 16 * i))
                 draw.text((12, 9 + 16 * i), text="??", font=font, fill="#2CA3E1")
                 image.paste(Image.open("icons/ebike.png"), (25, 8 + 16 * i))
@@ -135,24 +123,16 @@ class BlueBikes(Screen[tuple[Any, Any] | None]):
 
         guids = {}
         for sta_id in STATIONS:
-            sta_info = next(
-                s for s in all_stations["data"]["stations"] if s["short_name"] == sta_id
-            )
+            sta_info = next(s for s in all_stations["data"]["stations"] if s["short_name"] == sta_id)
             guids[sta_id] = sta_info["station_id"]
 
         status = {}
         for sta_id in STATIONS:
-            sta_status = next(
-                s
-                for s in all_status["data"]["stations"]
-                if s["station_id"] == guids[sta_id]
-            )
+            sta_status = next(s for s in all_status["data"]["stations"] if s["station_id"] == guids[sta_id])
             status[sta_id] = sta_status
 
         for i, (sta_id, info) in enumerate(status.items()):
-            draw.text(
-                (1, 1 + 16 * i), text=STATIONS[sta_id], font=smallfont, fill="#999999"
-            )
+            draw.text((1, 1 + 16 * i), text=STATIONS[sta_id], font=smallfont, fill="#999999")
             image.paste(Image.open("icons/bike.png"), (1, 8 + 16 * i))
             draw.text(
                 (12, 9 + 16 * i),

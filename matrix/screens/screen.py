@@ -6,6 +6,7 @@ import time
 import logging
 
 from datadog.dogstatsd.base import statsd
+from matrix.utils.panels import PanelSize
 
 
 logger = logging.getLogger(__name__)
@@ -17,8 +18,9 @@ T = TypeVar("T")
 
 
 class Screen(ABC, Generic[T]):
-    def __init__(self, config: dict) -> None:
+    def __init__(self, config: dict, size: PanelSize) -> None:
         self.config = config
+        self.size = size
         self.cached_data: T
 
         self.has_data = threading.Event()
@@ -74,15 +76,26 @@ class Screen(ABC, Generic[T]):
         self.has_data.wait()
         return self.cached_data
 
-    @abstractmethod
-    def get_image_64x64(self) -> Image.Image | None:
-        """Render an image."""
-        pass
+    def get_image(self) -> Image.Image | None:
+        """Get the current image for this screen. Delegates to size-specific methods by default.
 
-    @abstractmethod
+        Screens can either:
+        1. Override this method directly for size-agnostic rendering, or
+        2. Override get_image_64x64() and get_image_64x32() for size-specific rendering
+        """
+        match self.size:
+            case PanelSize.PANEL_64x64:
+                return self.get_image_64x64()
+            case PanelSize.PANEL_64x32:
+                return self.get_image_64x32()
+
+    def get_image_64x64(self) -> Image.Image | None:
+        """Get image for 64x64 panel. Override in subclasses for size-specific rendering."""
+        raise NotImplementedError(f"{self.__class__.__name__} must implement get_image_64x64() or override get_image()")
+
     def get_image_64x32(self) -> Image.Image | None:
-        """Render an image."""
-        pass
+        """Get image for 64x32 panel. Override in subclasses for size-specific rendering."""
+        raise NotImplementedError(f"{self.__class__.__name__} must implement get_image_64x32() or override get_image()")
 
     def get_time_stretch(self) -> float | None:
         """Screens can return a duration here to increase the amount of time displayed.

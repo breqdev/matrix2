@@ -22,9 +22,7 @@ class Screens(BaseMode):
         if self.is_back_selected:
             self.change_mode(ModeType.MENU)
         else:
-            self.screens[self.selected_option].is_enabled = not self.screens[
-                self.selected_option
-            ].is_enabled
+            self.screens[self.selected_option].is_enabled = not self.screens[self.selected_option].is_enabled
 
     def handle_encoder_clockwise(self):
         self.selected_option = (self.selected_option + 1) % self.total_options
