@@ -1,11 +1,10 @@
-import os
 from typing import TypedDict
 import requests
 import datetime
 
 from PIL import Image, ImageDraw
 
-from matrix.resources.fonts import font, bigfont, smallfont
+from matrix.resources.fonts import font, smallfont
 from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
 
 
@@ -52,40 +51,7 @@ class Forecast(Screen[WeatherData | None]):
     def fallback_data(self):
         return None
 
-    def get_image_64x64(self):
-        image = Image.new("RGB", (64, 64))
-        draw = ImageDraw.Draw(image)
-
-        date_str = datetime.datetime.now().strftime("%m/%d")
-        time_str = datetime.datetime.now().strftime("%H:%M")
-        draw.text((1, 1), f"{date_str:<5}", font=font, fill=TIME_DATE_COLOR)
-        draw.text((39, 1), f"{time_str:>5}", font=font, fill=TIME_DATE_COLOR)
-
-        if self.data is None:
-            return image
-
-        data = self.data
-
-        dates: dict[datetime.date, list[ForecastType]] = {}
-
-        for forecast in data["list"]:
-            timestamp = datetime.datetime.fromtimestamp(forecast["dt"], tz=datetime.timezone.utc)
-
-            if timestamp.date() not in dates:
-                dates[timestamp.date()] = []
-            dates[timestamp.date()].append(forecast)
-
-        for i, (date, forecasts) in enumerate(sorted(dates.items(), key=lambda pair: pair[0])):
-            draw.text(
-                (1, 10 + i * 10),
-                date.strftime("%a") + " " + forecasts[0]["weather"][0]["description"],
-                font=smallfont,
-                fill="#ffffff",
-            )
-
-        return image
-
-    def get_image_64x32(self):
+    def get_image(self):
         image = Image.new("RGB", (64, 64))
         draw = ImageDraw.Draw(image)
 

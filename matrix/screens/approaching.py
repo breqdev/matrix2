@@ -1,6 +1,6 @@
 import datetime
 
-from PIL import Image, ImageDraw
+from PIL import ImageDraw
 
 from matrix.resources.fonts import font
 from matrix.screens.screen import Screen

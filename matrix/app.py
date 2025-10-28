@@ -10,7 +10,6 @@ from matrix.screens.mbta import MBTA
 from matrix.screens.screen import Screen
 from matrix.screens.spotify import Spotify
 from matrix.screens.weather import Weather
-from matrix.screens.forecast import Forecast
 from matrix.web_ui import WebUI
 from matrix.utils.no_connection import get_image_no_connection
 from matrix.utils.panels import PanelSize

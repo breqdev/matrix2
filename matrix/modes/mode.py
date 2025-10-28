@@ -1,5 +1,5 @@
+from matrix.utils.panels import Drawable
 from abc import ABC, abstractmethod
-from PIL import Image
 from typing import Callable, TypeAlias
 import enum
 
@@ -18,13 +18,12 @@ class ModeType(enum.StrEnum):
 ChangeMode: TypeAlias = Callable[[ModeType], None]
 
 
-class BaseMode(ABC):
+class BaseMode(ABC, Drawable):
     change_mode: ChangeMode
-    size: PanelSize
 
     def __init__(self, change_mode: ChangeMode, size: PanelSize) -> None:
+        super().__init__(size)
         self.change_mode = change_mode
-        self.size = size
 
     @abstractmethod
     def handle_encoder_push(self) -> None:
@@ -35,24 +34,3 @@ class BaseMode(ABC):
 
     def handle_encoder_counterclockwise(self) -> None:
         pass
-
-    def get_image(self) -> Image.Image | None:
-        """Get the current image for this mode. Delegates to size-specific methods by default.
-
-        Modes can either:
-        1. Override this method directly for size-agnostic rendering, or
-        2. Override get_image_64x64() and get_image_64x32() for size-specific rendering
-        """
-        match self.size:
-            case PanelSize.PANEL_64x64:
-                return self.get_image_64x64()
-            case PanelSize.PANEL_64x32:
-                return self.get_image_64x32()
-
-    def get_image_64x64(self) -> Image.Image:
-        """Get image for 64x64 panel. Override in subclasses for size-specific rendering."""
-        raise NotImplementedError(f"{self.__class__.__name__} must implement get_image_64x64() or override get_image()")
-
-    def get_image_64x32(self) -> Image.Image:
-        """Get image for 64x32 panel. Override in subclasses for size-specific rendering."""
-        raise NotImplementedError(f"{self.__class__.__name__} must implement get_image_64x32() or override get_image()")
