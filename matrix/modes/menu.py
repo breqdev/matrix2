@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from PIL import Image, ImageDraw
 from matrix.resources.fonts import font
 from matrix.modes.mode import BaseMode, ChangeMode, ModeType
+from matrix.utils.panels import PanelSize
 import sys
 
 
@@ -12,8 +13,8 @@ class MenuOption:
 
 
 class Menu(BaseMode):
-    def __init__(self, change_mode: ChangeMode) -> None:
-        super().__init__(change_mode)
+    def __init__(self, change_mode: ChangeMode, size: PanelSize) -> None:
+        super().__init__(change_mode, size)
 
         self.options: list[MenuOption] = [
             MenuOption("Home", ModeType.MAIN),
@@ -36,27 +37,8 @@ class Menu(BaseMode):
     def handle_encoder_counterclockwise(self):
         self.selected_option = (self.selected_option - 1) % len(self.options)
 
-    def get_image_64x64(self) -> Image.Image:
-        image = Image.new("RGB", (64, 64))
-        draw = ImageDraw.Draw(image)
-
-        draw.text((0, 1), text="  Settings   ", font=font, fill="#ffffff")
-        draw.line((0, 8, 64, 8), fill="#888888")
-
-        for i, option in enumerate(self.options):
-            color = "#ffffff" if self.selected_option == i else "#888888"
-            draw.text((1, 12 + 10 * i), text=">", font=font, fill=color)
-            draw.text((12, 12 + 10 * i), text=option.name, font=font, fill=color)
-
-        draw.rectangle(
-            (0, 10 + 10 * self.selected_option, 63, 10 + 10 * self.selected_option + 9),
-            outline="#00ffff",
-        )
-
-        return image
-
-    def get_image_64x32(self) -> Image.Image:
-        image = Image.new("RGB", (64, 32))
+    def get_image(self) -> Image.Image:
+        image = self.create_image()
         draw = ImageDraw.Draw(image)
 
         draw.text((0, 1), text="  Settings   ", font=font, fill="#ffffff")

@@ -54,15 +54,15 @@ class App:
             BlueBikes(self.config["screens"]["bluebikes"]),
         ]
         self.modes: dict[ModeType, BaseMode] = {
-            ModeType.MAIN: Main(self.change_mode, screens),
-            ModeType.MENU: Menu(self.change_mode),
-            ModeType.SCREENS: Screens(self.change_mode, screens),
-            ModeType.OFF: Off(self.change_mode),
+            ModeType.MAIN: Main(self.change_mode, self.panel, screens),
+            ModeType.MENU: Menu(self.change_mode, self.panel),
+            ModeType.SCREENS: Screens(self.change_mode, self.panel, screens),
+            ModeType.OFF: Off(self.change_mode, self.panel),
         }
 
         if self.hardware is not None:
             self.modes[ModeType.BRIGHTNESS] = Brightness(
-                self.change_mode, hardware=self.hardware
+                self.change_mode, self.panel, hardware=self.hardware
             )
             self.hardware.dial.when_rotated_clockwise = self.handle_rotation_clockwise
             self.hardware.dial.when_rotated_counter_clockwise = (
@@ -71,7 +71,7 @@ class App:
             self.hardware.button.when_pressed = self.handle_press
 
         if sys.platform == "linux":
-            self.modes[ModeType.NETWORK] = Network(self.change_mode)
+            self.modes[ModeType.NETWORK] = Network(self.change_mode, self.panel)
 
         self.active_mode: ModeType = ModeType.MAIN
 
@@ -105,12 +105,7 @@ class App:
             while True:
                 try:
                     mode = self.modes[self.active_mode]
-                    match self.panel:
-                        case PanelSize.PANEL_64x64:
-                            image = mode.get_image_64x64()
-                        case PanelSize.PANEL_64x32:
-                            image = mode.get_image_64x32()
-
+                    image = mode.get_image()
                 except Exception as e:
                     logger.exception("Exception when drawing image: %s", e)
                     image = get_image_no_connection(self.panel)

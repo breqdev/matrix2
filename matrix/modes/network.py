@@ -2,6 +2,7 @@ from typing import NamedTuple
 from PIL import Image, ImageDraw
 from matrix.modes.mode import BaseMode, ChangeMode, ModeType
 from matrix.resources.fonts import font
+from matrix.utils.panels import PanelSize
 import subprocess
 import qrcode
 
@@ -9,8 +10,8 @@ from matrix.utils.line_wrap import line_wrap
 
 
 class Network(BaseMode):
-    def __init__(self, change_mode: ChangeMode) -> None:
-        super().__init__(change_mode)
+    def __init__(self, change_mode: ChangeMode, size: PanelSize) -> None:
+        super().__init__(change_mode, size)
         self.network_info = get_network_info()
 
         self.show_qr_code = False
@@ -25,7 +26,7 @@ class Network(BaseMode):
         self.show_qr_code = not self.show_qr_code
 
     def get_image_64x64(self) -> Image.Image:
-        image = Image.new("RGB", (64, 64))
+        image = self.create_image()
         draw = ImageDraw.Draw(image)
 
         if self.show_qr_code:
@@ -68,7 +69,7 @@ class Network(BaseMode):
         return image
 
     def get_image_64x32(self) -> Image.Image:
-        image = Image.new("RGB", (64, 32))
+        image = self.create_image()
         draw = ImageDraw.Draw(image)
 
         draw.text((2, 1), text="Network Info", font=font, fill="#ffffff")
