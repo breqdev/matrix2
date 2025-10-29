@@ -1,8 +1,8 @@
-from typing import Any
-import requests
 import datetime
 from concurrent.futures import ThreadPoolExecutor
+from typing import Any
 
+import requests
 from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font, smallfont

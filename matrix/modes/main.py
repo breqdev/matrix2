@@ -1,12 +1,13 @@
 # stdlib
-from datetime import datetime
-import time
 import logging
+import time
+from datetime import datetime
+from typing import Any
 
 # project
-from matrix.screens.screen import Screen
-from matrix.screens.fish import MakeAFish
 from matrix.modes.mode import BaseMode, ChangeMode, ModeType
+from matrix.screens.fish import MakeAFish
+from matrix.screens.screen import Screen
 from matrix.utils.panels import PanelSize
 
 logger = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ def is_eleven_eleven() -> bool:
 class Main(BaseMode):
     screen_refresh_rate: float = 5
 
-    def __init__(self, change_mode: ChangeMode, size: PanelSize, screens: list[Screen]) -> None:
+    def __init__(self, change_mode: ChangeMode, size: PanelSize, screens: list[Screen[Any]]) -> None:
         super().__init__(change_mode, size)
 
         self.screens = screens

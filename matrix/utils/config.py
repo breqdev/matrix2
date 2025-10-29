@@ -1,6 +1,6 @@
+import sys
 import tomllib
 from pathlib import Path
-import sys
 
 
 def parse_config():

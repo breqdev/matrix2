@@ -1,27 +1,25 @@
 # stdlib
-import threading
 import logging
 import sys
+import threading
 
 # project
+from matrix.modes.brightness import Brightness
+from matrix.modes.main import Main
+from matrix.modes.menu import Menu
+from matrix.modes.mode import BaseMode, ModeType
+from matrix.modes.network import Network
+from matrix.modes.off import Off
 from matrix.modes.screens import Screens
 from matrix.screens.bluebikes import BlueBikes
 from matrix.screens.mbta import MBTA
 from matrix.screens.screen import Screen
 from matrix.screens.spotify import Spotify
 from matrix.screens.weather import Weather
-from matrix.web_ui import WebUI
+from matrix.utils.config import parse_config
 from matrix.utils.no_connection import get_image_no_connection
 from matrix.utils.panels import PanelSize
-from matrix.utils.config import parse_config
-
-from matrix.modes.mode import ModeType, BaseMode
-from matrix.modes.main import Main
-from matrix.modes.menu import Menu
-from matrix.modes.off import Off
-from matrix.modes.brightness import Brightness
-from matrix.modes.network import Network
-
+from matrix.web_ui import WebUI
 
 logger = logging.getLogger(__name__)
 

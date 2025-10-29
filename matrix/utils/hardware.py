@@ -1,5 +1,5 @@
+from gpiozero import Button, RotaryEncoder
 from rgbmatrix import RGBMatrix, RGBMatrixOptions  # type: ignore
-from gpiozero import RotaryEncoder, Button
 
 from matrix.utils.panels import PanelSize
 

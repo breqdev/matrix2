@@ -1,9 +1,11 @@
-from dataclasses import dataclass
-from PIL import Image, ImageDraw
-from matrix.resources.fonts import font
-from matrix.modes.mode import BaseMode, ChangeMode, ModeType
-from matrix.utils.panels import PanelSize
 import sys
+from dataclasses import dataclass
+
+from PIL import Image, ImageDraw
+
+from matrix.modes.mode import BaseMode, ChangeMode, ModeType
+from matrix.resources.fonts import font
+from matrix.utils.panels import PanelSize
 
 
 @dataclass

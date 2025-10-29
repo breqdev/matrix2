@@ -1,14 +1,14 @@
-import requests
-from datetime import datetime, timedelta
-from typing import Literal, TypeAlias
+import re
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-import re
+from datetime import datetime, timedelta
+from typing import Literal, TypeAlias
 
+import requests
 from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font, smallfont
-from matrix.screens.screen import Screen, REQUEST_DEFAULT_TIMEOUT
+from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
 
 PredictionType: TypeAlias = Literal["prediction", "schedule"]
 
@@ -303,7 +303,7 @@ class MBTA(Screen[MbtaData]):
             line_predictions = filter(lambda p: p.line == line, predictions)
 
             pixel_x = 2
-            for col, prediction in enumerate(line_predictions):
+            for prediction in line_predictions:
                 time_str = str(int(prediction.eta / timedelta(minutes=1)))
                 length = draw.textlength(time_str, font=font)
                 if pixel_x + length > 64 - (draw.textlength("min", font=font) + X_MARGIN):
@@ -384,7 +384,7 @@ class MBTA(Screen[MbtaData]):
             line_predictions = filter(lambda p: p.line == line, predictions)
 
             pixel_x = 1 + length + 2 + 3
-            for col, prediction in enumerate(line_predictions):
+            for prediction in line_predictions:
                 time_str = str(int(prediction.eta / timedelta(minutes=1)))
                 length = draw.textlength(time_str, font=font)
                 if pixel_x + length > 64 - (draw.textlength("min", font=font) + X_MARGIN):
@@ -409,7 +409,6 @@ class MBTA(Screen[MbtaData]):
         return image
 
     def get_time_stretch(self):
-        if self.data:
-            if self.data[1]:
-                # remain on screen for 5s for alerts
-                return 10
+        if self.data and self.data[1]:
+            # remain on screen for 5s for alerts
+            return 10

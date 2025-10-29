@@ -1,11 +1,11 @@
-from typing import TypedDict
-import requests
 import datetime
 from pathlib import Path
+from typing import TypedDict
 
+import requests
 from PIL import Image, ImageDraw
 
-from matrix.resources.fonts import font, bigfont
+from matrix.resources.fonts import bigfont, font
 from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
 
 TIME_DATE_COLOR = "#aaaaaa"

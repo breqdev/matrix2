@@ -1,8 +1,10 @@
 from typing import Any
+
 from PIL import Image, ImageDraw
+
+from matrix.modes.mode import BaseMode, ChangeMode, ModeType
 from matrix.resources.colors import BLUE, GREEN, LIGHT_GREY, WHITE
 from matrix.resources.fonts import font
-from matrix.modes.mode import BaseMode, ChangeMode, ModeType
 from matrix.screens.screen import Screen
 from matrix.utils.panels import PanelSize
 

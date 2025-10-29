@@ -1,12 +1,13 @@
+import subprocess
 from typing import NamedTuple
+
+import qrcode
 from PIL import Image, ImageDraw
+
 from matrix.modes.mode import BaseMode, ChangeMode, ModeType
 from matrix.resources.fonts import font
-from matrix.utils.panels import PanelSize
-import subprocess
-import qrcode
-
 from matrix.utils.line_wrap import line_wrap
+from matrix.utils.panels import PanelSize
 
 
 class Network(BaseMode):

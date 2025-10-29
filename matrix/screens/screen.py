@@ -1,13 +1,12 @@
-from matrix.utils.panels import Drawable
-from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
+import logging
 import threading
 import time
-import logging
+from abc import ABC, abstractmethod
+from typing import Generic, TypeVar
 
 from datadog.dogstatsd.base import statsd
-from matrix.utils.panels import PanelSize
 
+from matrix.utils.panels import Drawable, PanelSize
 
 logger = logging.getLogger(__name__)
 

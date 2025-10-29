@@ -1,11 +1,11 @@
-from matrix.utils.panels import PanelSize
-import requests
 import io
 
+import requests
 from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font
 from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
+from matrix.utils.panels import PanelSize
 
 
 class MakeAFish(Screen[Image.Image]):

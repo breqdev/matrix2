@@ -1,8 +1,9 @@
 from typing import TYPE_CHECKING
 
 from PIL import Image, ImageDraw
+
 from matrix.modes.mode import BaseMode, ChangeMode, ModeType
-from matrix.resources.fonts import font, bigfont
+from matrix.resources.fonts import bigfont, font
 from matrix.utils.panels import PanelSize
 
 if TYPE_CHECKING:
