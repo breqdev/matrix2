@@ -2,6 +2,7 @@
 import logging
 import time
 from datetime import datetime
+from typing import Any
 
 # project
 from matrix.modes.mode import BaseMode, ChangeMode, ModeType
@@ -20,7 +21,7 @@ def is_eleven_eleven() -> bool:
 class Main(BaseMode):
     screen_refresh_rate: float = 5
 
-    def __init__(self, change_mode: ChangeMode, size: PanelSize, screens: list[Screen]) -> None:
+    def __init__(self, change_mode: ChangeMode, size: PanelSize, screens: list[Screen[Any]]) -> None:
         super().__init__(change_mode, size)
 
         self.screens = screens
