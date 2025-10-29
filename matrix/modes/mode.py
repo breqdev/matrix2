@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
-from PIL import Image
 from typing import Callable, TypeAlias
 import enum
+
+from matrix.utils.panels import Drawable, PanelSize
 
 
 class ModeType(enum.StrEnum):
@@ -16,10 +17,11 @@ class ModeType(enum.StrEnum):
 ChangeMode: TypeAlias = Callable[[ModeType], None]
 
 
-class BaseMode(ABC):
+class BaseMode(ABC, Drawable):
     change_mode: ChangeMode
 
-    def __init__(self, change_mode: ChangeMode) -> None:
+    def __init__(self, change_mode: ChangeMode, size: PanelSize) -> None:
+        super().__init__(size)
         self.change_mode = change_mode
 
     @abstractmethod
@@ -30,8 +32,4 @@ class BaseMode(ABC):
         pass
 
     def handle_encoder_counterclockwise(self) -> None:
-        pass
-
-    @abstractmethod
-    def get_image(self) -> Image.Image:
         pass

@@ -14,12 +14,12 @@ from matrix.app import App
 
 
 parser = argparse.ArgumentParser(
-    prog="matrix2",
+    prog="matrix",
     description="LED matrix display driver",
 )
 
 parser.add_argument("--simulate", action="store_true")
-parser.add_argument("--logfile", default="/var/log/matrix2.log")
+parser.add_argument("--logfile", default="/var/log/matrix.log")
 
 args = parser.parse_args()
 
@@ -33,5 +33,5 @@ if not args.simulate:
     # Add our handler to the root logger
     logging.root.addHandler(handler)
 
-app = App(simulation=args.simulate)
+app = App()
 app.run()

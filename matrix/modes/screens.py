@@ -4,11 +4,12 @@ from matrix.resources.colors import BLUE, GREEN, LIGHT_GREY, WHITE
 from matrix.resources.fonts import font
 from matrix.modes.mode import BaseMode, ChangeMode, ModeType
 from matrix.screens.screen import Screen
+from matrix.utils.panels import PanelSize
 
 
 class Screens(BaseMode):
-    def __init__(self, change_mode: ChangeMode, screens: list[Screen]) -> None:
-        super().__init__(change_mode)
+    def __init__(self, change_mode: ChangeMode, size: PanelSize, screens: list[Screen]) -> None:
+        super().__init__(change_mode, size)
         self.screens = screens
         self.selected_option: int = 0
         self.total_options = len(self.screens) + 1  # +1 for the "back" option
@@ -30,7 +31,8 @@ class Screens(BaseMode):
         self.selected_option = (self.selected_option - 1) % self.total_options
 
     def get_image(self) -> Image.Image:
-        image = Image.new("RGB", (64, 64))
+        # TODO: make sure everything can fit or implement scrolling?
+        image = self.create_image()
         draw = ImageDraw.Draw(image)
 
         draw.text((0, 1), text="   Screens   ", font=font, fill=WHITE)
@@ -64,7 +66,12 @@ class Screens(BaseMode):
             draw.rectangle((0, 0, 10, 10), outline=BLUE)
         else:
             draw.rectangle(
-                (0, 12 + 10 * self.selected_option, 63, 12 + 10 * self.selected_option + 9),
+                (
+                    0,
+                    12 + 10 * self.selected_option,
+                    63,
+                    12 + 10 * self.selected_option + 9,
+                ),
                 outline=BLUE,
             )
 

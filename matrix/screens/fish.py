@@ -1,3 +1,4 @@
+from matrix.utils.panels import PanelSize
 import requests
 import io
 
@@ -23,15 +24,17 @@ class MakeAFish(Screen[Image.Image]):
         # transparent image
         return Image.new("RGBA", (64, 64), (0, 0, 0, 0))
 
-    def get_image(self):
-        image = Image.new("RGB", (64, 64))
+    def get_image_64x64(self):
+        image = self.size.value.image()
         draw = ImageDraw.Draw(image)
 
         draw.rectangle((0, 0, 64, 64), fill="#0000FF")
 
+        # TODO: does the fish fit in 64x32?
         image.paste(self.data)
 
-        draw.text((20, 48), text="11:11", font=font, fill="#ffffff")
-        draw.text((5, 56), text="make a fish", font=font, fill="#ffffff")
+        if self.size == PanelSize.PANEL_64x64:
+            draw.text((20, 48), text="11:11", font=font, fill="#ffffff")
+            draw.text((5, 56), text="make a fish", font=font, fill="#ffffff")
 
         return image

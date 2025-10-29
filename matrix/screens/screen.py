@@ -1,11 +1,12 @@
+from matrix.utils.panels import Drawable
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
-from PIL import Image
 import threading
 import time
 import logging
 
 from datadog.dogstatsd.base import statsd
+from matrix.utils.panels import PanelSize
 
 
 logger = logging.getLogger(__name__)
@@ -16,8 +17,10 @@ CACHE_TTL = 60
 T = TypeVar("T")
 
 
-class Screen(ABC, Generic[T]):
-    def __init__(self) -> None:
+class Screen(ABC, Drawable, Generic[T]):
+    def __init__(self, config: dict, size: PanelSize) -> None:
+        self.config = config
+        self.size = size
         self.cached_data: T
 
         self.has_data = threading.Event()
@@ -72,11 +75,6 @@ class Screen(ABC, Generic[T]):
         """Return the latest cached data."""
         self.has_data.wait()
         return self.cached_data
-
-    @abstractmethod
-    def get_image(self) -> Image.Image | None:
-        """Render an image."""
-        pass
 
     def get_time_stretch(self) -> float | None:
         """Screens can return a duration here to increase the amount of time displayed.

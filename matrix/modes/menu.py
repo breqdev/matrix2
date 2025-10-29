@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from PIL import Image, ImageDraw
 from matrix.resources.fonts import font
 from matrix.modes.mode import BaseMode, ChangeMode, ModeType
+from matrix.utils.panels import PanelSize
 import sys
 
 
@@ -12,8 +13,8 @@ class MenuOption:
 
 
 class Menu(BaseMode):
-    def __init__(self, change_mode: ChangeMode) -> None:
-        super().__init__(change_mode)
+    def __init__(self, change_mode: ChangeMode, size: PanelSize) -> None:
+        super().__init__(change_mode, size)
 
         self.options: list[MenuOption] = [
             MenuOption("Home", ModeType.MAIN),
@@ -37,12 +38,13 @@ class Menu(BaseMode):
         self.selected_option = (self.selected_option - 1) % len(self.options)
 
     def get_image(self) -> Image.Image:
-        image = Image.new("RGB", (64, 64))
+        image = self.size.value.image()
         draw = ImageDraw.Draw(image)
 
         draw.text((0, 1), text="  Settings   ", font=font, fill="#ffffff")
         draw.line((0, 8, 64, 8), fill="#888888")
 
+        # TODO: draw options shorter or implement scrolling
         for i, option in enumerate(self.options):
             color = "#ffffff" if self.selected_option == i else "#888888"
             draw.text((1, 12 + 10 * i), text=">", font=font, fill=color)

@@ -75,7 +75,9 @@ class WebUI:
 
     def send_frame(self, pil_frame: Image.Image) -> None:
         image_bytes = io.BytesIO()
-        pil_frame.save(image_bytes, format="PNG")
+        pil_image = Image.new("RGB", (64, 64), (255, 0, 255))
+        pil_image.paste(pil_frame)
+        pil_image.save(image_bytes, format="PNG")
         self.frame = image_bytes.getvalue()
         with self.frame_get:
             self.frame_get.notify_all()

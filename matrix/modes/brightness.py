@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from PIL import Image, ImageDraw
 from matrix.modes.mode import BaseMode, ChangeMode, ModeType
 from matrix.resources.fonts import font, bigfont
+from matrix.utils.panels import PanelSize
 
 if TYPE_CHECKING:
     from matrix.utils.hardware import Hardware
@@ -12,8 +13,8 @@ BRIGHTNESS_STEP = 10
 
 
 class Brightness(BaseMode):
-    def __init__(self, change_mode: ChangeMode, *, hardware: "Hardware"):
-        super().__init__(change_mode)
+    def __init__(self, change_mode: ChangeMode, size: PanelSize, *, hardware: "Hardware"):
+        super().__init__(change_mode, size)
         self.matrix = hardware.matrix
 
     def handle_encoder_push(self):
@@ -32,7 +33,7 @@ class Brightness(BaseMode):
             self.matrix.brightness -= 10
 
     def get_image(self) -> Image.Image:
-        image = Image.new("RGB", (64, 64))
+        image = self.size.value.image()
         draw = ImageDraw.Draw(image)
 
         draw.text((2, 1), text=" Brightness ", font=font, fill="#888888")
@@ -45,9 +46,8 @@ class Brightness(BaseMode):
             fill="#ffffff",
         )
 
-        draw.rectangle((1, 32, 62, 40), outline="#ffffff")
-        draw.rectangle(
-            (1, 32, 1 + int(61 * self.matrix.brightness / 100), 40), fill="#ffffff"
-        )
+        if self.size == PanelSize.PANEL_64x64:
+            draw.rectangle((1, 32, 62, 40), outline="#ffffff")
+            draw.rectangle((1, 32, 1 + int(61 * self.matrix.brightness / 100), 40), fill="#ffffff")
 
         return image

@@ -1,10 +1,10 @@
 [project]
-name = "matrix2"
+name = "matrix"
 authors = [
     { name = "Brooke Chalmers", email = "breq@breq.dev" },
     { name = "Ava Silver", email = "ava@avasilver.dev" },
 ]
-requires-python = "==3.11.*"
+requires-python = ">=3.11"
 version = "0.1.0"
 dependencies = [
     "datadog==0.51.0",

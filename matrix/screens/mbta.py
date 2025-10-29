@@ -1,4 +1,3 @@
-import os
 import requests
 from datetime import datetime, timedelta
 from typing import Literal, TypeAlias
@@ -10,8 +9,6 @@ from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font, smallfont
 from matrix.screens.screen import Screen, REQUEST_DEFAULT_TIMEOUT
-
-API_KEY = os.environ["MBTA_TOKEN"]
 
 PredictionType: TypeAlias = Literal["prediction", "schedule"]
 
@@ -34,7 +31,7 @@ class Prediction:
     type: PredictionType
 
 
-def get_predictions(line: Line) -> list[Prediction]:
+def get_predictions(line: Line, api_key: str) -> list[Prediction]:
     predictions_response = requests.get(
         "https://api-v3.mbta.com/predictions",
         params={
@@ -44,7 +41,7 @@ def get_predictions(line: Line) -> list[Prediction]:
             "include": "stop",
             "sort": "arrival_time",
             "page[limit]": "10",
-            "api_key": API_KEY,
+            "api_key": api_key,
         },
         timeout=REQUEST_DEFAULT_TIMEOUT,
     )
@@ -118,7 +115,7 @@ def get_predictions(line: Line) -> list[Prediction]:
             "filter[date]": service_date.strftime("%Y-%m-%d"),
             "filter[min_time]": f"{service_hour:02}:{service_minute:02}",
             "filter[max_time]": f"{service_hour + 2:02}:{service_minute:02}",
-            "api_key": API_KEY,
+            "api_key": api_key,
         },
         timeout=REQUEST_DEFAULT_TIMEOUT,
     )
@@ -154,13 +151,13 @@ def get_predictions(line: Line) -> list[Prediction]:
     return results
 
 
-def get_alert(line: Line) -> str | None:
+def get_alert(line: Line, api_key: str) -> str | None:
     response = requests.get(
         "https://api-v3.mbta.com/alerts",
         params={
             "filter[route]": line.route_id,
             "filter[datetime]": "NOW",
-            "api_key": API_KEY,
+            "api_key": api_key,
         },
         timeout=REQUEST_DEFAULT_TIMEOUT,
     )
@@ -210,103 +207,46 @@ def get_alert(line: Line) -> str | None:
     return mbta_text
 
 
-LINES = [
-    Line(
-        symbol="E",
-        headsign="Heath St",
-        label="GL-E",
-        color="#00ff76",
-        stop_id="place-mgngl",
-        route_id="Green-E",
-        direction_id=0,
-    ),
-    # Line(
-    #     symbol="E",
-    #     headsign="Medfd/Tuft",
-    #     label="GL-E"
-    #     color="#00ff76",
-    #     stop_id="place-mgngl",
-    #     route_id="Green-E",
-    #     direction_id=1,
-    # ),
-    Line(
-        symbol="89",
-        headsign="Sullivan",
-        label="89 Bus",
-        color="#FFAA00",
-        stop_id="2698",
-        route_id="89",
-        direction_id=1,
-    ),
-    # Line(
-    #     symbol="89",
-    #     headsign="Davis",
-    #     label="89 Bus",
-    #     color="#FFAA00",
-    #     stop_id="2735",
-    #     route_id="89",
-    #     direction_id=0,
-    # ),
-    # Line(
-    #     symbol="80",
-    #     headsign="Arlington",
-    #     label="80 Bus",
-    #     color="#FFAA00",
-    #     stop_id="2735",
-    #     route_id="80",
-    #     direction_id=0,
-    # ),
-    # Line(
-    #     symbol="80",
-    #     headsign="Lechmere",
-    #     label="80 Bus",
-    #     color="#FFAA00",
-    #     stop_id="2698",
-    #     route_id="80",
-    #     direction_id=1,
-    # ),
-    # Line(
-    #     symbol="101",
-    #     headsign="Sullivan",
-    #     label="101 Bus",
-    #     color="#FFAA00",
-    #     stop_id="5299",
-    #     route_id="101",
-    #     direction_id=1,
-    # ),
-    Line(
-        symbol="101",
-        headsign="Malden",
-        label="101 Bus",
-        color="#FFAA00",
-        stop_id="5308",
-        route_id="101",
-        direction_id=0,
-    ),
-]
-
 MbtaData: TypeAlias = tuple[list[Prediction], str | None, Line | None]
 
 
 def darken_hex(color: str):
     r, g, b = (int(color.lstrip("#")[i * 2 : i * 2 + 2], 16) for i in range(3))
     x = 0.5
-    return f"#{int(r*x):02x}{int(g*x):02x}{int(b*x):02x}"
+    return f"#{int(r * x):02x}{int(g * x):02x}{int(b * x):02x}"
 
 
 class MBTA(Screen[MbtaData]):
     CACHE_TTL = 30
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, config: dict):
         self.scroll_idx = 0
 
+        self.lines = []
+        for item in config["lines"]:
+            self.lines.append(
+                Line(
+                    symbol=item["symbol"],
+                    headsign=item["headsign"],
+                    label=item["label"],
+                    color=item["color"],
+                    stop_id=item["stop_id"],
+                    route_id=item["route_id"],
+                    direction_id=item["direction_id"],
+                )
+            )
+
+        super().__init__(config, self.size)
+
     def fetch_data(self):
+        api_key = self.config["api_key"]
+
         with ThreadPoolExecutor() as tpe:
             predictions = [
                 prediction
                 for line_predictions in tpe.map(
-                    lambda line: get_predictions(line), LINES
+                    lambda line: get_predictions(line, api_key),
+                    self.lines,
                 )
                 for prediction in line_predictions
             ]
@@ -314,8 +254,8 @@ class MBTA(Screen[MbtaData]):
 
         alert = None
         alert_line = None
-        for line in LINES[:2]:
-            alert = get_alert(line)
+        for line in self.lines[:2]:
+            alert = get_alert(line, api_key)
             if alert is not None:
                 alert_line = line
                 break
@@ -325,7 +265,7 @@ class MBTA(Screen[MbtaData]):
     def fallback_data(self):
         return ([], None, None)
 
-    def get_image(self):
+    def get_image_64x64(self):
         image = Image.new("RGB", (64, 64))
         draw = ImageDraw.Draw(image)
         predictions, alert, alert_line = self.data
@@ -345,7 +285,7 @@ class MBTA(Screen[MbtaData]):
 
         lines_displayed = 2 if alert else 3
 
-        for row, line in enumerate(LINES[:lines_displayed]):
+        for row, line in enumerate(self.lines[:lines_displayed]):
             length = draw.textlength(line.symbol, font=smallfont)
 
             draw.rectangle(
@@ -359,18 +299,14 @@ class MBTA(Screen[MbtaData]):
 
             draw.text((3, 11 + 19 * row), line.symbol, font=smallfont, fill=line.color)
 
-            draw.text(
-                (6 + length, 10 + 19 * row), line.headsign, font=font, fill=line.color
-            )
+            draw.text((6 + length, 10 + 19 * row), line.headsign, font=font, fill=line.color)
             line_predictions = filter(lambda p: p.line == line, predictions)
 
             pixel_x = 2
             for col, prediction in enumerate(line_predictions):
                 time_str = str(int(prediction.eta / timedelta(minutes=1)))
                 length = draw.textlength(time_str, font=font)
-                if pixel_x + length > 64 - (
-                    draw.textlength("min", font=font) + X_MARGIN
-                ):
+                if pixel_x + length > 64 - (draw.textlength("min", font=font) + X_MARGIN):
                     break
 
                 draw.text(
@@ -397,9 +333,7 @@ class MBTA(Screen[MbtaData]):
 
             draw.line((9, 47, 60, 47), fill="#888888")
 
-            draw.text(
-                (12, 50), f"{alert_line.label} Alert", font=smallfont, fill="#888888"
-            )
+            draw.text((12, 50), f"{alert_line.label} Alert", font=smallfont, fill="#888888")
 
             draw.text((1 - self.scroll_idx, 57), alert_text, font=font, fill="#ff0000")
             draw.text(
@@ -410,6 +344,67 @@ class MBTA(Screen[MbtaData]):
             )
             self.scroll_idx += 1
             self.scroll_idx %= textlength
+
+        return image
+
+    def get_image_64x32(self):
+        image = Image.new("RGB", (64, 32))
+        draw = ImageDraw.Draw(image)
+        predictions, alert, alert_line = self.data
+
+        if len(predictions) == 0:
+            image.paste(Image.open("icons/train_sleeping.png"), (16, 0))
+
+            return image
+
+        X_MARGIN = 3
+
+        lines_displayed = 2
+
+        for row, line in enumerate(self.lines[:lines_displayed]):
+            length = draw.textlength(line.symbol, font=font)
+
+            draw.rectangle(
+                (1, 1 + 16 * row, 1 + length + 2, 10 + 16 * row),
+                outline=darken_hex(line.color),
+            )
+            draw.point((1, 1 + 16 * row), fill="#000000")
+            draw.point((1, 10 + 16 * row), fill="#000000")
+            draw.point((1 + length + 2, 1 + 16 * row), fill="#000000")
+            draw.point((1 + length + 2, 10 + 16 * row), fill="#000000")
+
+            draw.text((3, 3 + 16 * row), line.symbol, font=font, fill=line.color)
+
+            draw.text(
+                (6 + length, 1 + 16 * row),
+                line.headsign,
+                font=smallfont,
+                fill=line.color,
+            )
+            line_predictions = filter(lambda p: p.line == line, predictions)
+
+            pixel_x = 1 + length + 2 + 3
+            for col, prediction in enumerate(line_predictions):
+                time_str = str(int(prediction.eta / timedelta(minutes=1)))
+                length = draw.textlength(time_str, font=font)
+                if pixel_x + length > 64 - (draw.textlength("min", font=font) + X_MARGIN):
+                    break
+
+                draw.text(
+                    (pixel_x, 8 + 16 * row),
+                    time_str,
+                    font=font,
+                    fill=line.color if prediction.type == "prediction" else "#888888",
+                )
+
+                pixel_x += length + X_MARGIN
+
+            draw.text(
+                (pixel_x, 8 + 16 * row),
+                "min",
+                font=font,
+                fill="#888888",
+            )
 
         return image
 

@@ -7,6 +7,7 @@ import logging
 from matrix.screens.screen import Screen
 from matrix.screens.fish import MakeAFish
 from matrix.modes.mode import BaseMode, ChangeMode, ModeType
+from matrix.utils.panels import PanelSize
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +20,8 @@ def is_eleven_eleven() -> bool:
 class Main(BaseMode):
     screen_refresh_rate: float = 5
 
-    def __init__(self, change_mode: ChangeMode, screens: list[Screen]) -> None:
-        super().__init__(change_mode)
+    def __init__(self, change_mode: ChangeMode, size: PanelSize, screens: list[Screen]) -> None:
+        super().__init__(change_mode, size)
 
         self.screens = screens
         self.screen_index: int = 0
@@ -42,7 +43,7 @@ class Main(BaseMode):
     def get_image(self):
         if is_eleven_eleven():
             if self.fish is None:
-                self.fish = MakeAFish()
+                self.fish = MakeAFish({}, self.size)
             return self.fish.get_image()
         elif self.fish:
             self.fish.cancel()
@@ -63,8 +64,6 @@ class Main(BaseMode):
                 if result := screen.get_image():
                     return result
             except Exception as e:
-                logger.exception(
-                    "Exception drawing image for %s: %s", screen.__class__.__name__, e
-                )
+                logger.exception("Exception drawing image for %s: %s", screen.__class__.__name__, e)
 
             self.screen_index += 1
