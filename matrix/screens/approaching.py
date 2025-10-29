@@ -6,7 +6,6 @@ from matrix.resources.fonts import font
 from matrix.screens.screen import Screen
 from matrix.utils.panels import PanelSize
 
-
 EVENTS: dict[PanelSize, list[tuple[str, datetime.timedelta]]] = {
     PanelSize.PANEL_64x64: [
         ("dial a fish", datetime.timedelta(minutes=5)),

@@ -28,3 +28,25 @@ py-modules = ["matrix"]
 
 [tool.ruff]
 line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle
+    "F",   # Pyflakes
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+    "I",   # isort
+]
+ignore = [
+    "E501",  # Line too long -- we don't enforce this because anything beyond what a formatter would do is excessive
+    "B905",  # zip() without an explicit strict= parameter
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.ruff.lint.isort]
+combine-as-imports = true

@@ -2,7 +2,7 @@ import datetime
 
 from PIL import Image, ImageDraw
 
-from matrix.resources.fonts import font, bigfont, smallfont
+from matrix.resources.fonts import bigfont, font, smallfont
 from matrix.utils.panels import PanelSize
 
 

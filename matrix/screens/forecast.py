@@ -1,12 +1,11 @@
-from typing import TypedDict
-import requests
 import datetime
+from typing import TypedDict
 
+import requests
 from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font, smallfont
 from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
-
 
 TIME_DATE_COLOR = "#aaaaaa"
 HIGH_COLOR = "#ffa024"
@@ -68,7 +67,7 @@ class Forecast(Screen[WeatherData | None]):
         dates: dict[datetime.date, list[ForecastType]] = {}
 
         for forecast in data["list"]:
-            timestamp = datetime.datetime.fromtimestamp(forecast["dt"], tz=datetime.timezone.utc)
+            timestamp = datetime.datetime.fromtimestamp(forecast["dt"], tz=datetime.UTC)
 
             if timestamp.date() not in dates:
                 dates[timestamp.date()] = []

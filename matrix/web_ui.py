@@ -1,9 +1,10 @@
-from collections.abc import Callable
+import io
 import logging
 import threading
-import io
+from collections.abc import Callable
+
+from flask import Flask, Response, render_template, request
 from PIL import Image
-from flask import Flask, render_template, Response, request
 from werkzeug import serving
 
 logger = logging.getLogger(__name__)

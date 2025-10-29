@@ -1,6 +1,6 @@
 # stdlib
-import logging
 import argparse
+import logging
 
 # 3p
 import datadog
@@ -10,8 +10,7 @@ from json_log_formatter import VerboseJSONFormatter
 load_dotenv()
 
 # project
-from matrix.app import App
-
+from matrix.app import App  # noqa: E402
 
 parser = argparse.ArgumentParser(
     prog="matrix",

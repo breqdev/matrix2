@@ -1,6 +1,7 @@
-from abc import ABC, abstractmethod
-from typing import Callable, TypeAlias
 import enum
+from abc import ABC, abstractmethod
+from collections.abc import Callable
+from typing import TypeAlias
 
 from matrix.utils.panels import Drawable, PanelSize
 

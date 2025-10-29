@@ -1,12 +1,12 @@
 # stdlib
-from datetime import datetime
-import time
 import logging
+import time
+from datetime import datetime
 
 # project
-from matrix.screens.screen import Screen
-from matrix.screens.fish import MakeAFish
 from matrix.modes.mode import BaseMode, ChangeMode, ModeType
+from matrix.screens.fish import MakeAFish
+from matrix.screens.screen import Screen
 from matrix.utils.panels import PanelSize
 
 logger = logging.getLogger(__name__)

@@ -1,8 +1,8 @@
-from PIL import Image
-import requests
 import io
 
+import requests
 import spotipy
+from PIL import Image
 from spotipy.oauth2 import SpotifyOAuth
 
 from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
