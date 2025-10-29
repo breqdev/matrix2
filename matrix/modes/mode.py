@@ -1,9 +1,8 @@
-from matrix.utils.panels import Drawable
 from abc import ABC, abstractmethod
 from typing import Callable, TypeAlias
 import enum
 
-from matrix.utils.panels import PanelSize
+from matrix.utils.panels import Drawable, PanelSize
 
 
 class ModeType(enum.StrEnum):
