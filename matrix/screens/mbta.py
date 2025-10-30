@@ -1,3 +1,4 @@
+from matrix.utils.panels import PanelSize
 import re
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -219,7 +220,7 @@ def darken_hex(color: str):
 class MBTA(Screen[MbtaData]):
     CACHE_TTL = 30
 
-    def __init__(self, config: dict):
+    def __init__(self, config: dict, size: PanelSize):
         self.scroll_idx = 0
 
         self.lines = []
@@ -236,7 +237,7 @@ class MBTA(Screen[MbtaData]):
                 )
             )
 
-        super().__init__(config, self.size)
+        super().__init__(config, size)
 
     def fetch_data(self):
         api_key = self.config["api_key"]

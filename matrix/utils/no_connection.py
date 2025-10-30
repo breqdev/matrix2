@@ -9,7 +9,7 @@ from matrix.utils.panels import PanelSize
 def get_image_no_connection(panel: PanelSize) -> Image.Image:
     match panel:
         case PanelSize.PANEL_64x64:
-            image = Image.new("RGB", (64, 64))
+            image = panel.value.image()
             draw = ImageDraw.Draw(image)
 
             time_str = datetime.datetime.now().strftime("%H:%M")
@@ -22,7 +22,7 @@ def get_image_no_connection(panel: PanelSize) -> Image.Image:
             return image
 
         case PanelSize.PANEL_64x32:
-            image = Image.new("RGB", (64, 32))
+            image = panel.value.image()
             draw = ImageDraw.Draw(image)
 
             time_str = datetime.datetime.now().strftime("%H:%M")

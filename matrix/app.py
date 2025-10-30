@@ -1,4 +1,5 @@
 # stdlib
+from typing import Any
 import logging
 import sys
 import threading
@@ -43,7 +44,7 @@ class App:
 
             self.hardware = Hardware(self.panel, self.config["panel"]["brightness"])
 
-        screens: list[Screen] = [
+        screens: list[Screen[Any]] = [
             MBTA(self.config["screens"]["mbta"], self.panel),
             Spotify(self.config["screens"]["spotify"], self.panel),
             Weather(self.config["screens"]["weather"], self.panel),
