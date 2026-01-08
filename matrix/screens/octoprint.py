@@ -117,7 +117,7 @@ class Octoprint(Screen[dict]):
                 1 + int(60 * completion / 100),
                 49,
             ),
-            fill="#006666",
+            fill="#004444",
         )
         draw.rectangle((1, 40, 62, 49), outline="#AAAAAA")
 
