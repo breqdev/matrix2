@@ -1,4 +1,5 @@
 from urllib.parse import urljoin
+import math
 
 import requests
 from PIL import Image, ImageDraw
@@ -79,41 +80,48 @@ class Octoprint(Screen[dict]):
             fill="#77ff00",
         )
 
-        draw.text(
-            (1, 10),
-            text=self.data["current_job"]["job"]["file"]["name"],
-            font=smallfont,
-            fill="#AAAAAA",
-        )
+        # wrap to 15 ch
+        filename = self.data["current_job"]["job"]["file"]["name"]
+        for i in range(math.ceil(len(filename) / 15)):
+            draw.text(
+                (1 + (2 if i > 0 else 0), 10 + 7 * i),
+                text=filename[15 * i : 15 * (i + 1)],
+                font=smallfont,
+                fill="#AAAAAA",
+            )
 
         elapsed = self.data["current_job"]["progress"]["printTime"]
         remaining = self.data["current_job"]["progress"]["printTimeLeft"]
 
         draw.text(
-            (1, 19),
+            (1, 56),
             text=f"{elapsed // 3600:>2}:{(elapsed % 3600) // 60:02}",
             font=font,
             fill="#FFFFFF",
         )
-        draw.text((26, 20), text="e", font=smallfont, fill="#AAAAAA")
+        draw.text((26, 57), text="e", font=smallfont, fill="#AAAAAA")
         draw.text(
-            (32, 19),
+            (32, 56),
             text=f"{remaining // 3600:>2}:{(remaining % 3600) // 60:02}",
             font=font,
             fill="#FFFFFF",
         )
-        draw.text((57, 20), text="r", font=smallfont, fill="#AAAAAA")
+        draw.text((57, 57), text="r", font=smallfont, fill="#AAAAAA")
+
+        completion = self.data["current_job"]["progress"]["completion"]
 
         draw.rectangle(
             (
                 1,
-                27,
-                1 + int(60 * self.data["current_job"]["progress"]["completion"] / 100),
-                30,
+                40,
+                1 + int(60 * completion / 100),
+                49,
             ),
-            fill="#00FFFF",
+            fill="#006666",
         )
-        draw.rectangle((1, 27, 62, 30), outline="#AAAAAA")
+        draw.rectangle((1, 40, 62, 49), outline="#AAAAAA")
+
+        draw.text((24, 42), text=f"{int(completion):>2}%", font=font, fill="#FFFFFF")
 
         return image
 
