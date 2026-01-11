@@ -67,7 +67,11 @@ class Octoprint(Screen[dict]):
 
     @property
     def is_active(self):
-        return self.is_enabled and self.data["is_connected"]
+        return (
+            self.is_enabled
+            and self.data["is_connected"]
+            and self.data["current_job"]["progress"]["completion"] < 100
+        )
 
     def get_image_64x64(self):
         image = Image.new("RGB", (64, 64))
