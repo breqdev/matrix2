@@ -70,6 +70,7 @@ class Octoprint(Screen[dict]):
         return (
             self.is_enabled
             and self.data["is_connected"]
+            and self.data["current_job"]["progress"]["completion"] is not None
             and self.data["current_job"]["progress"]["completion"] < 100
         )
 
