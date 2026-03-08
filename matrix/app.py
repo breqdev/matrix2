@@ -19,6 +19,7 @@ from matrix.screens.screen import Screen
 from matrix.screens.spotify import Spotify
 from matrix.screens.weather import Weather
 from matrix.utils.config import parse_config
+from matrix.utils.matter import Matter
 from matrix.utils.no_connection import get_image_no_connection
 from matrix.utils.panels import PanelSize
 from matrix.web_ui import WebUI
@@ -61,9 +62,12 @@ class App:
         }
 
         if self.hardware is not None:
-            self.modes[ModeType.BRIGHTNESS] = Brightness(
+            brightness = Brightness(
                 self.change_mode, self.panel, hardware=self.hardware
             )
+            self.modes[ModeType.BRIGHTNESS] = brightness
+            if self.config["panel"].get("matter"):
+                Matter(brightness).start()
             self.hardware.dial.when_rotated_clockwise = self.handle_rotation_clockwise
             self.hardware.dial.when_rotated_counter_clockwise = (
                 self.handle_rotation_counterclockwise

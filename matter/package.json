@@ -1,0 +1,24 @@
+{
+    "dependencies": {
+        "@matter/main": "0.16.10"
+    },
+    "devDependencies": {
+        "typescript": "~5.9.3",
+        "@types/node": "^25.2.2"
+    },
+    "name": "matter-app",
+    "version": "0.1.0",
+    "type": "module",
+    "scripts": {
+        "prepare": "tsc",
+        "build": "tsc",
+        "app": "node --enable-source-maps dist/DeviceNode.js",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "clean": "node -e 'fs.rmSync(\"dist\", { recursive: true, force: true })'"
+    },
+    "engines": {
+        "node": ">=20.19.0 <22.0.0 || >=22.13.0"
+    },
+    "description": "OnOff light/socket device with a CLI command execution interface",
+    "author": "user.name=Ava Silver <user.email=avapsilver@gmail.com>"
+}

@@ -16,6 +16,7 @@ dependencies = [
     "requests==2.32.3",
     "spotipy==2.19.0",
     "python-dotenv==1.0.1",
+    "circuitmatter==0.4.1",
 ]
 
 [build-system]
@@ -39,8 +40,8 @@ select = [
     "I",   # isort
 ]
 ignore = [
-    "E501",  # Line too long -- we don't enforce this because anything beyond what a formatter would do is excessive
-    "B905",  # zip() without an explicit strict= parameter
+    "E501", # Line too long -- we don't enforce this because anything beyond what a formatter would do is excessive
+    "B905", # zip() without an explicit strict= parameter
 ]
 
 [tool.ruff.format]

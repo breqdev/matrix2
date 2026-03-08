@@ -4,3 +4,7 @@ fonts
 icons
 previews
 venv
+.venv
+matter/dist
+matter/node_modules
+.vscode
