@@ -22,7 +22,6 @@ import {
   VendorId,
 } from '@matter/main';
 import { OnOffLightDevice, OnOffPlugInUnitDevice } from '@matter/main/devices';
-import { execSync } from 'node:child_process';
 import net from 'net';
 
 const logger = Logger.get('DeviceNode');
@@ -88,19 +87,6 @@ async function main() {
     },
   });
 
-  const client = net.createConnection(SOCKET_PATH, () => {
-    client.write('Hello from Bun!');
-  });
-
-  client.on('data', (data) => {
-    console.log('Received:', data.toString());
-    client.end();
-  });
-
-  client.on('error', (err) => {
-    console.error('Connection error:', err.message);
-  });
-
   /**
    * Matter Nodes are a composition of endpoints. Create and add a single endpoint to the node. This example uses the
    * OnOffLightDevice or OnOffPlugInUnitDevice depending on the value of the type parameter. It also assigns this Part a
@@ -113,6 +99,25 @@ async function main() {
     { id: 'onoff' },
   );
   await server.add(endpoint);
+
+  const client = net.createConnection(SOCKET_PATH);
+
+  client.on('data', (data) => {
+    const msg = data.toString();
+    console.log('Received:', msg);
+    switch (msg) {
+      case 'on':
+        endpoint.set({ onOff: { onOff: true } });
+        break;
+      case 'off':
+        endpoint.set({ onOff: { onOff: false } });
+        break;
+    }
+  });
+
+  client.on('error', (err) => {
+    console.error('Connection error:', err.message);
+  });
 
   /**
    * Register state change handlers and events of the node for identify and onoff states to react to the commands.
@@ -129,7 +134,9 @@ async function main() {
 
   endpoint.events.onOff.onOff$Changed.on((value) => {
     // executeCommand(value ? "on" : "off");
-    console.log(`OnOff is now ${value ? 'ON' : 'OFF'}`);
+    const state = value ? 'on' : 'off';
+    console.log(`OnOff is now ${state}`);
+    client.write(state);
   });
 
   /**
@@ -150,15 +157,6 @@ main().catch((error) => console.error(error));
 /*********************************************************************************************************
  * Convenience Methods
  *********************************************************************************************************/
-
-/** Defined a shell command from an environment variable and execute it and log the response. */
-function executeCommand(scriptParamName: string) {
-  const script = Environment.default.vars.string(scriptParamName);
-  if (script === undefined) return undefined;
-  console.log(
-    `${scriptParamName}: ${execSync(script).toString().slice(0, -1)}`,
-  );
-}
 
 async function getConfiguration() {
   /**

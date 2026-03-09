@@ -39,6 +39,7 @@ class App:
             case unknown:
                 raise ValueError(f"Unexpected panel size: {unknown}")
 
+        self.matter = None
         if self.config["panel"]["simulation"]:
             self.hardware = None
         else:
@@ -67,7 +68,8 @@ class App:
             )
             self.modes[ModeType.BRIGHTNESS] = brightness
             if self.config["panel"].get("matter"):
-                Matter(brightness).start()
+                self.matter = Matter(brightness)
+                self.matter.start()
             self.hardware.dial.when_rotated_clockwise = self.handle_rotation_clockwise
             self.hardware.dial.when_rotated_counter_clockwise = (
                 self.handle_rotation_counterclockwise
@@ -90,6 +92,8 @@ class App:
 
     def change_mode(self, mode: ModeType) -> None:
         self.active_mode = mode
+        if self.matter and mode in (ModeType.OFF, ModeType.MAIN):
+            self.matter.on_mode_change(mode)
 
     def handle_rotation_clockwise(self):
         self.modes[self.active_mode].handle_encoder_clockwise()
