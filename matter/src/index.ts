@@ -104,7 +104,7 @@ async function main() {
 
   client.on('data', (data) => {
     const msg = data.toString();
-    console.log('Received:', msg);
+    console.warn('Received:', msg);
     switch (msg) {
       case 'on':
         endpoint.set({ onOff: { onOff: true } });
@@ -125,17 +125,17 @@ async function main() {
    * reported back to the controller.
    */
   endpoint.events.identify.startIdentifying.on(() => {
-    console.log(`Run identify logic, ideally blink a light every 0.5s ...`);
+    console.warn(`Run identify logic, ideally blink a light every 0.5s ...`);
   });
 
   endpoint.events.identify.stopIdentifying.on(() => {
-    console.log(`Stop identify logic ...`);
+    console.warn(`Stop identify logic ...`);
   });
 
   endpoint.events.onOff.onOff$Changed.on((value) => {
     // executeCommand(value ? "on" : "off");
     const state = value ? 'on' : 'off';
-    console.log(`OnOff is now ${state}`);
+    console.warn(`OnOff is now ${state}`);
     client.write(state);
   });
 
@@ -171,8 +171,8 @@ async function getConfiguration() {
   const environment = Environment.default;
 
   const storageService = environment.get(StorageService);
-  console.log(`Storage location: ${storageService.location} (Directory)`);
-  console.log(
+  console.warn(`Storage location: ${storageService.location} (Directory)`);
+  console.warn(
     'Use the parameter "--storage-path=NAME-OR-PATH" to specify a different storage location in this directory, use --storage-clear to start with an empty storage.',
   );
 
@@ -184,7 +184,7 @@ async function getConfiguration() {
     environment.vars.get('type') === 'socket',
   );
   if (await deviceStorage.has('isSocket')) {
-    console.log(
+    console.warn(
       `Device type ${isSocket ? 'socket' : 'light'} found in storage. --type parameter is ignored.`,
     );
   }

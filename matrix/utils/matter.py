@@ -1,5 +1,6 @@
 from os import path, remove
 from pathlib import Path
+from select import select
 from socket import AF_UNIX, SOCK_STREAM, socket
 from subprocess import Popen
 from threading import Thread
@@ -9,26 +10,6 @@ from matrix.modes.brightness import MAX_BRIGHTNESS, Brightness
 from matrix.modes.mode import ModeType
 
 log = getLogger(__name__)
-
-# class ScreenControl(DimmableLight):
-
-#     def __init__(self, brightness: Brightness) -> None:
-#         super().__init__("Matrix")
-#         self.brightness_controls = brightness
-
-#     def on(self):
-#         self.brightness_controls.change_mode(ModeType.MAIN)
-
-#     def off(self):
-#         self.brightness_controls.change_mode(ModeType.OFF)
-
-#     @property
-#     def brightness(self) -> float:
-#         return self.brightness_controls.brightness / MAX_BRIGHTNESS
-
-#     @brightness.setter
-#     def brightness(self, value: float):
-#         self.brightness_controls.brightness = int(value * MAX_BRIGHTNESS)
 
 
 SOCKET_PATH = "/run/matrix/matrix.sock"
@@ -40,6 +21,8 @@ class Matter:
         self.socks: set[socket] = set()
 
     def handle_command(self, cmd: str) -> None:
+        log.info("Unknown command: %s", cmd)
+
         match cmd:
             case "on":
                 self.brightness.change_mode(ModeType.MAIN)
@@ -79,13 +62,30 @@ class Matter:
             log.info("Listening on %s", SOCKET_PATH)
 
             while True:
-                conn, _ = server.accept()
-                with conn:
+                readable, _, _ = select([server] + list(self.socks), [], [])
+
+                if server in readable:
+                    conn, _ = server.accept()
                     self.socks.add(conn)
-                    data = conn.recv(1024)
-                    if data:
-                        log.info("Received: %s", data.decode())
+
+                for s in list(self.socks):
+                    if s in readable:
+                        try:
+                            data = s.recv(1024)
+                            if data:
+                                msg = data.decode()
+                                log.info("Received: %s", msg)
+                                self.handle_command(msg)
+                            else:
+                                s.close()
+                                self.socks.discard(s)
+                        except (BrokenPipeError, ConnectionResetError, OSError):
+                            s.close()
+                            self.socks.discard(s)
 
     def start(self):
         Thread(target=self.listen).start()
-        Popen(["/home/pi/.bun/bin/bun", "run", "start"], cwd="./matter")
+        Popen(
+            ["/home/pi/.bun/bin/bun", "run", "start"],
+            cwd="./matter",
+        )

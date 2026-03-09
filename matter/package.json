@@ -10,7 +10,7 @@
     "version": "0.1.0",
     "type": "module",
     "scripts": {
-        "start": "bun run src/index.ts"
+        "start": "MATTER_LOG_LEVEL=warn MATTER_STORAGE_PATH=/home/pi/matrix2/matter/.matter bun run src/index.ts"
     },
     "engines": {
         "node": ">=20.19.0 <22.0.0 || >=22.13.0"
