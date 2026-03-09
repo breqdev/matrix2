@@ -11,27 +11,40 @@ if TYPE_CHECKING:
 
 
 BRIGHTNESS_STEP = 10
+MAX_BRIGHTNESS = 100
 
 
 class Brightness(BaseMode):
-    def __init__(self, change_mode: ChangeMode, size: PanelSize, *, hardware: "Hardware"):
+    def __init__(
+        self, change_mode: ChangeMode, size: PanelSize, *, hardware: "Hardware"
+    ):
         super().__init__(change_mode, size)
         self.matrix = hardware.matrix
 
     def handle_encoder_push(self):
         self.change_mode(ModeType.MAIN)
 
+    @property
+    def brightness(self) -> int:
+        return self.matrix.brightness
+
+    @brightness.setter
+    def brightness(self, value: int) -> None:
+        if value > 100 or value < 0:
+            raise ValueError("brightness must be between 0 and 100")
+        self.matrix.brightness = value
+
     def handle_encoder_clockwise(self):
-        if self.matrix.brightness + BRIGHTNESS_STEP >= 100:
-            self.matrix.brightness = 100
+        if self.brightness + BRIGHTNESS_STEP >= MAX_BRIGHTNESS:
+            self.brightness = MAX_BRIGHTNESS
         else:
-            self.matrix.brightness += 10
+            self.brightness += 10
 
     def handle_encoder_counterclockwise(self):
-        if self.matrix.brightness - BRIGHTNESS_STEP <= 0:
-            self.matrix.brightness = 0
+        if self.brightness - BRIGHTNESS_STEP <= 0:
+            self.brightness = 0
         else:
-            self.matrix.brightness -= 10
+            self.brightness -= 10
 
     def get_image(self) -> Image.Image:
         image = self.size.value.image()
@@ -41,14 +54,17 @@ class Brightness(BaseMode):
         draw.line((0, 8, 64, 8), fill="#888888")
 
         draw.text(
-            (32 - 3 * len(f"{self.matrix.brightness}%"), 16),
-            text=f"{self.matrix.brightness}%",
+            (32 - 3 * len(f"{self.brightness}%"), 16),
+            text=f"{self.brightness}%",
             font=bigfont,
             fill="#ffffff",
         )
 
         if self.size == PanelSize.PANEL_64x64:
             draw.rectangle((1, 32, 62, 40), outline="#ffffff")
-            draw.rectangle((1, 32, 1 + int(61 * self.matrix.brightness / 100), 40), fill="#ffffff")
+            draw.rectangle(
+                (1, 32, 1 + int(61 * self.brightness / MAX_BRIGHTNESS), 40),
+                fill="#ffffff",
+            )
 
         return image

@@ -1,0 +1,41 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "matter-app",
+      "dependencies": {
+        "@matter/main": "0.16.10",
+      },
+      "devDependencies": {
+        "@types/node": "^25.2.2",
+        "typescript": "~5.9.3",
+      },
+    },
+  },
+  "packages": {
+    "@matter/general": ["@matter/general@0.16.10", "", { "dependencies": { "@noble/curves": "^2.0.1" } }, "sha512-/qytvaxvDDhEdHLaEoxlEFVBWg982jL+XXvOmAFgIv92yGDQvN4U+VcNW7S5dueJuv/L+gi0zDqhl8LUzHHAlg=="],
+
+    "@matter/main": ["@matter/main@0.16.10", "", { "dependencies": { "@matter/general": "0.16.10", "@matter/model": "0.16.10", "@matter/node": "0.16.10", "@matter/protocol": "0.16.10", "@matter/types": "0.16.10" }, "optionalDependencies": { "@matter/nodejs": "0.16.10" } }, "sha512-QKoQrmMnt6cB893+Oezk3DdIVgQJj5spt/ikEszF8pjyTuvB69zlzq1wnrn52N3mi57R6UWwk6+BPEbQE95FSw=="],
+
+    "@matter/model": ["@matter/model@0.16.10", "", { "dependencies": { "@matter/general": "0.16.10" } }, "sha512-6Ei8gETAkcKGEMRW+z8Mak55Y1Jl1TKGQIboC/4vvsrqcvB8zhIvGBS3GaAllxzvF0qjE7ihCPpgXXr6HuTLyg=="],
+
+    "@matter/node": ["@matter/node@0.16.10", "", { "dependencies": { "@matter/general": "0.16.10", "@matter/model": "0.16.10", "@matter/protocol": "0.16.10", "@matter/types": "0.16.10" } }, "sha512-Hb2AxuEf0DlfN8yHxeahZGYurUUu/UDWJkmdvpDKuwSR0eIHhMweOG2RBO55/anyRFObANaUr1gr3DnyocB/0w=="],
+
+    "@matter/nodejs": ["@matter/nodejs@0.16.10", "", { "dependencies": { "@matter/general": "0.16.10", "@matter/node": "0.16.10", "@matter/protocol": "0.16.10", "@matter/types": "0.16.10" } }, "sha512-o8e9tGZVsiqmEtD1osSL9+gRMIuNjtwXt29I3YDRzSqb3N5Dvd4Khj3HN68YhaFFeBlM4YEV2TS0/9VF3C06/w=="],
+
+    "@matter/protocol": ["@matter/protocol@0.16.10", "", { "dependencies": { "@matter/general": "0.16.10", "@matter/model": "0.16.10", "@matter/types": "0.16.10" } }, "sha512-vPQEMl8Wf4vc3tauwsGlLZRrDx+VrCPfccw3n50Lvyucws4UBt+SuBszSyIO2+QPnJcr4MB4L+EgCRI14U4zRA=="],
+
+    "@matter/types": ["@matter/types@0.16.10", "", { "dependencies": { "@matter/general": "0.16.10", "@matter/model": "0.16.10" } }, "sha512-AW86tGgL3sN1Vb76+03VPdQMsW9vWsaVGHe9agcED1sjtWRJBV17tcLDymAQ8k7fEeVqiy3qf9CUwFK1bhfXKQ=="],
+
+    "@noble/curves": ["@noble/curves@2.0.1", "", { "dependencies": { "@noble/hashes": "2.0.1" } }, "sha512-vs1Az2OOTBiP4q0pwjW5aF0xp9n4MxVrmkFBxc6EKZc6ddYx5gaZiAsZoq0uRRXWbi3AT/sBqn05eRPtn1JCPw=="],
+
+    "@noble/hashes": ["@noble/hashes@2.0.1", "", {}, "sha512-XlOlEbQcE9fmuXxrVTXCTlG2nlRXa9Rj3rr5Ue/+tX+nmkgbX720YHh0VR3hBF9xDvwnb8D2shVGOwNx+ulArw=="],
+
+    "@types/node": ["@types/node@25.3.5", "", { "dependencies": { "undici-types": "~7.18.0" } }, "sha512-oX8xrhvpiyRCQkG1MFchB09f+cXftgIXb3a7UUa4Y3wpmZPw5tyZGTLWhlESOLq1Rq6oDlc8npVU2/9xiCuXMA=="],
+
+    "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
+
+    "undici-types": ["undici-types@7.18.2", "", {}, "sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w=="],
+  }
+}

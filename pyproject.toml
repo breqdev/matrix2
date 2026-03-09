@@ -39,8 +39,8 @@ select = [
     "I",   # isort
 ]
 ignore = [
-    "E501",  # Line too long -- we don't enforce this because anything beyond what a formatter would do is excessive
-    "B905",  # zip() without an explicit strict= parameter
+    "E501", # Line too long -- we don't enforce this because anything beyond what a formatter would do is excessive
+    "B905", # zip() without an explicit strict= parameter
 ]
 
 [tool.ruff.format]

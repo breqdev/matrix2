@@ -6,3 +6,5 @@ venv
 *.egg-info
 .spotipy-cache-*
 matrix.toml
+node_modules/
+dist/
