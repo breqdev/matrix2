@@ -17,7 +17,9 @@
 ![](previews/fish.png)
 
 # Development
+
 Set up a virtual environment and install the requirements:
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate
@@ -25,3 +27,19 @@ pip install -e .
 ```
 
 Best of luck after that :)
+
+# Matter pairing
+
+Remove the existing cache with:
+
+```
+pi@matrix2:~/matrix2/matter $ sudo rm -rf .matter
+```
+
+Run it with something like:
+
+```
+pi@matrix2:~/matrix2/matter $ sudo /home/pi/.bun/bin/bun run start
+```
+
+It will print the QR code to the terminal that you can use for pairing!

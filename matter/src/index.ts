@@ -20,17 +20,16 @@ import {
   StorageService,
   Time,
   VendorId,
-} from '@matter/main';
-import { OnOffLightDevice, OnOffPlugInUnitDevice } from '@matter/main/devices';
-import net from 'net';
+} from "@matter/main";
+import { DimmableLightDevice } from "@matter/main/devices";
+import net from "net";
 
-const logger = Logger.get('DeviceNode');
-const SOCKET_PATH = '/run/matrix/matrix.sock';
+const logger = Logger.get("DeviceNode");
+const SOCKET_PATH = "/run/matrix/matrix.sock";
 
 async function main() {
   /** Initialize configuration values */
   const {
-    isSocket,
     deviceName,
     vendorName,
     passcode,
@@ -63,14 +62,10 @@ async function main() {
     },
 
     // Provide Node announcement settings
-    // Optional: If Ommitted some development defaults are used
+    // Optional: If Omitted some development defaults are used
     productDescription: {
       name: deviceName,
-      deviceType: DeviceTypeId(
-        isSocket
-          ? OnOffPlugInUnitDevice.deviceType
-          : OnOffLightDevice.deviceType,
-      ),
+      deviceType: DeviceTypeId(DimmableLightDevice.deviceType),
     },
 
     // Provide defaults for the BasicInformation cluster on the Root endpoint
@@ -94,29 +89,32 @@ async function main() {
    * In this case we directly use the default command implementation from matter.js. Check out the DeviceNodeFull example
    * to see how to customize the command handlers.
    */
-  const endpoint = new Endpoint(
-    isSocket ? OnOffPlugInUnitDevice : OnOffLightDevice,
-    { id: 'onoff' },
-  );
+  const endpoint = new Endpoint(DimmableLightDevice, { id: "dimmable" });
   await server.add(endpoint);
 
   const client = net.createConnection(SOCKET_PATH);
 
-  client.on('data', (data) => {
-    const msg = data.toString();
-    console.warn('Received:', msg);
-    switch (msg) {
-      case 'on':
-        endpoint.set({ onOff: { onOff: true } });
-        break;
-      case 'off':
-        endpoint.set({ onOff: { onOff: false } });
-        break;
+  client.on("data", (data) => {
+    const msg = data.toString().trim();
+    if (msg === "on") {
+      endpoint.set({ onOff: { onOff: true } });
+    } else if (msg === "off") {
+      endpoint.set({ onOff: { onOff: false } });
+    } else {
+      const percent = parseInt(msg);
+
+      if (Number.isNaN(percent)) {
+        console.error(`Unknown command: ${msg}`);
+      } else {
+        // Matter uses 0–254 for currentLevel, not 0–100
+        const level = Math.round((percent / 100) * 254);
+        endpoint.set({ levelControl: { currentLevel: level } });
+      }
     }
   });
 
-  client.on('error', (err) => {
-    console.error('Connection error:', err.message);
+  client.on("error", (err) => {
+    console.error("Connection error:", err.message);
   });
 
   /**
@@ -134,9 +132,15 @@ async function main() {
 
   endpoint.events.onOff.onOff$Changed.on((value) => {
     // executeCommand(value ? "on" : "off");
-    const state = value ? 'on' : 'off';
+    const state = value ? "on" : "off";
     console.warn(`OnOff is now ${state}`);
     client.write(state);
+  });
+
+  endpoint.events.levelControl.currentLevel$Changed.on((value) => {
+    const percent = Math.round(((value ?? 0) / 254) * 100);
+    console.warn(`Brightness is now ${percent}%`);
+    client.write(`${percent}`);
   });
 
   /**
@@ -159,15 +163,6 @@ main().catch((error) => console.error(error));
  *********************************************************************************************************/
 
 async function getConfiguration() {
-  /**
-   * Collect all needed data
-   *
-   * This block collects all needed data from cli, environment or storage. Replace this with where ever your data come from.
-   *
-   * Note: This example uses the matter.js process storage system to store the device parameter data for convenience
-   * and easy reuse. When you also do that be careful to not overlap with Matter-Server own storage contexts
-   * (so maybe better not do it ;-)).
-   */
   const environment = Environment.default;
 
   const storageService = environment.get(StorageService);
@@ -176,55 +171,32 @@ async function getConfiguration() {
     'Use the parameter "--storage-path=NAME-OR-PATH" to specify a different storage location in this directory, use --storage-clear to start with an empty storage.',
   );
 
-  const storageManager = await storageService.open('device');
-  const deviceStorage = storageManager.createContext('data');
+  const storageManager = await storageService.open("device");
+  const deviceStorage = storageManager.createContext("data");
 
-  const isSocket = await deviceStorage.get(
-    'isSocket',
-    environment.vars.get('type') === 'socket',
-  );
-  if (await deviceStorage.has('isSocket')) {
-    console.warn(
-      `Device type ${isSocket ? 'socket' : 'light'} found in storage. --type parameter is ignored.`,
-    );
-  }
-  const deviceName = 'Matter test device';
-  const vendorName = 'matter-node.js';
-  const passcode =
-    environment.vars.number('passcode') ??
-    (await deviceStorage.get('passcode', 20202021));
-  const discriminator =
-    environment.vars.number('discriminator') ??
-    (await deviceStorage.get('discriminator', 3840));
+  const deviceName = "Wall LED Matrix";
+  const vendorName = "Oomfie Networks";
+
+  // values from the example script, unchanged
+  const passcode = 20202021;
+  const discriminator = 3840;
   // product name / id and vendor id should match what is in the device certificate
-  const vendorId =
-    environment.vars.number('vendorid') ??
-    (await deviceStorage.get('vendorid', 0xfff1));
-  const productName = `node-matter OnOff ${isSocket ? 'Socket' : 'Light'}`;
-  const productId =
-    environment.vars.number('productid') ??
-    (await deviceStorage.get('productid', 0x8000));
+  const vendorId = 0xfff1; // development only VID
+  const productName = "Wall LED Matrix";
+  const productId = 0x8000; // development PID
 
-  const port = environment.vars.number('port') ?? 5540;
+  const port = 5540;
 
-  const uniqueId =
-    environment.vars.string('uniqueid') ??
-    (await deviceStorage.get('uniqueid', Time.nowMs)).toString();
+  const uniqueId = (await deviceStorage.get("uniqueid", Time.nowMs)).toString();
 
   // Persist basic data to keep them also on restart
   await deviceStorage.set({
-    passcode,
-    discriminator,
-    vendorid: vendorId,
-    productid: productId,
-    isSocket,
     uniqueid: uniqueId,
   });
 
   await storageManager.close();
 
   return {
-    isSocket,
     deviceName,
     vendorName,
     passcode,
