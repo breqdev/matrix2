@@ -108,11 +108,11 @@ class Weather(Screen[WeatherData | None]):
 
         temp_min: float = data["daily"]["temperature_2m_min"][0]
         temp_min_f = int(c_to_f(temp_min))
-        temp_min_c = int(temp)
+        temp_min_c = int(temp_min)
 
         temp_max: float = data["daily"]["temperature_2m_max"][0]
         temp_max_f = int(c_to_f(temp_max))
-        temp_max_c = int(temp)
+        temp_max_c = int(temp_max)
 
         icon_name = get_icon(
             data["current"]["weather_code"], bool(data["current"]["is_day"])
