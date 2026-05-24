@@ -1,84 +1,104 @@
 import datetime
+from pathlib import Path
 from typing import TypedDict
 
 import requests
 from PIL import Image, ImageDraw
 
-from matrix.resources.fonts import font, smallfont
+from matrix.resources.fonts import font
 from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
+from matrix.screens.weather import (
+    HIGH_COLOR,
+    LOW_COLOR,
+    TIME_DATE_COLOR,
+    c_to_f,
+    get_icon,
+)
 
-TIME_DATE_COLOR = "#aaaaaa"
-HIGH_COLOR = "#ffa024"
-LOW_COLOR = "#5cc9ff"
-
-
-def k_to_f(k: float) -> float:
-    return (k - 273.15) * 9 / 5 + 32
-
-
-def k_to_c(k: float) -> float:
-    return k - 273.15
+PRECIP_COLOR = "#58a8f0"
 
 
-class WeatherPrediction(TypedDict):
-    id: int
-    icon: str
+class DailyForecast(TypedDict):
+    time: list[str]
+    weather_code: list[int]
+    temperature_2m_max: list[float]
+    temperature_2m_min: list[float]
+    precipitation_probability_max: list[int]
 
 
-class ForecastType(TypedDict):
-    dt: int
-    main: dict[str, float]
-    weather: list[WeatherPrediction]
+class ForecastData(TypedDict):
+    daily: DailyForecast
 
 
-class WeatherData(TypedDict):
-    list: list[ForecastType]
-
-
-class Forecast(Screen[WeatherData | None]):
+class Forecast(Screen[ForecastData | None]):
     CACHE_TTL = 600
 
     def fetch_data(self):
-        weather_api_key = self.config["api_key"]
-        weather_base_url = "https://api.openweathermap.org/data/2.5/forecast?"
-        zip_code = self.config["zip_code"]
+        lat = self.config["latitude"]
+        lon = self.config["longitude"]
 
-        weather_url = weather_base_url + "appid=" + weather_api_key + "&zip=" + zip_code
+        url = (
+            "https://api.open-meteo.com/v1/forecast"
+            f"?latitude={lat}&longitude={lon}"
+            "&daily=weather_code,temperature_2m_max,"
+            "temperature_2m_min,precipitation_probability_max"
+            "&temperature_unit=celsius"
+            "&forecast_days=4"
+            "&timezone=auto"
+        )
 
-        return requests.get(weather_url, timeout=REQUEST_DEFAULT_TIMEOUT).json()
+        return requests.get(url, timeout=REQUEST_DEFAULT_TIMEOUT).json()
 
     def fallback_data(self):
         return None
 
-    def get_image(self):
+    def get_image_64x64(self) -> Image.Image:
         image = Image.new("RGB", (64, 64))
         draw = ImageDraw.Draw(image)
 
-        date_str = datetime.datetime.now().strftime("%m/%d")
-        time_str = datetime.datetime.now().strftime("%H:%M")
-        draw.text((1, 1), f"{date_str:<5}", font=font, fill=TIME_DATE_COLOR)
-        draw.text((39, 1), f"{time_str:>5}", font=font, fill=TIME_DATE_COLOR)
+        # Top bar
+        draw.text((1, 1), "Forecast", font=font, fill=TIME_DATE_COLOR)
 
         if self.data is None:
             return image
 
-        data = self.data
+        daily = self.data["daily"]
 
-        dates: dict[datetime.date, list[ForecastType]] = {}
+        # Indices 1-3 skip today
+        for i, day_index in enumerate([1, 2, 3]):
+            y = 10 + i * 18
 
-        for forecast in data["list"]:
-            timestamp = datetime.datetime.fromtimestamp(forecast["dt"], tz=datetime.UTC)
+            date_str = daily["time"][day_index]
+            day_label = datetime.date.fromisoformat(date_str).strftime("%a").title()
 
-            if timestamp.date() not in dates:
-                dates[timestamp.date()] = []
-            dates[timestamp.date()].append(forecast)
+            temp_max_f = int(c_to_f(daily["temperature_2m_max"][day_index]))
+            temp_min_f = int(c_to_f(daily["temperature_2m_min"][day_index]))
+            precip = daily["precipitation_probability_max"][day_index]
 
-        for i, (date, forecasts) in enumerate(sorted(dates.items(), key=lambda pair: pair[0])):
-            draw.text(
-                (1, 10 + i * 10),
-                date.strftime("%a") + " " + forecasts[0]["weather"][0]["description"],
-                font=smallfont,
-                fill="#ffffff",
+            draw.text((1, y), day_label, font=font, fill=TIME_DATE_COLOR)
+
+            precip_icon = Image.open(
+                Path.cwd()
+                / "icons"
+                / "weather"
+                / "precip"
+                / f"{int(round(precip / 100 * 5)) * 20}.png"
             )
+            image.paste(precip_icon, (0, y + 8))
+
+            draw.text((7, y + 9), f"{precip:>2}%", font=font, fill=PRECIP_COLOR)
+
+            wmo_code = daily["weather_code"][day_index]
+            icon_name = get_icon(wmo_code, is_day=True)
+            if icon_name is not None:
+                icon = Image.open(
+                    Path.cwd() / "icons" / "weather" / "16px" / f"{icon_name}.png"
+                )
+                image.paste(icon, (23, y))
+
+            draw.line((42, y + 3, 44, y + 1, 46, y + 3), fill=HIGH_COLOR)
+            draw.text((49, y), f"{temp_max_f}°", font=font, fill=HIGH_COLOR)
+            draw.line((42, y + 11, 44, y + 13, 46, y + 11), fill=LOW_COLOR)
+            draw.text((49, y + 9), f"{temp_min_f}°", font=font, fill=LOW_COLOR)
 
         return image

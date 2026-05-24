@@ -118,7 +118,9 @@ class Weather(Screen[WeatherData | None]):
             data["current"]["weather_code"], bool(data["current"]["is_day"])
         )
 
-        icon = Image.open(Path.cwd() / "icons" / "weather" / f"{icon_name}.png")
+        icon = Image.open(
+            Path.cwd() / "icons" / "weather" / "32px" / f"{icon_name}.png"
+        )
 
         image.paste(icon, (1, 11))
         draw.text((39, 14), f"{temp_f:>2}°", font=bigfont, fill="#ffffff")
@@ -155,7 +157,9 @@ class Weather(Screen[WeatherData | None]):
             data["current"]["weather_code"], bool(data["current"]["is_day"])
         )
 
-        icon = Image.open(Path.cwd() / "icons" / "weather" / f"{icon_name}.png")
+        icon = Image.open(
+            Path.cwd() / "icons" / "weather" / "32px" / f"{icon_name}.png"
+        )
 
         image.paste(icon, (1, 0))
         draw.text((39, 0), f"{temp_f:>2}°", font=bigfont, fill="#ffffff")

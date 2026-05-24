@@ -17,6 +17,7 @@ from matrix.screens.octoprint import Octoprint
 from matrix.screens.mbta import MBTA
 from matrix.screens.screen import Screen
 from matrix.screens.spotify import Spotify
+from matrix.screens.forecast import Forecast
 from matrix.screens.weather import Weather
 from matrix.utils.config import parse_config
 from matrix.utils.matter import Matter
@@ -51,9 +52,9 @@ class App:
             MBTA(self.config["screens"]["mbta"], self.panel),
             Spotify(self.config["screens"]["spotify"], self.panel),
             Weather(self.config["screens"]["weather"], self.panel),
-            # Forecast(self.config["screens"]["forecast"], self.panel),
+            Forecast(self.config["screens"]["forecast"], self.panel),
             BlueBikes(self.config["screens"]["bluebikes"], self.panel),
-            Octoprint(self.config["screens"]["octoprint"], self.panel),
+            # Octoprint(self.config["screens"]["octoprint"], self.panel),
         ]
         self.modes: dict[ModeType, BaseMode] = {
             ModeType.MAIN: Main(self.change_mode, self.panel, screens),
