@@ -1,0 +1,94 @@
+[panel]
+# size = "64x32"
+size = "64x64"
+brightness = 60
+simulation = true
+
+[screens.bluebikes]
+
+[[screens.bluebikes.stations]]
+id = "S32022"
+label = "Cedar St"
+
+[[screens.bluebikes.stations]]
+id = "S32013"
+label = "Trum Field"
+
+[[screens.bluebikes.stations]]
+id = "S32040"
+label = "Lowell St"
+
+[screens.mbta]
+api_key = "<your_api_key>"
+
+[[screens.mbta.lines]]
+symbol = "E"
+headsign = "Heath St"
+label = "GL-E"
+color = "#00ff76"
+stop_id = "place-mgngl"
+route_id = "Green-E"
+direction_id = 0
+
+# [[screens.mbta.lines]]
+# symbol = "E"
+# headsign = "Medfd/Tuft"
+# label = "GL-E"
+# color = "#00ff76"
+# stop_id = "place-mgngl"
+# route_id = "Green-E"
+# direction_id = 1
+
+[[screens.mbta.lines]]
+symbol = "89"
+headsign = "Sullivan"
+label = "89 Bus"
+color = "#FFAA00"
+stop_id = "2698"
+route_id = "89"
+direction_id = 1
+
+# [[screens.mbta.lines]]
+# symbol = "89"
+# headsign = "Davis"
+# label = "89 Bus"
+# color = "#FFAA00"
+# stop_id = "2735"
+# route_id = "89"
+# direction_id = 0
+
+# [[screens.mbta.lines]]
+# symbol = "101"
+# headsign = "Sullivan"
+# label = "101 Bus"
+# color = "#FFAA00"
+# stop_id = "5299"
+# route_id = "101"
+# direction_id = 1
+
+[[screens.mbta.lines]]
+symbol = "101"
+headsign = "Malden"
+label = "101 Bus"
+color = "#FFAA00"
+stop_id = "5308"
+route_id = "101"
+direction_id = 0
+
+[screens.spotify]
+# Listed in order of precedence
+users = ["Brooke", "Ava"]
+
+[screens.weather]
+latitude = 42.39625977790948
+longitude = -71.10866518203339
+
+[screens.forecast]
+latitude = 42.39625977790948
+longitude = -71.10866518203339
+
+
+[screens.octoprint]
+api_key = "<your_api_key>"
+endpoint = "https://octoprint.example.com/"
+printer_name = "Ender 3 Pro"

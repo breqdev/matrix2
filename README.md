@@ -21,13 +21,24 @@
 Set up a virtual environment and install the requirements:
 
 ```bash
+uv sync
+# or
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e .
 ```
 
+Set up your configuration in matrix.toml
+
+```bash
+cp matrix.example.toml matrix.toml
+# Edit matrix.toml with your preferred text editor, you'll need to at least add credentials for the services you want to use
+```
+
 Run with:
 
 ```bash
+uv run main.py --simulate
+# or
 python3 main.py --simulate
 ```
