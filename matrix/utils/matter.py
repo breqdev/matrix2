@@ -21,8 +21,6 @@ class Matter:
         self.socks: set[socket] = set()
 
     def handle_command(self, cmd: str) -> None:
-        log.info("Unknown command: %s", cmd)
-
         match cmd:
             case "on":
                 self.brightness.change_mode(ModeType.MAIN)
@@ -30,9 +28,13 @@ class Matter:
                 self.brightness.change_mode(ModeType.OFF)
             case _:
                 try:
-                    self.brightness.brightness = int(float(cmd) * MAX_BRIGHTNESS)
+                    cmd_brightness = float(cmd.strip())
                 except ValueError:
                     log.error("Unknown command: %s", cmd)
+                else:
+                    self.brightness.brightness = int(
+                        cmd_brightness / 100 * MAX_BRIGHTNESS
+                    )
 
     def send(self, msg: str) -> None:
         broken_socks: set[socket] = set()
