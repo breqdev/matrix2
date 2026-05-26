@@ -20,7 +20,7 @@ class Octoprint(Screen[dict]):
         super().__init__(config, size)
 
     def _get(self, path: str):
-        return requests.get(
+        return self.session.get(
             urljoin(self.endpoint, path),
             headers={"Authorization": f"Bearer {self.api_key}"},
         ).json()

@@ -4,16 +4,15 @@ import requests
 from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font
-from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
+from matrix.screens.screen import Screen
 
 
 class MakeAFish(Screen[tuple[Image.Image, Image.Image]]):
     CACHE_TTL = 5
 
     def fetch_data(self):
-        data = requests.get(
+        data = self.fetch_url(
             "http://makea.fish/fishimg.php?s=11&t=x6362x&f=11",
-            timeout=REQUEST_DEFAULT_TIMEOUT,
         ).content
         fish = Image.open(io.BytesIO(data))
 

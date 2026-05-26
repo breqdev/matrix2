@@ -6,7 +6,7 @@ import requests
 from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import bigfont, font
-from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
+from matrix.screens.screen import Screen
 
 TIME_DATE_COLOR = "#aaaaaa"
 HIGH_COLOR = "#ffa024"
@@ -83,7 +83,7 @@ class Weather(Screen[WeatherData | None]):
             "&timezone=auto"
         )
 
-        return requests.get(url, timeout=REQUEST_DEFAULT_TIMEOUT).json()
+        return self.fetch_url(url).json()
 
     def fallback_data(self):
         return None

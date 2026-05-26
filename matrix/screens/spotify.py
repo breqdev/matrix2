@@ -5,7 +5,7 @@ import spotipy
 from PIL import Image
 from spotipy.oauth2 import SpotifyOAuth
 
-from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
+from matrix.screens.screen import Screen
 
 scope = "user-read-currently-playing user-read-playback-state"
 
@@ -33,7 +33,7 @@ class Spotify(Screen[Image.Image | None]):
             state = sp.current_user_playing_track()
             if state and state["item"]:
                 cover_url = state["item"]["album"]["images"][0]["url"]
-                image_data = requests.get(cover_url, timeout=REQUEST_DEFAULT_TIMEOUT).content
+                image_data = self.fetch_url(cover_url).content
                 return Image.open(io.BytesIO(image_data)).resize((64, 64))
 
         return None
@@ -42,18 +42,20 @@ class Spotify(Screen[Image.Image | None]):
         return None
 
     def get_image_64x64(self):
+        image = Image.new("RGB", (64, 64))
+
         if data := self.data:
-            image = Image.new("RGB", (64, 64))
             image.paste(data)
-            return image
-        return None
+
+        return image
 
     def get_image_64x32(self):
+        image = Image.new("RGB", (64, 32))
+
         if data := self.data:
-            image = Image.new("RGB", (64, 32))
             image.paste(data.resize((32, 32)), (16, 0))
-            return image
-        return None
+
+        return image
 
     @property
     def is_active(self):
