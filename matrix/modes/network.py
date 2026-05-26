@@ -115,7 +115,7 @@ def get_ssid() -> str:
     for line in lines:
         if line.strip().startswith("SSID: "):
             return line.strip().removeprefix("SSID: ")
-    raise ValueError("command failed")
+    return "???"
 
 
 def get_network_info() -> NetworkInfo:
