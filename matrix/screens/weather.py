@@ -13,40 +13,82 @@ HIGH_COLOR = "#ffa024"
 LOW_COLOR = "#5cc9ff"
 
 
-def k_to_f(k: float) -> float:
-    return (k - 273.15) * 9 / 5 + 32
+def c_to_f(c: float) -> float:
+    return c * 9 / 5 + 32
 
 
-def k_to_c(k: float) -> float:
-    return k - 273.15
+class CurrentWeather(TypedDict):
+    temperature_2m: float
+    apparent_temperature: float
+    weather_code: int
+    is_day: int  # 1 = day, 0 = night
 
 
-class WeatherPrediction(TypedDict):
-    id: int
-    icon: str
+class DailyWeather(TypedDict):
+    temperature_2m_max: list[float]
+    temperature_2m_min: list[float]
 
 
 class WeatherData(TypedDict):
-    main: dict[str, float]
-    weather: list[WeatherPrediction]
+    current: CurrentWeather
+    daily: DailyWeather
+
+
+# Maps icon name -> (daytime WMO codes, nighttime WMO codes)
+WMO_ICON_MAP: dict[str, tuple[list[int], list[int]]] = {
+    "sun": ([0], []),
+    "moon": ([], [0]),
+    "cloud_sun": ([1, 2], []),
+    "cloud_moon": ([], [1, 2]),
+    "cloud": ([3], [3]),
+    "cloud_wind": ([45, 48], [45, 48]),
+    "rain0_sun": ([51, 53], []),
+    "rain0_moon": ([], [51, 53]),
+    "rain0": ([55, 56, 57], [55, 56, 57]),
+    "rain1_sun": ([61, 63], []),
+    "rain1_moon": ([], [61, 63]),
+    "rain1": ([65, 66, 67], [65, 66, 67]),
+    "rain2": ([80, 81, 82], [80, 81, 82]),
+    "rain_snow": ([68, 69], [68, 69]),
+    "snow_sun": ([71, 73], []),
+    "snow_moon": ([], [71, 73]),
+    "snow": ([75, 77, 85, 86], [75, 77, 85, 86]),
+    "rain_lightning": ([95, 96, 99], [95, 96, 99]),
+}
+
+
+def get_icon(wmo_code: int, is_day: bool) -> str | None:
+    for icon, (day_codes, night_codes) in WMO_ICON_MAP.items():
+        codes = day_codes if is_day else night_codes
+        if wmo_code in codes:
+            return icon
+    return None
 
 
 class Weather(Screen[WeatherData | None]):
     CACHE_TTL = 600
 
     def fetch_data(self):
-        weather_api_key = self.config["api_key"]
-        weather_base_url = "https://api.openweathermap.org/data/2.5/weather?"
-        zip_code = self.config["zip_code"]
+        lat = self.config["latitude"]
+        lon = self.config["longitude"]
 
-        weather_url = weather_base_url + "appid=" + weather_api_key + "&zip=" + zip_code
+        url = (
+            "https://api.open-meteo.com/v1/forecast"
+            f"?latitude={lat}&longitude={lon}"
+            "&current=temperature_2m,apparent_temperature,"
+            "weather_code,is_day"
+            "&daily=temperature_2m_max,temperature_2m_min"
+            "&temperature_unit=celsius"
+            "&forecast_days=1"
+            "&timezone=auto"
+        )
 
-        return requests.get(weather_url, timeout=REQUEST_DEFAULT_TIMEOUT).json()
+        return requests.get(url, timeout=REQUEST_DEFAULT_TIMEOUT).json()
 
     def fallback_data(self):
         return None
 
-    def get_image_64x64(self):
+    def get_image_64x64(self) -> Image.Image:
         image = Image.new("RGB", (64, 64))
         draw = ImageDraw.Draw(image)
 
@@ -60,79 +102,21 @@ class Weather(Screen[WeatherData | None]):
 
         data = self.data
 
-        temp: float = data["main"]["temp"]
-        temp_f = int(k_to_f(temp))
-        temp_c = int(k_to_c(temp))
+        temp: float = data["current"]["temperature_2m"]
+        temp_f = int(c_to_f(temp))
+        temp_c = int(temp)
 
-        temp_min: float = data["main"]["temp_min"]
-        temp_min_f = int(k_to_f(temp_min))
-        temp_min_c = int(k_to_c(temp_min))
+        temp_min: float = data["daily"]["temperature_2m_min"][0]
+        temp_min_f = int(c_to_f(temp_min))
+        temp_min_c = int(temp)
 
-        temp_max: float = data["main"]["temp_max"]
-        temp_max_f = int(k_to_f(temp_max))
-        temp_max_c = int(k_to_c(temp_max))
+        temp_max: float = data["daily"]["temperature_2m_max"][0]
+        temp_max_f = int(c_to_f(temp_max))
+        temp_max_c = int(temp)
 
-        DAYTIME: dict[str, list[int]] = {
-            "cloud": [803],
-            "cloud_moon": [],
-            "cloud_sun": [801, 802],
-            "cloud_wind": [711, 721, 731, 741, 751, 761, 762],
-            "cloud_wind_moon": [],
-            "cloud_wind_sun": [701],
-            "clouds": [804],
-            "lightning": [210, 211, 212, 221],
-            "moon": [],
-            "rain0": [302, 310, 311, 312, 313, 314, 321],
-            "rain0_sun": [300, 301],
-            "rain1": [502, 521, 522],
-            "rain1_moon": [],
-            "rain1_sun": [500, 501],
-            "rain2": [503, 504, 531],
-            "rain_lightning": [200, 201, 202, 230, 231, 232],
-            "rain_snow": [511, 615, 616],
-            "snow": [602, 613, 621, 622],
-            "snow_moon": [],
-            "snow_sun": [600, 601, 611, 612, 620],
-            "sun": [800],
-            "wind": [771, 781],
-        }
-
-        NIGHTTIME: dict[str, list[int]] = {
-            "cloud": [803],
-            "cloud_moon": [801, 802],
-            "cloud_sun": [],
-            "cloud_wind": [711, 721, 731, 741, 751, 761, 762],
-            "cloud_wind_moon": [701],
-            "cloud_wind_sun": [],
-            "clouds": [804],
-            "lightning": [210, 211, 212, 221],
-            "moon": [800],
-            "rain0": [300, 301, 302, 310, 311, 312, 313, 314, 321],
-            "rain0_sun": [],
-            "rain1": [502, 521, 522],
-            "rain1_moon": [500, 501],
-            "rain1_sun": [],
-            "rain2": [503, 504, 531],
-            "rain_lightning": [200, 201, 202, 230, 231, 232],
-            "rain_snow": [511, 615, 616],
-            "snow": [602, 613, 621, 622],
-            "snow_moon": [600, 601, 611, 612, 620],
-            "snow_sun": [],
-            "sun": [],
-            "wind": [771, 781],
-        }
-
-        def get_icon(code: int, daytime: bool = True):
-            mapping = DAYTIME if daytime else NIGHTTIME
-
-            for icon, codes in mapping.items():
-                if code in codes:
-                    return icon
-
-        icon_code = data["weather"][0]["icon"]
-
-        is_daytime = icon_code[-1] == "d"
-        icon_name = get_icon(data["weather"][0]["id"], is_daytime)
+        icon_name = get_icon(
+            data["current"]["weather_code"], bool(data["current"]["is_day"])
+        )
 
         icon = Image.open(Path.cwd() / "icons" / "weather" / f"{icon_name}.png")
 
@@ -151,7 +135,7 @@ class Weather(Screen[WeatherData | None]):
 
         return image
 
-    def get_image_64x32(self):
+    def get_image_64x32(self) -> Image.Image:
         image = Image.new("RGB", (64, 32))
         draw = ImageDraw.Draw(image)
 
@@ -163,71 +147,13 @@ class Weather(Screen[WeatherData | None]):
 
         data = self.data
 
-        temp: float = data["main"]["temp"]
-        temp_f = int(k_to_f(temp))
-        temp_c = int(k_to_c(temp))
+        temp: float = data["current"]["temperature_2m"]
+        temp_f = int(c_to_f(temp))
+        temp_c = int(temp)
 
-        DAYTIME: dict[str, list[int]] = {
-            "cloud": [803],
-            "cloud_moon": [],
-            "cloud_sun": [801, 802],
-            "cloud_wind": [711, 721, 731, 741, 751, 761, 762],
-            "cloud_wind_moon": [],
-            "cloud_wind_sun": [701],
-            "clouds": [804],
-            "lightning": [210, 211, 212, 221],
-            "moon": [],
-            "rain0": [302, 310, 311, 312, 313, 314, 321],
-            "rain0_sun": [300, 301],
-            "rain1": [502, 521, 522],
-            "rain1_moon": [],
-            "rain1_sun": [500, 501],
-            "rain2": [503, 504, 531],
-            "rain_lightning": [200, 201, 202, 230, 231, 232],
-            "rain_snow": [511, 615, 616],
-            "snow": [602, 613, 621, 622],
-            "snow_moon": [],
-            "snow_sun": [600, 601, 611, 612, 620],
-            "sun": [800],
-            "wind": [771, 781],
-        }
-
-        NIGHTTIME: dict[str, list[int]] = {
-            "cloud": [803],
-            "cloud_moon": [801, 802],
-            "cloud_sun": [],
-            "cloud_wind": [711, 721, 731, 741, 751, 761, 762],
-            "cloud_wind_moon": [701],
-            "cloud_wind_sun": [],
-            "clouds": [804],
-            "lightning": [210, 211, 212, 221],
-            "moon": [800],
-            "rain0": [300, 301, 302, 310, 311, 312, 313, 314, 321],
-            "rain0_sun": [],
-            "rain1": [502, 521, 522],
-            "rain1_moon": [500, 501],
-            "rain1_sun": [],
-            "rain2": [503, 504, 531],
-            "rain_lightning": [200, 201, 202, 230, 231, 232],
-            "rain_snow": [511, 615, 616],
-            "snow": [602, 613, 621, 622],
-            "snow_moon": [600, 601, 611, 612, 620],
-            "snow_sun": [],
-            "sun": [],
-            "wind": [771, 781],
-        }
-
-        def get_icon(code: int, daytime: bool = True):
-            mapping = DAYTIME if daytime else NIGHTTIME
-
-            for icon, codes in mapping.items():
-                if code in codes:
-                    return icon
-
-        icon_code = data["weather"][0]["icon"]
-
-        is_daytime = icon_code[-1] == "d"
-        icon_name = get_icon(data["weather"][0]["id"], is_daytime)
+        icon_name = get_icon(
+            data["current"]["weather_code"], bool(data["current"]["is_day"])
+        )
 
         icon = Image.open(Path.cwd() / "icons" / "weather" / f"{icon_name}.png")
 
