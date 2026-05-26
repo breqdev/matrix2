@@ -6,7 +6,7 @@ import requests
 from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font
-from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
+from matrix.screens.screen import Screen
 from matrix.screens.weather import (
     HIGH_COLOR,
     LOW_COLOR,
@@ -31,7 +31,7 @@ class ForecastData(TypedDict):
 
 
 class Forecast(Screen[ForecastData | None]):
-    CACHE_TTL = 600
+    CACHE_TTL = 1200
 
     def fetch_data(self):
         lat = self.config["latitude"]
@@ -47,7 +47,7 @@ class Forecast(Screen[ForecastData | None]):
             "&timezone=auto"
         )
 
-        return requests.get(url, timeout=REQUEST_DEFAULT_TIMEOUT).json()
+        return self.fetch_url(url).json()
 
     def fallback_data(self):
         return None
