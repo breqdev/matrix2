@@ -82,7 +82,7 @@ class Forecast(Screen[ForecastData | None]):
                 / "icons"
                 / "weather"
                 / "precip"
-                / f"{int(round(precip / 100 * 5)) * 20}.png"
+                / f"{int(round(precip / 20)) * 20}.png"
             )
             image.paste(precip_icon, (0, y + 8))
 
