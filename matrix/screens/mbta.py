@@ -1,4 +1,3 @@
-from matrix.utils.panels import PanelSize
 import re
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -10,6 +9,7 @@ from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font, smallfont
 from matrix.screens.screen import Screen
+from matrix.utils.panels import PanelSize
 
 PredictionType: TypeAlias = Literal["prediction", "schedule"]
 
@@ -32,9 +32,7 @@ class Prediction:
     type: PredictionType
 
 
-def get_predictions(
-    session: requests.Session, line: Line, api_key: str
-) -> list[Prediction]:
+def get_predictions(session: requests.Session, line: Line, api_key: str) -> list[Prediction]:
     predictions_response = session.get(
         "https://api-v3.mbta.com/predictions",
         params={
@@ -302,18 +300,14 @@ class MBTA(Screen[MbtaData]):
 
             draw.text((3, 11 + 19 * row), line.symbol, font=smallfont, fill=line.color)
 
-            draw.text(
-                (6 + length, 10 + 19 * row), line.headsign, font=font, fill=line.color
-            )
+            draw.text((6 + length, 10 + 19 * row), line.headsign, font=font, fill=line.color)
             line_predictions = filter(lambda p: p.line == line, predictions)
 
             pixel_x = 2
             for prediction in line_predictions:
                 time_str = str(int(prediction.eta / timedelta(minutes=1)))
                 length = draw.textlength(time_str, font=font)
-                if pixel_x + length > 64 - (
-                    draw.textlength("min", font=font) + X_MARGIN
-                ):
+                if pixel_x + length > 64 - (draw.textlength("min", font=font) + X_MARGIN):
                     break
 
                 draw.text(
@@ -340,9 +334,7 @@ class MBTA(Screen[MbtaData]):
 
             draw.line((9, 47, 60, 47), fill="#888888")
 
-            draw.text(
-                (12, 50), f"{alert_line.label} Alert", font=smallfont, fill="#888888"
-            )
+            draw.text((12, 50), f"{alert_line.label} Alert", font=smallfont, fill="#888888")
 
             draw.text((1 - self.scroll_idx, 57), alert_text, font=font, fill="#ff0000")
             draw.text(
@@ -396,9 +388,7 @@ class MBTA(Screen[MbtaData]):
             for prediction in line_predictions:
                 time_str = str(int(prediction.eta / timedelta(minutes=1)))
                 length = draw.textlength(time_str, font=font)
-                if pixel_x + length > 64 - (
-                    draw.textlength("min", font=font) + X_MARGIN
-                ):
+                if pixel_x + length > 64 - (draw.textlength("min", font=font) + X_MARGIN):
                     break
 
                 draw.text(

@@ -21,9 +21,7 @@ def is_eleven_eleven() -> bool:
 class Main(BaseMode):
     screen_refresh_rate: float = 5
 
-    def __init__(
-        self, change_mode: ChangeMode, size: PanelSize, screens: list[Screen[Any]]
-    ) -> None:
+    def __init__(self, change_mode: ChangeMode, size: PanelSize, screens: list[Screen[Any]]) -> None:
         super().__init__(change_mode, size)
 
         self.screens = screens
@@ -67,8 +65,6 @@ class Main(BaseMode):
                 if result := screen.get_image():
                     return result
             except Exception as e:
-                logger.exception(
-                    "Exception drawing image for %s: %s", screen.__class__.__name__, e
-                )
+                logger.exception("Exception drawing image for %s: %s", screen.__class__.__name__, e)
 
             self.screen_index += 1

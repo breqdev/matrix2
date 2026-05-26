@@ -2,7 +2,6 @@ import datetime
 from pathlib import Path
 from typing import TypedDict
 
-import requests
 from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font
@@ -78,11 +77,7 @@ class Forecast(Screen[ForecastData | None]):
             draw.text((1, y), day_label, font=font, fill=TIME_DATE_COLOR)
 
             precip_icon = Image.open(
-                Path.cwd()
-                / "icons"
-                / "weather"
-                / "precip"
-                / f"{int(round(precip / 20)) * 20}.png"
+                Path.cwd() / "icons" / "weather" / "precip" / f"{int(round(precip / 20)) * 20}.png"
             )
             image.paste(precip_icon, (0, y + 8))
 
@@ -91,9 +86,7 @@ class Forecast(Screen[ForecastData | None]):
             wmo_code = daily["weather_code"][day_index]
             icon_name = get_icon(wmo_code, is_day=True)
             if icon_name is not None:
-                icon = Image.open(
-                    Path.cwd() / "icons" / "weather" / "16px" / f"{icon_name}.png"
-                )
+                icon = Image.open(Path.cwd() / "icons" / "weather" / "16px" / f"{icon_name}.png")
                 image.paste(icon, (23, y))
 
             draw.line((42, y + 3, 44, y + 1, 46, y + 3), fill=HIGH_COLOR)
@@ -127,11 +120,7 @@ class Forecast(Screen[ForecastData | None]):
         draw.text((1, 10), day_label, font=font, fill=TIME_DATE_COLOR)
 
         precip_icon = Image.open(
-            Path.cwd()
-            / "icons"
-            / "weather"
-            / "precip"
-            / f"{int(round(precip / 100 * 5)) * 20}.png"
+            Path.cwd() / "icons" / "weather" / "precip" / f"{int(round(precip / 100 * 5)) * 20}.png"
         )
         image.paste(precip_icon, (0, 18))
 
@@ -140,9 +129,7 @@ class Forecast(Screen[ForecastData | None]):
         wmo_code = daily["weather_code"][day_index]
         icon_name = get_icon(wmo_code, is_day=True)
         if icon_name is not None:
-            icon = Image.open(
-                Path.cwd() / "icons" / "weather" / "16px" / f"{icon_name}.png"
-            )
+            icon = Image.open(Path.cwd() / "icons" / "weather" / "16px" / f"{icon_name}.png")
             image.paste(icon, (23, 10))
 
         draw.line((42, 13, 44, 11, 46, 13), fill=HIGH_COLOR)

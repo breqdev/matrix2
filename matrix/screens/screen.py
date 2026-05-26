@@ -3,10 +3,10 @@ import threading
 import time
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
-import requests
-from requests.adapters import HTTPAdapter, Retry
 
+import requests
 from datadog.dogstatsd.base import statsd
+from requests.adapters import HTTPAdapter, Retry
 
 from matrix.utils.panels import Drawable, PanelSize
 
@@ -23,9 +23,7 @@ class Screen(ABC, Drawable, Generic[T]):
         self.size = size
         self.cached_data: T
 
-        retries = Retry(
-            total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504]
-        )
+        retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
 
         self.session = requests.Session()
         self.session.mount("https://", HTTPAdapter(max_retries=retries))

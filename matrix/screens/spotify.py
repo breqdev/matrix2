@@ -1,6 +1,5 @@
 import io
 
-import requests
 import spotipy
 from PIL import Image
 from spotipy.oauth2 import SpotifyOAuth

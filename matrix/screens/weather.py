@@ -2,7 +2,6 @@ import datetime
 from pathlib import Path
 from typing import TypedDict
 
-import requests
 from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import bigfont, font
@@ -114,13 +113,9 @@ class Weather(Screen[WeatherData | None]):
         temp_max_f = int(c_to_f(temp_max))
         temp_max_c = int(temp_max)
 
-        icon_name = get_icon(
-            data["current"]["weather_code"], bool(data["current"]["is_day"])
-        )
+        icon_name = get_icon(data["current"]["weather_code"], bool(data["current"]["is_day"]))
 
-        icon = Image.open(
-            Path.cwd() / "icons" / "weather" / "32px" / f"{icon_name}.png"
-        )
+        icon = Image.open(Path.cwd() / "icons" / "weather" / "32px" / f"{icon_name}.png")
 
         image.paste(icon, (1, 11))
         draw.text((39, 14), f"{temp_f:>2}°", font=bigfont, fill="#ffffff")
@@ -153,13 +148,9 @@ class Weather(Screen[WeatherData | None]):
         temp_f = int(c_to_f(temp))
         temp_c = int(temp)
 
-        icon_name = get_icon(
-            data["current"]["weather_code"], bool(data["current"]["is_day"])
-        )
+        icon_name = get_icon(data["current"]["weather_code"], bool(data["current"]["is_day"]))
 
-        icon = Image.open(
-            Path.cwd() / "icons" / "weather" / "32px" / f"{icon_name}.png"
-        )
+        icon = Image.open(Path.cwd() / "icons" / "weather" / "32px" / f"{icon_name}.png")
 
         image.paste(icon, (1, 0))
         draw.text((39, 0), f"{temp_f:>2}°", font=bigfont, fill="#ffffff")

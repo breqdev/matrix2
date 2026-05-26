@@ -1,10 +1,10 @@
+from logging import getLogger
 from os import path, remove
 from pathlib import Path
 from select import select
 from socket import AF_UNIX, SOCK_STREAM, socket
 from subprocess import Popen
 from threading import Thread
-from logging import getLogger
 
 from matrix.modes.brightness import MAX_BRIGHTNESS, Brightness
 from matrix.modes.mode import ModeType
@@ -32,9 +32,7 @@ class Matter:
                 except ValueError:
                     log.error("Unknown command: %s", cmd)
                 else:
-                    self.brightness.brightness = int(
-                        cmd_brightness / 100 * MAX_BRIGHTNESS
-                    )
+                    self.brightness.brightness = int(cmd_brightness / 100 * MAX_BRIGHTNESS)
 
     def send(self, msg: str) -> None:
         broken_socks: set[socket] = set()

@@ -1,8 +1,8 @@
 # stdlib
-from typing import Any
 import logging
 import sys
 import threading
+from typing import Any
 
 # project
 from matrix.modes.brightness import Brightness
@@ -13,11 +13,10 @@ from matrix.modes.network import Network
 from matrix.modes.off import Off
 from matrix.modes.screens import Screens
 from matrix.screens.bluebikes import BlueBikes
-from matrix.screens.octoprint import Octoprint
+from matrix.screens.forecast import Forecast
 from matrix.screens.mbta import MBTA
 from matrix.screens.screen import Screen
 from matrix.screens.spotify import Spotify
-from matrix.screens.forecast import Forecast
 from matrix.screens.weather import Weather
 from matrix.utils.config import parse_config
 from matrix.utils.matter import Matter
@@ -64,17 +63,13 @@ class App:
         }
 
         if self.hardware is not None:
-            brightness = Brightness(
-                self.change_mode, self.panel, hardware=self.hardware
-            )
+            brightness = Brightness(self.change_mode, self.panel, hardware=self.hardware)
             self.modes[ModeType.BRIGHTNESS] = brightness
             if self.config["panel"].get("matter"):
                 self.matter = Matter(brightness)
                 self.matter.start()
             self.hardware.dial.when_rotated_clockwise = self.handle_rotation_clockwise
-            self.hardware.dial.when_rotated_counter_clockwise = (
-                self.handle_rotation_counterclockwise
-            )
+            self.hardware.dial.when_rotated_counter_clockwise = self.handle_rotation_counterclockwise
             self.hardware.button.when_pressed = self.handle_press
 
         if sys.platform == "linux":

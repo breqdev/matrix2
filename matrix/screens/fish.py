@@ -1,6 +1,5 @@
 import io
 
-import requests
 from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font
