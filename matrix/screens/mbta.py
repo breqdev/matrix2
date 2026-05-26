@@ -9,7 +9,7 @@ import requests
 from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font, smallfont
-from matrix.screens.screen import REQUEST_DEFAULT_TIMEOUT, Screen
+from matrix.screens.screen import Screen
 
 PredictionType: TypeAlias = Literal["prediction", "schedule"]
 
@@ -32,8 +32,10 @@ class Prediction:
     type: PredictionType
 
 
-def get_predictions(line: Line, api_key: str) -> list[Prediction]:
-    predictions_response = requests.get(
+def get_predictions(
+    session: requests.Session, line: Line, api_key: str
+) -> list[Prediction]:
+    predictions_response = session.get(
         "https://api-v3.mbta.com/predictions",
         params={
             "filter[stop]": line.stop_id,
@@ -44,7 +46,7 @@ def get_predictions(line: Line, api_key: str) -> list[Prediction]:
             "page[limit]": "10",
             "api_key": api_key,
         },
-        timeout=REQUEST_DEFAULT_TIMEOUT,
+        timeout=15,
     )
 
     predictions_response.raise_for_status()
@@ -104,7 +106,7 @@ def get_predictions(line: Line, api_key: str) -> list[Prediction]:
         service_hour = wall_time.hour
         service_minute = wall_time.minute
 
-    schedule_response = requests.get(
+    schedule_response = session.get(
         "https://api-v3.mbta.com/schedules",
         params={
             "filter[stop]": line.stop_id,
@@ -118,7 +120,7 @@ def get_predictions(line: Line, api_key: str) -> list[Prediction]:
             "filter[max_time]": f"{service_hour + 2:02}:{service_minute:02}",
             "api_key": api_key,
         },
-        timeout=REQUEST_DEFAULT_TIMEOUT,
+        timeout=15,
     )
 
     schedule_response.raise_for_status()
@@ -152,15 +154,15 @@ def get_predictions(line: Line, api_key: str) -> list[Prediction]:
     return results
 
 
-def get_alert(line: Line, api_key: str) -> str | None:
-    response = requests.get(
+def get_alert(session: requests.Session, line: Line, api_key: str) -> str | None:
+    response = session.get(
         "https://api-v3.mbta.com/alerts",
         params={
             "filter[route]": line.route_id,
             "filter[datetime]": "NOW",
             "api_key": api_key,
         },
-        timeout=REQUEST_DEFAULT_TIMEOUT,
+        timeout=15,
     )
 
     response.raise_for_status()
@@ -246,7 +248,7 @@ class MBTA(Screen[MbtaData]):
             predictions = [
                 prediction
                 for line_predictions in tpe.map(
-                    lambda line: get_predictions(line, api_key),
+                    lambda line: get_predictions(self.session, line, api_key),
                     self.lines,
                 )
                 for prediction in line_predictions
@@ -256,7 +258,7 @@ class MBTA(Screen[MbtaData]):
         alert = None
         alert_line = None
         for line in self.lines[:2]:
-            alert = get_alert(line, api_key)
+            alert = get_alert(self.session, line, api_key)
             if alert is not None:
                 alert_line = line
                 break
@@ -300,14 +302,18 @@ class MBTA(Screen[MbtaData]):
 
             draw.text((3, 11 + 19 * row), line.symbol, font=smallfont, fill=line.color)
 
-            draw.text((6 + length, 10 + 19 * row), line.headsign, font=font, fill=line.color)
+            draw.text(
+                (6 + length, 10 + 19 * row), line.headsign, font=font, fill=line.color
+            )
             line_predictions = filter(lambda p: p.line == line, predictions)
 
             pixel_x = 2
             for prediction in line_predictions:
                 time_str = str(int(prediction.eta / timedelta(minutes=1)))
                 length = draw.textlength(time_str, font=font)
-                if pixel_x + length > 64 - (draw.textlength("min", font=font) + X_MARGIN):
+                if pixel_x + length > 64 - (
+                    draw.textlength("min", font=font) + X_MARGIN
+                ):
                     break
 
                 draw.text(
@@ -334,7 +340,9 @@ class MBTA(Screen[MbtaData]):
 
             draw.line((9, 47, 60, 47), fill="#888888")
 
-            draw.text((12, 50), f"{alert_line.label} Alert", font=smallfont, fill="#888888")
+            draw.text(
+                (12, 50), f"{alert_line.label} Alert", font=smallfont, fill="#888888"
+            )
 
             draw.text((1 - self.scroll_idx, 57), alert_text, font=font, fill="#ff0000")
             draw.text(
@@ -388,7 +396,9 @@ class MBTA(Screen[MbtaData]):
             for prediction in line_predictions:
                 time_str = str(int(prediction.eta / timedelta(minutes=1)))
                 length = draw.textlength(time_str, font=font)
-                if pixel_x + length > 64 - (draw.textlength("min", font=font) + X_MARGIN):
+                if pixel_x + length > 64 - (
+                    draw.textlength("min", font=font) + X_MARGIN
+                ):
                     break
 
                 draw.text(

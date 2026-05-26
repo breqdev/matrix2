@@ -3,6 +3,8 @@ import threading
 import time
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
+import requests
+from requests.adapters import HTTPAdapter, Retry
 
 from datadog.dogstatsd.base import statsd
 
@@ -10,7 +12,6 @@ from matrix.utils.panels import Drawable, PanelSize
 
 logger = logging.getLogger(__name__)
 
-REQUEST_DEFAULT_TIMEOUT = 15
 CACHE_TTL = 60
 
 T = TypeVar("T")
@@ -21,6 +22,13 @@ class Screen(ABC, Drawable, Generic[T]):
         self.config = config
         self.size = size
         self.cached_data: T
+
+        retries = Retry(
+            total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504]
+        )
+
+        self.session = requests.Session()
+        self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
         self.has_data = threading.Event()
         self.cancel_timer = threading.Event()
@@ -40,6 +48,9 @@ class Screen(ABC, Drawable, Generic[T]):
     def is_active(self) -> bool:
         """Return if the screen should be displayed"""
         return self.is_enabled
+
+    def fetch_url(self, url: str) -> requests.Response:
+        return self.session.get(url, timeout=15)
 
     def background_fetcher(self) -> None:
         while True:
