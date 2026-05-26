@@ -1,12 +1,11 @@
-from urllib.parse import urljoin
 import math
+from urllib.parse import urljoin
 
-import requests
 from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font, smallfont
-from matrix.utils.panels import PanelSize
 from matrix.screens.screen import Screen
+from matrix.utils.panels import PanelSize
 
 
 class Octoprint(Screen[dict]):

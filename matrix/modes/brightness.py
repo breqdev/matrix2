@@ -15,9 +15,7 @@ MAX_BRIGHTNESS = 100
 
 
 class Brightness(BaseMode):
-    def __init__(
-        self, change_mode: ChangeMode, size: PanelSize, *, hardware: "Hardware"
-    ):
+    def __init__(self, change_mode: ChangeMode, size: PanelSize, *, hardware: "Hardware"):
         super().__init__(change_mode, size)
         self.matrix = hardware.matrix
 
