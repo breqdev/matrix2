@@ -102,3 +102,52 @@ class Forecast(Screen[ForecastData | None]):
             draw.text((49, y + 9), f"{temp_min_f}°", font=font, fill=LOW_COLOR)
 
         return image
+
+    def get_image_64x32(self) -> Image.Image:
+        image = Image.new("RGB", (64, 32))
+        draw = ImageDraw.Draw(image)
+
+        # Top bar
+        draw.text((1, 1), "Tomorrow", font=font, fill=TIME_DATE_COLOR)
+
+        if self.data is None:
+            return image
+
+        daily = self.data["daily"]
+
+        day_index = 1  # skip today (0), show tomorrow
+
+        date_str = daily["time"][day_index]
+        day_label = datetime.date.fromisoformat(date_str).strftime("%a").title()
+
+        temp_max_f = int(c_to_f(daily["temperature_2m_max"][day_index]))
+        temp_min_f = int(c_to_f(daily["temperature_2m_min"][day_index]))
+        precip = daily["precipitation_probability_max"][day_index]
+
+        draw.text((1, 10), day_label, font=font, fill=TIME_DATE_COLOR)
+
+        precip_icon = Image.open(
+            Path.cwd()
+            / "icons"
+            / "weather"
+            / "precip"
+            / f"{int(round(precip / 100 * 5)) * 20}.png"
+        )
+        image.paste(precip_icon, (0, 18))
+
+        draw.text((7, 19), f"{precip:>2}%", font=font, fill=PRECIP_COLOR)
+
+        wmo_code = daily["weather_code"][day_index]
+        icon_name = get_icon(wmo_code, is_day=True)
+        if icon_name is not None:
+            icon = Image.open(
+                Path.cwd() / "icons" / "weather" / "16px" / f"{icon_name}.png"
+            )
+            image.paste(icon, (23, 10))
+
+        draw.line((42, 13, 44, 11, 46, 13), fill=HIGH_COLOR)
+        draw.text((49, 10), f"{temp_max_f}°", font=font, fill=HIGH_COLOR)
+        draw.line((42, 21, 44, 23, 46, 21), fill=LOW_COLOR)
+        draw.text((49, 19), f"{temp_min_f}°", font=font, fill=LOW_COLOR)
+
+        return image
