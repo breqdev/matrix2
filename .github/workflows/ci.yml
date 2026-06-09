@@ -1,4 +1,4 @@
-name: lint and type checks
+name: ci
 on: [push]
 
 jobs:
