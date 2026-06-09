@@ -1,4 +1,4 @@
-name: Pre-commit checks
+name: lint and type checks
 on: [push]
 
 jobs:
@@ -7,3 +7,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: j178/prek-action@v2
+  type-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+      - name: Type check
+        run: uv run --frozen pyrefly check

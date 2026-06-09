@@ -114,7 +114,7 @@ class App:
                     logger.exception("Exception when drawing image: %s", e)
                     image = get_image_no_connection(self.panel)
 
-                if image != prev_image:  # Only send the image if it's different
+                if image != prev_image and image is not None:  # Only send the image if it's different
                     self.ui.send_frame(image)
                     if self.hardware is not None:
                         self.hardware.matrix.SetImage(image.convert("RGB"))

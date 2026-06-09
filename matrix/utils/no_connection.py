@@ -1,4 +1,5 @@
 import datetime
+from typing import assert_never
 
 from PIL import Image, ImageDraw
 
@@ -33,3 +34,5 @@ def get_image_no_connection(panel: PanelSize) -> Image.Image:
             draw.text((7, 24), text="no connection", font=smallfont, fill="#888888")
 
             return image
+        case _:
+            assert_never(panel)

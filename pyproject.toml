@@ -17,7 +17,11 @@ dependencies = [
     "spotipy==2.19.0",
     "python-dotenv==1.0.1",
 ]
-
+[project.optional-dependencies]
+dev = [
+    "pyrefly==1.0.0",
+    "ruff==0.15.16",
+]
 [build-system]
 requires = ["setuptools >= 61.0"]
 build-backend = "setuptools.build_meta"
