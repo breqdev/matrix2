@@ -306,7 +306,7 @@ class MBTA(Screen[MbtaData]):
             pixel_x = 2
             for prediction in line_predictions:
                 time_str = str(int(prediction.eta / timedelta(minutes=1)))
-                length = draw.textlength(time_str, font=font)
+                length = int(draw.textlength(time_str, font=font))
                 if pixel_x + length > 64 - (draw.textlength("min", font=font) + X_MARGIN):
                     break
 
@@ -326,9 +326,9 @@ class MBTA(Screen[MbtaData]):
                 fill="#888888",
             )
 
-        if alert:
+        if alert and alert_line:
             alert_text = alert + "  "
-            textlength = draw.textlength(alert_text, font=font)
+            textlength = int(draw.textlength(alert_text, font=font))
 
             image.paste(Image.open("icons/alert.png"), (1, 46))
 
@@ -351,7 +351,7 @@ class MBTA(Screen[MbtaData]):
     def get_image_64x32(self):
         image = Image.new("RGB", (64, 32))
         draw = ImageDraw.Draw(image)
-        predictions, alert, alert_line = self.data
+        predictions, _alert, _alert_line = self.data
 
         if len(predictions) == 0:
             image.paste(Image.open("icons/train_sleeping.png"), (16, 0))
