@@ -8,3 +8,4 @@ venv
 matrix.toml
 node_modules/
 dist/
+matter/.matter/
