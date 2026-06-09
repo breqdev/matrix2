@@ -134,13 +134,13 @@ def main():
     check_log_file_readable()
 
     print("\nRestarting datadog-agent...")
-    run("systemctl restart datadog-agent")
+    run("systemctl restart datadog-agent", shell=True)
 
     print("\nRunning configcheck...")
-    run("datadog-agent configcheck")
+    run("datadog-agent configcheck", shell=True)
 
     print("\nLogs Agent status...")
-    run("datadog-agent status | grep -A 20 'Logs Agent'")
+    run("datadog-agent status | grep -A 20 'Logs Agent'", shell=True)
 
 
 if __name__ == "__main__":
