@@ -1,22 +1,21 @@
 import io
+import subprocess
 
 from PIL import Image, ImageDraw
+from cairosvg import svg2png
 
 from matrix.resources.fonts import font
 from matrix.screens.screen import Screen
-
 
 class MakeAFish(Screen[tuple[Image.Image, Image.Image]]):
     CACHE_TTL = 5
 
     def fetch_data(self):
-        data = self.fetch_url(
-            "http://makea.fish/fishimg.php?s=11&t=x6362x&f=11",
-        ).content
+        svg = subprocess.run(["bun", "scripts/amy_fish.js"], capture_output=True, text=True).stdout
+        data = svg2png(bytestring=svg.encode('utf-8'))
         fish = Image.open(io.BytesIO(data))
 
-        fish_64x64 = fish.copy()
-        fish_64x64.thumbnail((64, 64))
+        fish_64x64 = fish.copy().resize((64, 48))
 
         fish_64x32 = fish.copy()
         fish_64x32.thumbnail((64, 32))
@@ -33,12 +32,12 @@ class MakeAFish(Screen[tuple[Image.Image, Image.Image]]):
         image = self.size.value.image()
         draw = ImageDraw.Draw(image)
 
-        draw.rectangle((0, 0, 64, 64), fill="#0000FF")
+        draw.rectangle((0, 0, 64, 64), fill="#0000F4")
 
         image.paste(self.data[0])
 
-        draw.text((20, 48), text="11:11", font=font, fill="#ffffff")
-        draw.text((5, 56), text="make a fish", font=font, fill="#ffffff")
+        draw.text((5, 48), text="11:11 make", font=font, fill="#ffffff")
+        draw.text((5, 56), text="an Amy fish", font=font, fill="#ffffff")
 
         return image
 

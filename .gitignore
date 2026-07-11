@@ -9,3 +9,4 @@ matrix.toml
 node_modules/
 dist/
 matter/.matter/
+.DS_Store
