@@ -1,18 +1,19 @@
 import io
 import subprocess
 
-from PIL import Image, ImageDraw
 from cairosvg import svg2png
+from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font
 from matrix.screens.screen import Screen
+
 
 class MakeAFish(Screen[tuple[Image.Image, Image.Image]]):
     CACHE_TTL = 5
 
     def fetch_data(self):
         svg = subprocess.run(["bun", "scripts/amy_fish.js"], capture_output=True, text=True).stdout
-        data = svg2png(bytestring=svg.encode('utf-8'))
+        data = svg2png(bytestring=svg.encode("utf-8"))
         fish = Image.open(io.BytesIO(data))
 
         fish_64x64 = fish.copy().resize((64, 48))
