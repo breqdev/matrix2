@@ -21,7 +21,9 @@ def is_eleven_eleven() -> bool:
 class Main(BaseMode):
     screen_refresh_rate: float = 5
 
-    def __init__(self, change_mode: ChangeMode, size: PanelSize, screens: list[Screen[Any]]) -> None:
+    def __init__(
+        self, change_mode: ChangeMode, size: PanelSize, screens: list[Screen[Any]], config: dict[str, Any]
+    ) -> None:
         super().__init__(change_mode, size)
 
         self.screens = screens
@@ -29,6 +31,8 @@ class Main(BaseMode):
 
         self.fish: MakeAFish | None = None
         self.next_refresh_time = time.time() + self.screen_refresh_rate
+
+        self.config = config
 
     def handle_encoder_clockwise(self):
         self.screen_index += 1
@@ -44,7 +48,7 @@ class Main(BaseMode):
     def get_image(self):
         if is_eleven_eleven():
             if self.fish is None:
-                self.fish = MakeAFish({}, self.size)
+                self.fish = MakeAFish(self.config["screens"].get("fish") or {"provider": "makeafish"}, self.size)
             return self.fish.get_image()
         elif self.fish:
             self.fish.cancel()

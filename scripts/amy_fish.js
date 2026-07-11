@@ -1,3 +1,5 @@
+// Fish generation lifted from https://strudel.org.uk/fish/
+
 function Fish(id, w, h) {
   this.aspectratio = w / h;
   this.id = id;
