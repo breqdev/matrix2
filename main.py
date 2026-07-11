@@ -31,6 +31,8 @@ if not args.simulate:
     handler.setFormatter(VerboseJSONFormatter())
     # Add our handler to the root logger
     logging.root.addHandler(handler)
+else:
+    logging.getLogger("datadog.dogstatsd").setLevel(logging.FATAL)
 
 app = App()
 app.run()
