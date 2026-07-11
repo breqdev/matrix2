@@ -18,10 +18,9 @@ class MakeAFish(Screen[tuple[Image.Image, Image.Image]]):
                     ["/home/pi/.bun/bin/bun", "scripts/amy_fish.js"], capture_output=True, text=True
                 ).stdout
                 data = svg2png(bytestring=svg.encode("utf-8"))
-                fish = Image.open(io.BytesIO(data))
 
-                fish_64x48 = fish.resize((64, 48))
-                fish_64x32 = fish.resize((64, 32))
+                fish_64x48 = Image.open(io.BytesIO(data))
+                fish_64x32 = fish_64x48.resize((64, 32))
 
                 return fish_64x48, fish_64x32
             case "makeafish":

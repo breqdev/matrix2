@@ -1,4 +1,5 @@
 // Fish generation lifted from https://strudel.org.uk/fish/
+// Modified to use artificial canvas for Node/Bun compatibility
 
 function Fish(id, w, h) {
   this.aspectratio = w / h;
@@ -624,6 +625,6 @@ SVG.prototype.draw = function () {
 };
 
 var fish;
-fish = new Fish("fish", 64, 64);
+fish = new Fish("fish", 64, 48);
 fish.update();
 console.log(fish.svg);
