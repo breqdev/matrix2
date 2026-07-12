@@ -97,7 +97,3 @@ class Screen(ABC, Drawable, Generic[T]):
         """Get the configuration for this specific screen type."""
         config = get_config()
         return config.screens.get(self.__class__.__name__.lower(), {})
-
-    def get_screen_config_value(self, key: str, default=None):
-        """Get a specific configuration value for this screen."""
-        return self.get_screen_config().get(key, default)
