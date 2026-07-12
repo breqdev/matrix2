@@ -1,0 +1,283 @@
+{
+  "$defs": {
+    "BlueBikesConfig": {
+      "properties": {
+        "stations": {
+          "default": [
+            {
+              "id": "S32022",
+              "label": "Cedar St"
+            },
+            {
+              "id": "S32013",
+              "label": "Trum Field"
+            },
+            {
+              "id": "S32040",
+              "label": "Lowell St"
+            }
+          ],
+          "items": {
+            "$ref": "#/$defs/BlueBikesStation"
+          },
+          "title": "Stations",
+          "type": "array"
+        }
+      },
+      "title": "BlueBikesConfig",
+      "type": "object"
+    },
+    "BlueBikesStation": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "BlueBikesStation",
+      "type": "object"
+    },
+    "FishConfig": {
+      "properties": {
+        "provider": {
+          "default": "makeafish",
+          "enum": [
+            "makeafish",
+            "amy"
+          ],
+          "title": "Provider",
+          "type": "string"
+        }
+      },
+      "title": "FishConfig",
+      "type": "object"
+    },
+    "ForecastConfig": {
+      "properties": {
+        "latitude": {
+          "title": "Latitude",
+          "type": "number"
+        },
+        "longitude": {
+          "title": "Longitude",
+          "type": "number"
+        }
+      },
+      "required": [
+        "latitude",
+        "longitude"
+      ],
+      "title": "ForecastConfig",
+      "type": "object"
+    },
+    "MbtaConfig": {
+      "properties": {
+        "api_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Api Key"
+        },
+        "lines": {
+          "items": {
+            "$ref": "#/$defs/MbtaLine"
+          },
+          "title": "Lines",
+          "type": "array"
+        }
+      },
+      "title": "MbtaConfig",
+      "type": "object"
+    },
+    "MbtaLine": {
+      "properties": {
+        "symbol": {
+          "title": "Symbol",
+          "type": "string"
+        },
+        "headsign": {
+          "title": "Headsign",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "color": {
+          "title": "Color",
+          "type": "string"
+        },
+        "stop_id": {
+          "title": "Stop Id",
+          "type": "string"
+        },
+        "route_id": {
+          "title": "Route Id",
+          "type": "string"
+        },
+        "direction_id": {
+          "title": "Direction Id",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "symbol",
+        "headsign",
+        "label",
+        "color",
+        "stop_id",
+        "route_id",
+        "direction_id"
+      ],
+      "title": "MbtaLine",
+      "type": "object"
+    },
+    "OctoprintConfig": {
+      "properties": {
+        "api_key": {
+          "title": "Api Key",
+          "type": "string"
+        },
+        "endpoint": {
+          "title": "Endpoint",
+          "type": "string"
+        },
+        "printer_name": {
+          "title": "Printer Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "api_key",
+        "endpoint",
+        "printer_name"
+      ],
+      "title": "OctoprintConfig",
+      "type": "object"
+    },
+    "PanelConfig": {
+      "properties": {
+        "size": {
+          "default": [
+            64,
+            64
+          ],
+          "enum": [
+            "64x64",
+            "64x32"
+          ],
+          "type": "string"
+        },
+        "brightness": {
+          "default": 60,
+          "title": "Brightness",
+          "type": "integer"
+        },
+        "simulation": {
+          "default": true,
+          "title": "Simulation",
+          "type": "boolean"
+        }
+      },
+      "title": "PanelConfig",
+      "type": "object"
+    },
+    "ScreensConfig": {
+      "properties": {
+        "fish": {
+          "$ref": "#/$defs/FishConfig"
+        },
+        "bluebikes": {
+          "$ref": "#/$defs/BlueBikesConfig"
+        },
+        "mbta": {
+          "$ref": "#/$defs/MbtaConfig"
+        },
+        "spotify": {
+          "$ref": "#/$defs/SpotifyConfig"
+        },
+        "weather": {
+          "$ref": "#/$defs/WeatherConfig"
+        },
+        "forecast": {
+          "$ref": "#/$defs/ForecastConfig"
+        },
+        "octoprint": {
+          "$ref": "#/$defs/OctoprintConfig"
+        },
+        "matter": {
+          "default": false,
+          "title": "Matter",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "weather",
+        "forecast",
+        "octoprint"
+      ],
+      "title": "ScreensConfig",
+      "type": "object"
+    },
+    "SpotifyConfig": {
+      "properties": {
+        "users": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Users",
+          "type": "array"
+        }
+      },
+      "title": "SpotifyConfig",
+      "type": "object"
+    },
+    "WeatherConfig": {
+      "properties": {
+        "latitude": {
+          "title": "Latitude",
+          "type": "number"
+        },
+        "longitude": {
+          "title": "Longitude",
+          "type": "number"
+        }
+      },
+      "required": [
+        "latitude",
+        "longitude"
+      ],
+      "title": "WeatherConfig",
+      "type": "object"
+    }
+  },
+  "description": "Typed configuration for the matrix application.",
+  "properties": {
+    "panel": {
+      "$ref": "#/$defs/PanelConfig"
+    },
+    "screens": {
+      "$ref": "#/$defs/ScreensConfig"
+    }
+  },
+  "required": [
+    "panel",
+    "screens"
+  ],
+  "title": "Config",
+  "type": "object"
+}

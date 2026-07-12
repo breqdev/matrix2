@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Annotated, Literal, NamedTuple, Self
 
 from PIL import Image
-from pydantic import BaseModel, BeforeValidator, Field
+from pydantic import BaseModel, BeforeValidator, Field, WithJsonSchema
 
 
 class Size(NamedTuple):
@@ -28,7 +28,11 @@ class PanelSize(Enum):
 
 
 class PanelConfig(BaseModel):
-    size: Annotated[PanelSize, BeforeValidator(lambda v: PanelSize.from_str(v))] = PanelSize.PANEL_64x64
+    size: Annotated[
+        PanelSize,
+        BeforeValidator(lambda v: PanelSize.from_str(v)),
+        WithJsonSchema({"type": "string", "enum": ["64x64", "64x32"]}),
+    ] = PanelSize.PANEL_64x64
     brightness: int = 60
     simulation: bool = True
 

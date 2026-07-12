@@ -14,3 +14,12 @@ repos:
     rev: v0.51.0
     hooks:
       - id: oxfmt
+  - repo: local
+    hooks:
+      - id: regenerate-matrix-schema
+        name: Regenerate matrix schema
+        entry: uv run scripts/generate_config_schema.py
+        language: python
+        additional_dependencies: ["uv"]
+        files: matrix/utils/config.py
+        pass_filenames: false
