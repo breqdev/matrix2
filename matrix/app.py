@@ -30,8 +30,6 @@ class App:
     def __init__(self) -> None:
         self.config = get_config()
 
-        self.panel = self.config.panel.size
-
         self.matter = None
         if self.config.is_simulated:
             self.hardware = None
@@ -49,14 +47,14 @@ class App:
             # Octoprint(),
         ]
         self.modes: dict[ModeType, BaseMode] = {
-            ModeType.MAIN: Main(self.change_mode, self.panel, screens, self.config),
-            ModeType.MENU: Menu(self.change_mode, self.panel),
-            ModeType.SCREENS: Screens(self.change_mode, self.panel, screens),
-            ModeType.OFF: Off(self.change_mode, self.panel),
+            ModeType.MAIN: Main(self.change_mode, screens, self.config),
+            ModeType.MENU: Menu(self.change_mode),
+            ModeType.SCREENS: Screens(self.change_mode, screens),
+            ModeType.OFF: Off(self.change_mode),
         }
 
         if self.hardware is not None:
-            brightness = Brightness(self.change_mode, self.panel, hardware=self.hardware)
+            brightness = Brightness(self.change_mode, hardware=self.hardware)
             self.modes[ModeType.BRIGHTNESS] = brightness
             if not self.config.is_simulated and self.config.screens.matter:
                 self.matter = Matter(brightness)
@@ -66,7 +64,7 @@ class App:
             self.hardware.button.when_pressed = self.handle_press
 
         if sys.platform == "linux":
-            self.modes[ModeType.NETWORK] = Network(self.change_mode, self.panel)
+            self.modes[ModeType.NETWORK] = Network(self.change_mode)
 
         self.active_mode: ModeType = ModeType.MAIN
 
@@ -105,7 +103,7 @@ class App:
                     image = mode.get_image()
                 except Exception as e:
                     logger.exception("Exception when drawing image: %s", e)
-                    image = get_image_no_connection(self.panel)
+                    image = get_image_no_connection()
 
                 if image != prev_image and image is not None:  # Only send the image if it's different
                     self.ui.send_frame(image)

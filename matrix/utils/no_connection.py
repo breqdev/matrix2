@@ -4,10 +4,12 @@ from typing import assert_never
 from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import bigfont, font, smallfont
+from matrix.utils.config import get_panel_size
 from matrix.utils.panels import PanelSize
 
 
-def get_image_no_connection(panel: PanelSize) -> Image.Image:
+def get_image_no_connection() -> Image.Image:
+    panel = get_panel_size()
     match panel:
         case PanelSize.PANEL_64x64:
             image = panel.value.image()

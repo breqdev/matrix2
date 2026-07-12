@@ -8,7 +8,6 @@ from typing import Any
 from matrix.modes.mode import BaseMode, ChangeMode, ModeType
 from matrix.screens.fish import MakeAFish
 from matrix.screens.screen import Screen
-from matrix.utils.panels import PanelSize
 
 logger = logging.getLogger(__name__)
 
@@ -21,10 +20,18 @@ def is_eleven_eleven() -> bool:
 class Main(BaseMode):
     screen_refresh_rate: float = 5
 
+<<<<<<< HEAD
     def __init__(
         self, change_mode: ChangeMode, size: PanelSize, screens: list[Screen[Any]], config: dict[str, Any]
     ) -> None:
         super().__init__(change_mode, size)
+||||||| parent of b566ba9 (fix modes as well)
+    def __init__(self, change_mode: ChangeMode, size: PanelSize, screens: list[Screen[Any]]) -> None:
+        super().__init__(change_mode, size)
+=======
+    def __init__(self, change_mode: ChangeMode, screens: list[Screen[Any]]) -> None:
+        super().__init__(change_mode)
+>>>>>>> b566ba9 (fix modes as well)
 
         self.screens = screens
         self.screen_index: int = 0
@@ -48,13 +55,7 @@ class Main(BaseMode):
     def get_image(self):
         if is_eleven_eleven():
             if self.fish is None:
-<<<<<<< HEAD
-                self.fish = MakeAFish(self.config["screens"].get("fish") or {"provider": "makeafish"}, self.size)
-||||||| parent of 0999feb (alright no more llm)
-                self.fish = MakeAFish({}, self.size)
-=======
                 self.fish = MakeAFish()
->>>>>>> 0999feb (alright no more llm)
             return self.fish.get_image()
         elif self.fish:
             self.fish.cancel()

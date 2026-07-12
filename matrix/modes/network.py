@@ -6,13 +6,13 @@ from PIL import Image, ImageDraw
 
 from matrix.modes.mode import BaseMode, ChangeMode, ModeType
 from matrix.resources.fonts import font
+from matrix.utils.config import get_base_image
 from matrix.utils.line_wrap import line_wrap
-from matrix.utils.panels import PanelSize
 
 
 class Network(BaseMode):
-    def __init__(self, change_mode: ChangeMode, size: PanelSize) -> None:
-        super().__init__(change_mode, size)
+    def __init__(self, change_mode: ChangeMode) -> None:
+        super().__init__(change_mode)
         self.network_info = get_network_info()
 
         self.show_qr_code = False
@@ -27,7 +27,7 @@ class Network(BaseMode):
         self.show_qr_code = not self.show_qr_code
 
     def get_image_64x64(self) -> Image.Image:
-        image = self.size.value.image()
+        image = get_base_image()
         draw = ImageDraw.Draw(image)
 
         if self.show_qr_code:
@@ -70,7 +70,7 @@ class Network(BaseMode):
         return image
 
     def get_image_64x32(self) -> Image.Image:
-        image = self.size.value.image()
+        image = get_base_image()
         draw = ImageDraw.Draw(image)
 
         draw.text((2, 1), text="Network Info", font=font, fill="#ffffff")

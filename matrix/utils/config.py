@@ -1,11 +1,30 @@
 import sys
 import tomllib
+from enum import Enum
 from pathlib import Path
-from typing import Annotated, Self
+from typing import Annotated, NamedTuple, Self
 
+from PIL import Image
 from pydantic import BaseModel, BeforeValidator, Field
 
-from matrix.utils.panels import PanelSize
+
+class Size(NamedTuple):
+    cols: int
+    rows: int
+
+    def image(self) -> Image.Image:
+        """Create a new RGB image with the correct size for this panel."""
+        return Image.new("RGB", (self.cols, self.rows))
+
+
+class PanelSize(Enum):
+    PANEL_64x64 = Size(64, 64)
+    PANEL_64x32 = Size(64, 32)
+
+    @classmethod
+    def from_str(cls, s: str) -> "PanelSize":
+        """Create a PanelSize from a string name (e.g. "64x64" -> PanelSize.PANEL_64x64)."""
+        return cls["PANEL_" + s]
 
 
 class PanelConfig(BaseModel):
@@ -119,3 +138,13 @@ def get_config(simulate_arg: bool | None = None) -> Config:
     if simulate_arg is not None:
         _config_instance._simulate = simulate_arg
     return _config_instance
+
+
+def get_panel_size() -> PanelSize:
+    """Get the panel size from the global configuration."""
+    return get_config().panel.size
+
+
+def get_base_image() -> Image.Image:
+    """Get the base image for the panel size."""
+    return get_panel_size().value.image()

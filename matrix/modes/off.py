@@ -1,4 +1,5 @@
 from matrix.modes.mode import BaseMode, ModeType
+from matrix.utils.config import get_base_image
 
 
 class Off(BaseMode):
@@ -6,4 +7,4 @@ class Off(BaseMode):
         self.change_mode(ModeType.MAIN)
 
     def get_image(self):
-        return self.size.value.image()
+        return get_base_image()
