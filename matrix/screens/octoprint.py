@@ -5,18 +5,17 @@ from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font, smallfont
 from matrix.screens.screen import Screen
-from matrix.utils.panels import PanelSize
 
 
 class Octoprint(Screen[dict]):
     CACHE_TTL = 5
 
-    def __init__(self, size: PanelSize):
+    def __init__(self):
         self.api_key = self.config["api_key"]
         self.endpoint = self.config["endpoint"]
         self.printer_name = self.config["printer_name"]
 
-        super().__init__(size)
+        super().__init__()
 
     def _get(self, path: str):
         return self.session.get(

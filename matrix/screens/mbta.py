@@ -9,7 +9,6 @@ from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font, smallfont
 from matrix.screens.screen import Screen
-from matrix.utils.panels import PanelSize
 
 PredictionType: TypeAlias = Literal["prediction", "schedule"]
 
@@ -220,7 +219,7 @@ def darken_hex(color: str):
 class MBTA(Screen[MbtaData]):
     CACHE_TTL = 30
 
-    def __init__(self, size: PanelSize):
+    def __init__(self):
         self.scroll_idx = 0
 
         self.lines = []
@@ -237,7 +236,7 @@ class MBTA(Screen[MbtaData]):
                 )
             )
 
-        super().__init__(size)
+        super().__init__()
 
     def fetch_data(self):
         api_key = self.config["api_key"]

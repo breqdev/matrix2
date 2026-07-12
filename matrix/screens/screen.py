@@ -9,7 +9,7 @@ from datadog.dogstatsd.base import statsd
 from requests.adapters import HTTPAdapter, Retry
 
 from matrix.utils.config import get_config
-from matrix.utils.panels import Drawable, PanelSize
+from matrix.utils.panels import Drawable
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +19,8 @@ T = TypeVar("T")
 
 
 class Screen(ABC, Drawable, Generic[T]):
-    def __init__(self, size: PanelSize) -> None:
-        self.size = size
+    def __init__(self) -> None:
+        self.size = get_config().panel_size
         self.config = self.get_screen_config()
         self.cached_data: T
 
