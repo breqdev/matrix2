@@ -5,8 +5,8 @@ from PIL import Image
 
 
 class Size(NamedTuple):
-    rows: int
     cols: int
+    rows: int
 
     def image(self) -> Image.Image:
         """Create a new RGB image with the correct size for this panel."""
@@ -15,7 +15,12 @@ class Size(NamedTuple):
 
 class PanelSize(Enum):
     PANEL_64x64 = Size(64, 64)
-    PANEL_64x32 = Size(32, 64)
+    PANEL_64x32 = Size(64, 32)
+
+    @classmethod
+    def from_str(cls, s: str) -> "PanelSize":
+        """Create a PanelSize from a string name (e.g. "64x64" -> PanelSize.PANEL_64x64)."""
+        return cls["PANEL_" + s]
 
 
 class Drawable:

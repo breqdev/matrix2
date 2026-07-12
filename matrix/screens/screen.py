@@ -20,8 +20,7 @@ T = TypeVar("T")
 
 class Screen(ABC, Drawable, Generic[T]):
     def __init__(self) -> None:
-        self.size = get_config().panel_size
-        self.config = self.get_screen_config()
+        self.size = get_config().panel.size
         self.cached_data: T
 
         retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
@@ -92,8 +91,3 @@ class Screen(ABC, Drawable, Generic[T]):
         scrolling alert messages.
         """
         return None
-
-    def get_screen_config(self) -> dict:
-        """Get the configuration for this specific screen type."""
-        config = get_config()
-        return config.screens.get(self.__class__.__name__.lower(), {})

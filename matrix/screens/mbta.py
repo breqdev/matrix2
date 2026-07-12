@@ -9,29 +9,19 @@ from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font, smallfont
 from matrix.screens.screen import Screen
+from matrix.utils.config import MbtaLine, get_config
 
 PredictionType: TypeAlias = Literal["prediction", "schedule"]
 
 
 @dataclass
-class Line:
-    symbol: str
-    headsign: str
-    label: str
-    color: str
-    stop_id: str
-    route_id: str
-    direction_id: int
-
-
-@dataclass
 class Prediction:
-    line: Line
+    line: MbtaLine
     eta: timedelta
     type: PredictionType
 
 
-def get_predictions(session: requests.Session, line: Line, api_key: str) -> list[Prediction]:
+def get_predictions(session: requests.Session, line: MbtaLine, api_key: str) -> list[Prediction]:
     predictions_response = session.get(
         "https://api-v3.mbta.com/predictions",
         params={
@@ -151,7 +141,7 @@ def get_predictions(session: requests.Session, line: Line, api_key: str) -> list
     return results
 
 
-def get_alert(session: requests.Session, line: Line, api_key: str) -> str | None:
+def get_alert(session: requests.Session, line: MbtaLine, api_key: str) -> str | None:
     response = session.get(
         "https://api-v3.mbta.com/alerts",
         params={
@@ -207,7 +197,7 @@ def get_alert(session: requests.Session, line: Line, api_key: str) -> str | None
     return mbta_text
 
 
-MbtaData: TypeAlias = tuple[list[Prediction], str | None, Line | None]
+MbtaData: TypeAlias = tuple[list[Prediction], str | None, MbtaLine | None]
 
 
 def darken_hex(color: str):
@@ -221,32 +211,21 @@ class MBTA(Screen[MbtaData]):
 
     def __init__(self):
         self.scroll_idx = 0
-
-        self.lines = []
-        for item in self.config["lines"]:
-            self.lines.append(
-                Line(
-                    symbol=item["symbol"],
-                    headsign=item["headsign"],
-                    label=item["label"],
-                    color=item["color"],
-                    stop_id=item["stop_id"],
-                    route_id=item["route_id"],
-                    direction_id=item["direction_id"],
-                )
-            )
+        self.config = get_config().screens.mbta
 
         super().__init__()
 
     def fetch_data(self):
-        api_key = self.config["api_key"]
+        api_key = self.config.api_key
+        if not api_key:
+            return self.fallback_data()
 
         with ThreadPoolExecutor() as tpe:
             predictions = [
                 prediction
                 for line_predictions in tpe.map(
                     lambda line: get_predictions(self.session, line, api_key),
-                    self.lines,
+                    self.config.lines,
                 )
                 for prediction in line_predictions
             ]
@@ -254,7 +233,7 @@ class MBTA(Screen[MbtaData]):
 
         alert = None
         alert_line = None
-        for line in self.lines[:2]:
+        for line in self.config.lines[:2]:
             alert = get_alert(self.session, line, api_key)
             if alert is not None:
                 alert_line = line
@@ -285,7 +264,7 @@ class MBTA(Screen[MbtaData]):
 
         lines_displayed = 2 if alert else 3
 
-        for row, line in enumerate(self.lines[:lines_displayed]):
+        for row, line in enumerate(self.config.lines[:lines_displayed]):
             length = draw.textlength(line.symbol, font=smallfont)
 
             draw.rectangle(
@@ -361,7 +340,7 @@ class MBTA(Screen[MbtaData]):
 
         lines_displayed = 2
 
-        for row, line in enumerate(self.lines[:lines_displayed]):
+        for row, line in enumerate(self.config.lines[:lines_displayed]):
             length = draw.textlength(line.symbol, font=font)
 
             draw.rectangle(

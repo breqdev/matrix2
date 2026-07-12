@@ -30,7 +30,7 @@ class App:
     def __init__(self) -> None:
         self.config = get_config()
 
-        self.panel = self.config.panel_size
+        self.panel = self.config.panel.size
 
         self.matter = None
         if self.config.is_simulated:
@@ -38,7 +38,7 @@ class App:
         else:
             from matrix.utils.hardware import Hardware
 
-            self.hardware = Hardware(self.panel, self.config.panel_brightness)
+            self.hardware = Hardware()
 
         screens: list[Screen[Any]] = [
             MBTA(),
@@ -58,7 +58,7 @@ class App:
         if self.hardware is not None:
             brightness = Brightness(self.change_mode, self.panel, hardware=self.hardware)
             self.modes[ModeType.BRIGHTNESS] = brightness
-            if not self.config.is_simulated and self.config.screens.get("matter"):
+            if not self.config.is_simulated and self.config.screens.matter:
                 self.matter = Matter(brightness)
                 self.matter.start()
             self.hardware.dial.when_rotated_clockwise = self.handle_rotation_clockwise

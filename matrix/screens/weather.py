@@ -6,6 +6,7 @@ from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import bigfont, font
 from matrix.screens.screen import Screen
+from matrix.utils.config import get_config
 
 TIME_DATE_COLOR = "#aaaaaa"
 HIGH_COLOR = "#ffa024"
@@ -67,9 +68,13 @@ def get_icon(wmo_code: int, is_day: bool) -> str | None:
 class Weather(Screen[WeatherData | None]):
     CACHE_TTL = 600
 
+    def __init__(self) -> None:
+        self.config = get_config().screens.weather
+        super().__init__()
+
     def fetch_data(self):
-        lat = self.config["latitude"]
-        lon = self.config["longitude"]
+        lat = self.config.latitude
+        lon = self.config.longitude
 
         url = (
             "https://api.open-meteo.com/v1/forecast"

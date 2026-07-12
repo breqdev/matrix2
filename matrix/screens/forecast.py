@@ -13,6 +13,7 @@ from matrix.screens.weather import (
     c_to_f,
     get_icon,
 )
+from matrix.utils.config import get_config
 
 PRECIP_COLOR = "#58a8f0"
 
@@ -32,9 +33,13 @@ class ForecastData(TypedDict):
 class Forecast(Screen[ForecastData | None]):
     CACHE_TTL = 1200
 
+    def __init__(self) -> None:
+        self.config = get_config().screens.forecast
+        super().__init__()
+
     def fetch_data(self):
-        lat = self.config["latitude"]
-        lon = self.config["longitude"]
+        lat = self.config.latitude
+        lon = self.config.longitude
 
         url = (
             "https://api.open-meteo.com/v1/forecast"

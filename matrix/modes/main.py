@@ -48,7 +48,13 @@ class Main(BaseMode):
     def get_image(self):
         if is_eleven_eleven():
             if self.fish is None:
+<<<<<<< HEAD
                 self.fish = MakeAFish(self.config["screens"].get("fish") or {"provider": "makeafish"}, self.size)
+||||||| parent of 0999feb (alright no more llm)
+                self.fish = MakeAFish({}, self.size)
+=======
+                self.fish = MakeAFish()
+>>>>>>> 0999feb (alright no more llm)
             return self.fish.get_image()
         elif self.fish:
             self.fish.cancel()
