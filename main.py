@@ -11,6 +11,7 @@ load_dotenv()
 
 # project
 from matrix.app import App  # noqa: E402
+from matrix.utils.config import get_config, set_config  # noqa: E402
 
 parser = argparse.ArgumentParser(
     prog="matrix",
@@ -21,6 +22,11 @@ parser.add_argument("--simulate", action="store_true")
 parser.add_argument("--logfile", default="/var/log/matrix.log")
 
 args = parser.parse_args()
+
+# Load the config first, then update with command-line args
+config = get_config()
+config.simulate = args.simulate
+set_config(config)
 
 logging.basicConfig(level=logging.INFO)
 

@@ -18,10 +18,9 @@ from matrix.screens.mbta import MBTA
 from matrix.screens.screen import Screen
 from matrix.screens.spotify import Spotify
 from matrix.screens.weather import Weather
-from matrix.utils.config import parse_config
+from matrix.utils.config_singleton import get_config
 from matrix.utils.matter import Matter
 from matrix.utils.no_connection import get_image_no_connection
-from matrix.utils.panels import PanelSize
 from matrix.web_ui import WebUI
 
 logger = logging.getLogger(__name__)
@@ -29,31 +28,25 @@ logger = logging.getLogger(__name__)
 
 class App:
     def __init__(self) -> None:
-        self.config = parse_config()
+        self.config = get_config()
 
-        match self.config["panel"]["size"]:
-            case "64x64":
-                self.panel = PanelSize.PANEL_64x64
-            case "64x32":
-                self.panel = PanelSize.PANEL_64x32
-            case unknown:
-                raise ValueError(f"Unexpected panel size: {unknown}")
+        self.panel = self.config.panel_size
 
         self.matter = None
-        if self.config["panel"]["simulation"]:
+        if self.config.is_simulated:
             self.hardware = None
         else:
             from matrix.utils.hardware import Hardware
 
-            self.hardware = Hardware(self.panel, self.config["panel"]["brightness"])
+            self.hardware = Hardware(self.panel, self.config.panel_brightness)
 
         screens: list[Screen[Any]] = [
-            MBTA(self.config["screens"]["mbta"], self.panel),
-            Spotify(self.config["screens"]["spotify"], self.panel),
-            Weather(self.config["screens"]["weather"], self.panel),
-            Forecast(self.config["screens"]["forecast"], self.panel),
-            BlueBikes(self.config["screens"]["bluebikes"], self.panel),
-            # Octoprint(self.config["screens"]["octoprint"], self.panel),
+            MBTA(self.config.screens.get("mbta", {}), self.panel),
+            Spotify(self.config.screens.get("spotify", {}), self.panel),
+            Weather(self.config.screens.get("weather", {}), self.panel),
+            Forecast(self.config.screens.get("forecast", {}), self.panel),
+            BlueBikes(self.config.screens.get("bluebikes", {}), self.panel),
+            # Octoprint(self.config.screens.get("octoprint", {}), self.panel),
         ]
         self.modes: dict[ModeType, BaseMode] = {
             ModeType.MAIN: Main(self.change_mode, self.panel, screens, self.config),
@@ -65,7 +58,7 @@ class App:
         if self.hardware is not None:
             brightness = Brightness(self.change_mode, self.panel, hardware=self.hardware)
             self.modes[ModeType.BRIGHTNESS] = brightness
-            if self.config["panel"].get("matter"):
+            if not self.config.is_simulated and self.config.screens.get("matter"):
                 self.matter = Matter(brightness)
                 self.matter.start()
             self.hardware.dial.when_rotated_clockwise = self.handle_rotation_clockwise
@@ -78,7 +71,7 @@ class App:
         self.active_mode: ModeType = ModeType.MAIN
 
         self.ui = WebUI(
-            port=8080 if self.config["panel"]["simulation"] else 80,
+            port=8080 if self.config.is_simulated else 80,
             on_rotation_clockwise=self.handle_rotation_clockwise,
             on_rotation_counterclockwise=self.handle_rotation_counterclockwise,
             on_press=self.handle_press,

@@ -8,6 +8,7 @@ import requests
 from datadog.dogstatsd.base import statsd
 from requests.adapters import HTTPAdapter, Retry
 
+from matrix.utils.config import get_config
 from matrix.utils.panels import Drawable, PanelSize
 
 logger = logging.getLogger(__name__)
@@ -91,3 +92,12 @@ class Screen(ABC, Drawable, Generic[T]):
         scrolling alert messages.
         """
         return None
+
+    def get_screen_config(self) -> dict:
+        """Get the configuration for this specific screen type."""
+        config = get_config()
+        return config.screens.get(self.__class__.__name__.lower(), {})
+
+    def get_screen_config_value(self, key: str, default=None):
+        """Get a specific configuration value for this screen."""
+        return self.get_screen_config().get(key, default)

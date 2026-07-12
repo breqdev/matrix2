@@ -3,6 +3,8 @@ repos:
     rev: v0.15.14
     hooks:
       - id: ruff-check
+        args:
+          - --fix
       - id: ruff-format
   - repo: https://github.com/oxc-project/mirrors-oxlint
     rev: v1.66.0
