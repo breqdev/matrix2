@@ -13,9 +13,8 @@ class BlueBikes(Screen[tuple[Any, Any] | None]):
     CACHE_TTL = 60
 
     def __init__(self) -> None:
-        self.config = get_config().screens.bluebikes
+        self.stations = {sta.id: sta.label for sta in get_config().screens.bluebikes.stations}
         super().__init__()
-        self.stations = {sta.id: sta.label for sta in self.config.stations}
 
     def fetch_data(self):
         with ThreadPoolExecutor() as tpe:

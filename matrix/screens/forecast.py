@@ -33,17 +33,11 @@ class ForecastData(TypedDict):
 class Forecast(Screen[ForecastData | None]):
     CACHE_TTL = 1200
 
-    def __init__(self) -> None:
-        self.config = get_config().screens.forecast
-        super().__init__()
-
     def fetch_data(self):
-        lat = self.config.latitude
-        lon = self.config.longitude
-
+        config = get_config().screens.forecast
         url = (
             "https://api.open-meteo.com/v1/forecast"
-            f"?latitude={lat}&longitude={lon}"
+            f"?latitude={config.latitude}&longitude={config.longitude}"
             "&daily=weather_code,temperature_2m_max,"
             "temperature_2m_min,precipitation_probability_max"
             "&temperature_unit=celsius"

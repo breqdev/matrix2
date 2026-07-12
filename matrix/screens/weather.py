@@ -68,17 +68,11 @@ def get_icon(wmo_code: int, is_day: bool) -> str | None:
 class Weather(Screen[WeatherData | None]):
     CACHE_TTL = 600
 
-    def __init__(self) -> None:
-        self.config = get_config().screens.weather
-        super().__init__()
-
     def fetch_data(self):
-        lat = self.config.latitude
-        lon = self.config.longitude
-
+        config = get_config().screens.weather
         url = (
             "https://api.open-meteo.com/v1/forecast"
-            f"?latitude={lat}&longitude={lon}"
+            f"?latitude={config.latitude}&longitude={config.longitude}"
             "&current=temperature_2m,apparent_temperature,"
             "weather_code,is_day"
             "&daily=temperature_2m_max,temperature_2m_min"

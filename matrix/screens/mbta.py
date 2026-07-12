@@ -211,12 +211,14 @@ class MBTA(Screen[MbtaData]):
 
     def __init__(self):
         self.scroll_idx = 0
-        self.config = get_config().screens.mbta
+        config = get_config().screens.mbta
+        self.api_key = config.api_key
+        self.lines = config.lines
 
         super().__init__()
 
     def fetch_data(self):
-        api_key = self.config.api_key
+        api_key = self.api_key
         if not api_key:
             return self.fallback_data()
 
@@ -225,7 +227,7 @@ class MBTA(Screen[MbtaData]):
                 prediction
                 for line_predictions in tpe.map(
                     lambda line: get_predictions(self.session, line, api_key),
-                    self.config.lines,
+                    self.lines,
                 )
                 for prediction in line_predictions
             ]
@@ -233,7 +235,7 @@ class MBTA(Screen[MbtaData]):
 
         alert = None
         alert_line = None
-        for line in self.config.lines[:2]:
+        for line in self.lines[:2]:
             alert = get_alert(self.session, line, api_key)
             if alert is not None:
                 alert_line = line
@@ -264,7 +266,7 @@ class MBTA(Screen[MbtaData]):
 
         lines_displayed = 2 if alert else 3
 
-        for row, line in enumerate(self.config.lines[:lines_displayed]):
+        for row, line in enumerate(self.lines[:lines_displayed]):
             length = draw.textlength(line.symbol, font=smallfont)
 
             draw.rectangle(
@@ -340,7 +342,7 @@ class MBTA(Screen[MbtaData]):
 
         lines_displayed = 2
 
-        for row, line in enumerate(self.config.lines[:lines_displayed]):
+        for row, line in enumerate(self.lines[:lines_displayed]):
             length = draw.textlength(line.symbol, font=font)
 
             draw.rectangle(

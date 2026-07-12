@@ -15,13 +15,9 @@ class Spotify(Screen[Image.Image | None]):
     has_login = False
     spotify_clients: dict[str, spotipy.Spotify] = {}
 
-    def __init__(self) -> None:
-        self.config = get_config().screens.spotify
-        super().__init__()
-
     def fetch_data(self):
         if not self.has_login:
-            for account in self.config.users:
+            for account in get_config().screens.spotify.users:
                 print(f"Logging in {account}...")
                 auth_manager = SpotifyOAuth(
                     scope=scope,

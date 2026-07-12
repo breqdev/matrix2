@@ -12,10 +12,10 @@ class Octoprint(Screen[dict]):
     CACHE_TTL = 5
 
     def __init__(self):
-        self.config = get_config().screens.octoprint
-        self.api_key = self.config.api_key
-        self.endpoint = self.config.endpoint
-        self.printer_name = self.config.printer_name
+        config = get_config().screens.octoprint
+        self.api_key = config.api_key
+        self.endpoint = config.endpoint
+        self.printer_name = config.printer_name
 
         super().__init__()
 
