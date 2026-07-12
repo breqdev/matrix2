@@ -2,7 +2,7 @@ import sys
 import tomllib
 from enum import Enum
 from pathlib import Path
-from typing import Annotated, NamedTuple, Self
+from typing import Annotated, Literal, NamedTuple, Self
 
 from PIL import Image
 from pydantic import BaseModel, BeforeValidator, Field
@@ -82,7 +82,12 @@ class OctoprintConfig(BaseModel):
     printer_name: str
 
 
+class FishConfig(BaseModel):
+    provider: Literal["makeafish", "amy"] = "makeafish"
+
+
 class ScreensConfig(BaseModel):
+    fish: FishConfig = Field(default_factory=FishConfig)
     bluebikes: BlueBikesConfig = Field(default_factory=BlueBikesConfig)
     mbta: MbtaConfig = Field(default_factory=MbtaConfig)
     spotify: SpotifyConfig = Field(default_factory=SpotifyConfig)

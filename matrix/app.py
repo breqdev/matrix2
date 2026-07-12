@@ -47,7 +47,7 @@ class App:
             # Octoprint(),
         ]
         self.modes: dict[ModeType, BaseMode] = {
-            ModeType.MAIN: Main(self.change_mode, screens, self.config),
+            ModeType.MAIN: Main(self.change_mode, screens),
             ModeType.MENU: Menu(self.change_mode),
             ModeType.SCREENS: Screens(self.change_mode, screens),
             ModeType.OFF: Off(self.change_mode),

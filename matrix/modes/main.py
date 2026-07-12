@@ -20,26 +20,13 @@ def is_eleven_eleven() -> bool:
 class Main(BaseMode):
     screen_refresh_rate: float = 5
 
-<<<<<<< HEAD
-    def __init__(
-        self, change_mode: ChangeMode, size: PanelSize, screens: list[Screen[Any]], config: dict[str, Any]
-    ) -> None:
-        super().__init__(change_mode, size)
-||||||| parent of b566ba9 (fix modes as well)
-    def __init__(self, change_mode: ChangeMode, size: PanelSize, screens: list[Screen[Any]]) -> None:
-        super().__init__(change_mode, size)
-=======
     def __init__(self, change_mode: ChangeMode, screens: list[Screen[Any]]) -> None:
         super().__init__(change_mode)
->>>>>>> b566ba9 (fix modes as well)
-
         self.screens = screens
         self.screen_index: int = 0
 
         self.fish: MakeAFish | None = None
         self.next_refresh_time = time.time() + self.screen_refresh_rate
-
-        self.config = config
 
     def handle_encoder_clockwise(self):
         self.screen_index += 1
