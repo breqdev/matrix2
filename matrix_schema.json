@@ -60,24 +60,6 @@
       "title": "FishConfig",
       "type": "object"
     },
-    "ForecastConfig": {
-      "properties": {
-        "latitude": {
-          "title": "Latitude",
-          "type": "number"
-        },
-        "longitude": {
-          "title": "Longitude",
-          "type": "number"
-        }
-      },
-      "required": [
-        "latitude",
-        "longitude"
-      ],
-      "title": "ForecastConfig",
-      "type": "object"
-    },
     "MbtaConfig": {
       "properties": {
         "api_key": {
@@ -196,6 +178,24 @@
       "title": "PanelConfig",
       "type": "object"
     },
+    "Position": {
+      "properties": {
+        "latitude": {
+          "title": "Latitude",
+          "type": "number"
+        },
+        "longitude": {
+          "title": "Longitude",
+          "type": "number"
+        }
+      },
+      "required": [
+        "latitude",
+        "longitude"
+      ],
+      "title": "Position",
+      "type": "object"
+    },
     "ScreensConfig": {
       "properties": {
         "fish": {
@@ -211,10 +211,10 @@
           "$ref": "#/$defs/SpotifyConfig"
         },
         "weather": {
-          "$ref": "#/$defs/WeatherConfig"
+          "$ref": "#/$defs/Position"
         },
         "forecast": {
-          "$ref": "#/$defs/ForecastConfig"
+          "$ref": "#/$defs/Position"
         },
         "octoprint": {
           "$ref": "#/$defs/OctoprintConfig"
@@ -244,24 +244,6 @@
         }
       },
       "title": "SpotifyConfig",
-      "type": "object"
-    },
-    "WeatherConfig": {
-      "properties": {
-        "latitude": {
-          "title": "Latitude",
-          "type": "number"
-        },
-        "longitude": {
-          "title": "Longitude",
-          "type": "number"
-        }
-      },
-      "required": [
-        "latitude",
-        "longitude"
-      ],
-      "title": "WeatherConfig",
       "type": "object"
     }
   },

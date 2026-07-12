@@ -12,7 +12,7 @@ def get_image_no_connection() -> Image.Image:
     panel = get_panel_size()
     match panel:
         case PanelSize.PANEL_64x64:
-            image = panel.value.image()
+            image = panel.image()
             draw = ImageDraw.Draw(image)
 
             time_str = datetime.datetime.now().strftime("%H:%M")
@@ -25,7 +25,7 @@ def get_image_no_connection() -> Image.Image:
             return image
 
         case PanelSize.PANEL_64x32:
-            image = panel.value.image()
+            image = panel.image()
             draw = ImageDraw.Draw(image)
 
             time_str = datetime.datetime.now().strftime("%H:%M")

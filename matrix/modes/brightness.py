@@ -4,7 +4,7 @@ from PIL import Image, ImageDraw
 
 from matrix.modes.mode import BaseMode, ChangeMode, ModeType
 from matrix.resources.fonts import bigfont, font
-from matrix.utils.config import PanelSize, get_base_image, get_panel_size
+from matrix.utils.config import PanelSize, get_panel_size
 
 if TYPE_CHECKING:
     from matrix.utils.hardware import Hardware
@@ -45,7 +45,7 @@ class Brightness(BaseMode):
             self.brightness -= 10
 
     def get_image(self) -> Image.Image:
-        image = get_base_image()
+        image = get_panel_size().image()
         draw = ImageDraw.Draw(image)
 
         draw.text((2, 1), text=" Brightness ", font=font, fill="#888888")

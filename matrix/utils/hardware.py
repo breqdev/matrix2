@@ -12,8 +12,7 @@ class Hardware:
     def __init__(self):
         config = get_config()
         matrix_options = RGBMatrixOptions()
-        matrix_options.cols = config.panel.size.value.cols
-        matrix_options.rows = config.panel.size.value.rows
+        matrix_options.cols, matrix_options.rows = config.panel.size.value
         matrix_options.drop_privileges = False
         matrix_options.hardware_mapping = "adafruit-hat-pwm"
 

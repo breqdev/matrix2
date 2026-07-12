@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw
 
 from matrix.modes.mode import BaseMode, ChangeMode, ModeType
 from matrix.resources.fonts import font
-from matrix.utils.config import get_base_image
+from matrix.utils.config import get_panel_size
 
 
 @dataclass
@@ -40,7 +40,7 @@ class Menu(BaseMode):
         self.selected_option = (self.selected_option - 1) % len(self.options)
 
     def get_image(self) -> Image.Image:
-        image = get_base_image()
+        image = get_panel_size().image()
         draw = ImageDraw.Draw(image)
 
         draw.text((0, 1), text="  Settings   ", font=font, fill="#ffffff")

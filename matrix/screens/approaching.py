@@ -33,7 +33,7 @@ class Approaching(Screen[None]):
         return None
 
     def get_image(self):
-        image = self.size.value.image()
+        image = self.size.image()
         draw = ImageDraw.Draw(image)
 
         time_str = datetime.datetime.now().strftime("%H:%M")

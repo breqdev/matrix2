@@ -6,7 +6,7 @@ from matrix.modes.mode import BaseMode, ChangeMode, ModeType
 from matrix.resources.colors import BLUE, GREEN, LIGHT_GREY, WHITE
 from matrix.resources.fonts import font
 from matrix.screens.screen import Screen
-from matrix.utils.config import get_base_image
+from matrix.utils.config import get_panel_size
 
 
 class Screens(BaseMode):
@@ -34,7 +34,7 @@ class Screens(BaseMode):
 
     def get_image(self) -> Image.Image:
         # TODO: make sure everything can fit or implement scrolling?
-        image = get_base_image()
+        image = get_panel_size().image()
         draw = ImageDraw.Draw(image)
 
         draw.text((0, 1), text="   Screens   ", font=font, fill=WHITE)

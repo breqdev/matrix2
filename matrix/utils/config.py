@@ -2,29 +2,24 @@ import sys
 import tomllib
 from enum import Enum
 from pathlib import Path
-from typing import Annotated, Literal, NamedTuple, Self
+from typing import Annotated, Literal, Self
 
 from PIL import Image
 from pydantic import BaseModel, BeforeValidator, Field, WithJsonSchema
 
 
-class Size(NamedTuple):
-    cols: int
-    rows: int
-
-    def image(self) -> Image.Image:
-        """Create a new RGB image with the correct size for this panel."""
-        return Image.new("RGB", (self.cols, self.rows))
-
-
 class PanelSize(Enum):
-    PANEL_64x64 = Size(64, 64)
-    PANEL_64x32 = Size(64, 32)
+    PANEL_64x64 = (64, 64)
+    PANEL_64x32 = (64, 32)
 
     @classmethod
     def from_str(cls, s: str) -> "PanelSize":
         """Create a PanelSize from a string name (e.g. "64x64" -> PanelSize.PANEL_64x64)."""
         return cls["PANEL_" + s]
+
+    def image(self) -> Image.Image:
+        """Create a new RGB image with the correct size for this panel."""
+        return Image.new("RGB", self.value)
 
 
 class PanelConfig(BaseModel):
@@ -70,12 +65,7 @@ class SpotifyConfig(BaseModel):
     users: list[str] = Field(default_factory=list)
 
 
-class WeatherConfig(BaseModel):
-    latitude: float
-    longitude: float
-
-
-class ForecastConfig(BaseModel):
+class Position(BaseModel):
     latitude: float
     longitude: float
 
@@ -95,8 +85,8 @@ class ScreensConfig(BaseModel):
     bluebikes: BlueBikesConfig = Field(default_factory=BlueBikesConfig)
     mbta: MbtaConfig = Field(default_factory=MbtaConfig)
     spotify: SpotifyConfig = Field(default_factory=SpotifyConfig)
-    weather: WeatherConfig
-    forecast: ForecastConfig
+    weather: Position
+    forecast: Position
     octoprint: OctoprintConfig
     matter: bool = False
 
@@ -152,8 +142,3 @@ def get_config(simulate_arg: bool | None = None) -> Config:
 def get_panel_size() -> PanelSize:
     """Get the panel size from the global configuration."""
     return get_config().panel.size
-
-
-def get_base_image() -> Image.Image:
-    """Get the base image for the panel size."""
-    return get_panel_size().value.image()

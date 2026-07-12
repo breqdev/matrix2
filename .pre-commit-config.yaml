@@ -18,7 +18,7 @@ repos:
     hooks:
       - id: regenerate-matrix-schema
         name: Regenerate matrix schema
-        entry: uv run scripts/generate_config_schema.py
+        entry: env -u VIRTUAL_ENV uv run scripts/generate_config_schema.py
         language: python
         additional_dependencies: ["uv"]
         files: matrix/utils/config.py
