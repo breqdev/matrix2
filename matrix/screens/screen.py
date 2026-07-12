@@ -19,9 +19,9 @@ T = TypeVar("T")
 
 
 class Screen(ABC, Drawable, Generic[T]):
-    def __init__(self, config: dict, size: PanelSize) -> None:
-        self.config = config
+    def __init__(self, size: PanelSize) -> None:
         self.size = size
+        self.config = self.get_screen_config()
         self.cached_data: T
 
         retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])

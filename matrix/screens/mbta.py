@@ -220,11 +220,11 @@ def darken_hex(color: str):
 class MBTA(Screen[MbtaData]):
     CACHE_TTL = 30
 
-    def __init__(self, config: dict, size: PanelSize):
+    def __init__(self, size: PanelSize):
         self.scroll_idx = 0
 
         self.lines = []
-        for item in config["lines"]:
+        for item in self.config["lines"]:
             self.lines.append(
                 Line(
                     symbol=item["symbol"],
@@ -237,7 +237,7 @@ class MBTA(Screen[MbtaData]):
                 )
             )
 
-        super().__init__(config, size)
+        super().__init__(size)
 
     def fetch_data(self):
         api_key = self.config["api_key"]

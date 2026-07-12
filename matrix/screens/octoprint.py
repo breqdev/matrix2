@@ -11,12 +11,12 @@ from matrix.utils.panels import PanelSize
 class Octoprint(Screen[dict]):
     CACHE_TTL = 5
 
-    def __init__(self, config: dict, size: PanelSize):
-        self.api_key = config["api_key"]
-        self.endpoint = config["endpoint"]
-        self.printer_name = config["printer_name"]
+    def __init__(self, size: PanelSize):
+        self.api_key = self.config["api_key"]
+        self.endpoint = self.config["endpoint"]
+        self.printer_name = self.config["printer_name"]
 
-        super().__init__(config, size)
+        super().__init__(size)
 
     def _get(self, path: str):
         return self.session.get(

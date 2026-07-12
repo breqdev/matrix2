@@ -41,12 +41,12 @@ class App:
             self.hardware = Hardware(self.panel, self.config.panel_brightness)
 
         screens: list[Screen[Any]] = [
-            MBTA(self.config.screens.get("mbta", {}), self.panel),
-            Spotify(self.config.screens.get("spotify", {}), self.panel),
-            Weather(self.config.screens.get("weather", {}), self.panel),
-            Forecast(self.config.screens.get("forecast", {}), self.panel),
-            BlueBikes(self.config.screens.get("bluebikes", {}), self.panel),
-            # Octoprint(self.config.screens.get("octoprint", {}), self.panel),
+            MBTA(self.panel),
+            Spotify(self.panel),
+            Weather(self.panel),
+            Forecast(self.panel),
+            BlueBikes(self.panel),
+            # Octoprint(self.panel),
         ]
         self.modes: dict[ModeType, BaseMode] = {
             ModeType.MAIN: Main(self.change_mode, self.panel, screens, self.config),
