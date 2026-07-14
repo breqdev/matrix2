@@ -60,6 +60,11 @@ longitude = -71.10866518203339
 latitude = 42.39625977790948
 longitude = -71.10866518203339
 
+[screens.fish]
+# Fetches image from http://makea.fish
+provider = "makeafish"
+# Generates image locally
+#provider = "amy"
 
 [screens.octoprint]
 api_key = "<your_api_key>"
