@@ -33,9 +33,7 @@ class Matter:
                 except ValueError:
                     log.error("Unknown command: %s", cmd)
                 else:
-                    self.brightness.brightness = int(
-                        cmd_brightness / 100 * MAX_BRIGHTNESS
-                    )
+                    self.brightness.brightness = int(cmd_brightness / 100 * MAX_BRIGHTNESS)
 
     def send(self, msg: str) -> None:
         broken_socks: set[socket] = set()
