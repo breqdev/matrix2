@@ -52,7 +52,7 @@ class MakeAFish(Screen[tuple[Image.Image, Image.Image]]):
         return blank_64x64, blank_64x32
 
     def get_image_64x64(self):
-        image = self.size.image()
+        image = self.size.empty_image()
         draw = ImageDraw.Draw(image)
 
         draw.rectangle((0, 0, 64, 64), fill="#0000F4")
@@ -70,7 +70,7 @@ class MakeAFish(Screen[tuple[Image.Image, Image.Image]]):
         return image
 
     def get_image_64x32(self):
-        image = self.size.image()
+        image = self.size.empty_image()
         draw = ImageDraw.Draw(image)
 
         draw.rectangle((0, 0, 64, 32), fill="#0000FF")

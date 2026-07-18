@@ -17,7 +17,7 @@ class PanelSize(Enum):
         """Create a PanelSize from a string name (e.g. "64x64" -> PanelSize.PANEL_64x64)."""
         return cls["PANEL_" + s]
 
-    def image(self) -> Image.Image:
+    def empty_image(self) -> Image.Image:
         """Create a new RGB image with the correct size for this panel."""
         return Image.new("RGB", self.value)
 

@@ -34,7 +34,7 @@ class Screens(BaseMode):
 
     def get_image(self) -> Image.Image:
         # TODO: make sure everything can fit or implement scrolling?
-        image = get_panel_size().image()
+        image = get_panel_size().empty_image()
         draw = ImageDraw.Draw(image)
 
         draw.text((0, 1), text="   Screens   ", font=font, fill=WHITE)

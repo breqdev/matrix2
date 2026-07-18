@@ -7,4 +7,4 @@ class Off(BaseMode):
         self.change_mode(ModeType.MAIN)
 
     def get_image(self):
-        return get_panel_size().image()
+        return get_panel_size().empty_image()

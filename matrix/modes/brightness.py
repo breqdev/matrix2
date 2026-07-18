@@ -45,7 +45,7 @@ class Brightness(BaseMode):
             self.brightness -= 10
 
     def get_image(self) -> Image.Image:
-        image = get_panel_size().image()
+        image = get_panel_size().empty_image()
         draw = ImageDraw.Draw(image)
 
         draw.text((2, 1), text=" Brightness ", font=font, fill="#888888")

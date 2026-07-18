@@ -8,7 +8,7 @@ import requests
 from datadog.dogstatsd.base import statsd
 from requests.adapters import HTTPAdapter, Retry
 
-from matrix.utils.config import get_config
+from matrix.utils.config import get_panel_size
 from matrix.utils.panels import Drawable
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ T = TypeVar("T")
 
 class Screen(ABC, Drawable, Generic[T]):
     def __init__(self) -> None:
-        self.size = get_config().panel.size
+        self.size = get_panel_size()
         self.cached_data: T
 
         retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
