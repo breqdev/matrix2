@@ -43,6 +43,12 @@ uv run main.py --simulate
 python3 main.py --simulate
 ```
 
+If you run into an issue with cairo not being found on macos, ensure you have cairo installed and have the DYLD path set correctly:
+```bash
+brew install cairo
+export DYLD_FALLBACK_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_FALLBACK_LIBRARY_PATH"
+```
+
 # Matter pairing
 
 Remove the existing cache with:
