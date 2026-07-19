@@ -75,6 +75,7 @@
           "title": "Api Key"
         },
         "lines": {
+          "default": [],
           "items": {
             "$ref": "#/$defs/MbtaLine"
           },
@@ -199,16 +200,42 @@
     "ScreensConfig": {
       "properties": {
         "fish": {
-          "$ref": "#/$defs/FishConfig"
+          "$ref": "#/$defs/FishConfig",
+          "default": {
+            "provider": "makeafish"
+          }
         },
         "bluebikes": {
-          "$ref": "#/$defs/BlueBikesConfig"
+          "$ref": "#/$defs/BlueBikesConfig",
+          "default": {
+            "stations": [
+              {
+                "id": "S32022",
+                "label": "Cedar St"
+              },
+              {
+                "id": "S32013",
+                "label": "Trum Field"
+              },
+              {
+                "id": "S32040",
+                "label": "Lowell St"
+              }
+            ]
+          }
         },
         "mbta": {
-          "$ref": "#/$defs/MbtaConfig"
+          "$ref": "#/$defs/MbtaConfig",
+          "default": {
+            "api_key": null,
+            "lines": []
+          }
         },
         "spotify": {
-          "$ref": "#/$defs/SpotifyConfig"
+          "$ref": "#/$defs/SpotifyConfig",
+          "default": {
+            "users": []
+          }
         },
         "weather": {
           "$ref": "#/$defs/Position"
@@ -236,6 +263,7 @@
     "SpotifyConfig": {
       "properties": {
         "users": {
+          "default": [],
           "items": {
             "type": "string"
           },

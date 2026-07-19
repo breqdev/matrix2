@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Annotated, Literal, Self
 
 from PIL import Image
-from pydantic import BaseModel, BeforeValidator, Field, WithJsonSchema
+from pydantic import BaseModel, BeforeValidator, WithJsonSchema
 
 
 class PanelSize(Enum):
@@ -58,11 +58,11 @@ class MbtaLine(BaseModel):
 
 class MbtaConfig(BaseModel):
     api_key: str | None = None
-    lines: list[MbtaLine] = Field(default_factory=list)
+    lines: list[MbtaLine] = []
 
 
 class SpotifyConfig(BaseModel):
-    users: list[str] = Field(default_factory=list)
+    users: list[str] = []
 
 
 class Position(BaseModel):
@@ -81,10 +81,10 @@ class FishConfig(BaseModel):
 
 
 class ScreensConfig(BaseModel):
-    fish: FishConfig = Field(default_factory=FishConfig)
-    bluebikes: BlueBikesConfig = Field(default_factory=BlueBikesConfig)
-    mbta: MbtaConfig = Field(default_factory=MbtaConfig)
-    spotify: SpotifyConfig = Field(default_factory=SpotifyConfig)
+    fish: FishConfig = FishConfig()
+    bluebikes: BlueBikesConfig = BlueBikesConfig()
+    mbta: MbtaConfig = MbtaConfig()
+    spotify: SpotifyConfig = SpotifyConfig()
     weather: Position
     forecast: Position
     octoprint: OctoprintConfig
