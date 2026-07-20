@@ -9,30 +9,19 @@ from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font, smallfont
 from matrix.screens.screen import Screen
-from matrix.utils.panels import PanelSize
+from matrix.utils.config import MbtaLine, get_config
 
 PredictionType: TypeAlias = Literal["prediction", "schedule"]
 
 
 @dataclass
-class Line:
-    symbol: str
-    headsign: str
-    label: str
-    color: str
-    stop_id: str
-    route_id: str
-    direction_id: int
-
-
-@dataclass
 class Prediction:
-    line: Line
+    line: MbtaLine
     eta: timedelta
     type: PredictionType
 
 
-def get_predictions(session: requests.Session, line: Line, api_key: str) -> list[Prediction]:
+def get_predictions(session: requests.Session, line: MbtaLine, api_key: str) -> list[Prediction]:
     predictions_response = session.get(
         "https://api-v3.mbta.com/predictions",
         params={
@@ -152,7 +141,7 @@ def get_predictions(session: requests.Session, line: Line, api_key: str) -> list
     return results
 
 
-def get_alert(session: requests.Session, line: Line, api_key: str) -> str | None:
+def get_alert(session: requests.Session, line: MbtaLine, api_key: str) -> str | None:
     response = session.get(
         "https://api-v3.mbta.com/alerts",
         params={
@@ -208,7 +197,7 @@ def get_alert(session: requests.Session, line: Line, api_key: str) -> str | None
     return mbta_text
 
 
-MbtaData: TypeAlias = tuple[list[Prediction], str | None, Line | None]
+MbtaData: TypeAlias = tuple[list[Prediction], str | None, MbtaLine | None]
 
 
 def darken_hex(color: str):
@@ -220,27 +209,18 @@ def darken_hex(color: str):
 class MBTA(Screen[MbtaData]):
     CACHE_TTL = 30
 
-    def __init__(self, config: dict, size: PanelSize):
+    def __init__(self):
         self.scroll_idx = 0
+        config = get_config().screens.mbta
+        self.api_key = config.api_key
+        self.lines = config.lines
 
-        self.lines = []
-        for item in config["lines"]:
-            self.lines.append(
-                Line(
-                    symbol=item["symbol"],
-                    headsign=item["headsign"],
-                    label=item["label"],
-                    color=item["color"],
-                    stop_id=item["stop_id"],
-                    route_id=item["route_id"],
-                    direction_id=item["direction_id"],
-                )
-            )
-
-        super().__init__(config, size)
+        super().__init__()
 
     def fetch_data(self):
-        api_key = self.config["api_key"]
+        api_key = self.api_key
+        if not api_key:
+            return self.fallback_data()
 
         with ThreadPoolExecutor() as tpe:
             predictions = [

@@ -17,6 +17,7 @@ dependencies = [
     "spotipy==2.19.0",
     "python-dotenv==1.0.1",
     "cairosvg>=2.9.0",
+    "pydantic>=2.13.4",
 ]
 
 [dependency-groups]
@@ -57,3 +58,8 @@ docstring-code-format = true
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
+
+[tool.pyrefly]
+project-includes = [
+    "**/*.py*",
+]

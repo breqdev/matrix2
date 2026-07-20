@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import TypeAlias
 
-from matrix.utils.panels import Drawable, PanelSize
+from matrix.utils.panels import Drawable
 
 
 class ModeType(enum.StrEnum):
@@ -21,8 +21,7 @@ ChangeMode: TypeAlias = Callable[[ModeType], None]
 class BaseMode(ABC, Drawable):
     change_mode: ChangeMode
 
-    def __init__(self, change_mode: ChangeMode, size: PanelSize) -> None:
-        super().__init__(size)
+    def __init__(self, change_mode: ChangeMode) -> None:
         self.change_mode = change_mode
 
     @abstractmethod

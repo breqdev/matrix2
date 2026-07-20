@@ -5,6 +5,7 @@ from PIL import Image
 from spotipy.oauth2 import SpotifyOAuth
 
 from matrix.screens.screen import Screen
+from matrix.utils.config import get_config
 
 scope = "user-read-currently-playing user-read-playback-state"
 
@@ -16,7 +17,7 @@ class Spotify(Screen[Image.Image | None]):
 
     def fetch_data(self):
         if not self.has_login:
-            for account in self.config["users"]:
+            for account in get_config().screens.spotify.users:
                 print(f"Logging in {account}...")
                 auth_manager = SpotifyOAuth(
                     scope=scope,
