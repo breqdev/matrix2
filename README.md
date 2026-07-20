@@ -18,16 +18,26 @@
 
 # Development
 
-Set up a virtual environment and install the requirements:
+Install the prerequisites for your platform:
+
+## MacOS
 
 ```bash
-uv sync
-# or
+./scripts/setup_brew.sh
+```
+
+## Other 
+Optionally install [uv](https://docs.astral.sh/uv/getting-started/installation/), (and [bun](https://bun.com/docs/installation) if you plan to work on matter support), then set up a virtual environment and install the requirements:
+
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e .
+# or
+uv sync
 ```
 
+## Configuration & Usage
 Set up your configuration in matrix.toml
 
 ```bash

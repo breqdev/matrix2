@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw
 
 from matrix.modes.mode import BaseMode, ChangeMode, ModeType
 from matrix.resources.fonts import font
-from matrix.utils.panels import PanelSize
+from matrix.utils.config import get_panel_size
 
 
 @dataclass
@@ -15,8 +15,8 @@ class MenuOption:
 
 
 class Menu(BaseMode):
-    def __init__(self, change_mode: ChangeMode, size: PanelSize) -> None:
-        super().__init__(change_mode, size)
+    def __init__(self, change_mode: ChangeMode) -> None:
+        super().__init__(change_mode)
 
         self.options: list[MenuOption] = [
             MenuOption("Home", ModeType.MAIN),
@@ -40,7 +40,7 @@ class Menu(BaseMode):
         self.selected_option = (self.selected_option - 1) % len(self.options)
 
     def get_image(self) -> Image.Image:
-        image = self.size.value.image()
+        image = get_panel_size().empty_image()
         draw = ImageDraw.Draw(image)
 
         draw.text((0, 1), text="  Settings   ", font=font, fill="#ffffff")

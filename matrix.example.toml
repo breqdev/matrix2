@@ -1,3 +1,4 @@
+#:schema ./matrix_schema.json
 [panel]
 # size = "64x32"
 size = "64x64"

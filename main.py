@@ -11,6 +11,7 @@ load_dotenv()
 
 # project
 from matrix.app import App  # noqa: E402
+from matrix.utils.config import get_config  # noqa: E402
 
 parser = argparse.ArgumentParser(
     prog="matrix",
@@ -22,9 +23,12 @@ parser.add_argument("--logfile", default="/var/log/matrix.log")
 
 args = parser.parse_args()
 
+# Load the config first, then update with command-line args
+config = get_config(simulate_arg=args.simulate)
+
 logging.basicConfig(level=logging.INFO)
 
-if not args.simulate:
+if not config.is_simulated:
     datadog.initialize(statsd_disable_buffering=False)
 
     handler = logging.FileHandler(filename=args.logfile)

@@ -18,10 +18,9 @@ from matrix.screens.mbta import MBTA
 from matrix.screens.screen import Screen
 from matrix.screens.spotify import Spotify
 from matrix.screens.weather import Weather
-from matrix.utils.config import parse_config
+from matrix.utils.config import get_config
 from matrix.utils.matter import Matter
 from matrix.utils.no_connection import get_image_no_connection
-from matrix.utils.panels import PanelSize
 from matrix.web_ui import WebUI
 
 logger = logging.getLogger(__name__)
@@ -29,43 +28,35 @@ logger = logging.getLogger(__name__)
 
 class App:
     def __init__(self) -> None:
-        self.config = parse_config()
-
-        match self.config["panel"]["size"]:
-            case "64x64":
-                self.panel = PanelSize.PANEL_64x64
-            case "64x32":
-                self.panel = PanelSize.PANEL_64x32
-            case unknown:
-                raise ValueError(f"Unexpected panel size: {unknown}")
+        self.config = get_config()
 
         self.matter = None
-        if self.config["panel"]["simulation"]:
+        if self.config.is_simulated:
             self.hardware = None
         else:
             from matrix.utils.hardware import Hardware
 
-            self.hardware = Hardware(self.panel, self.config["panel"]["brightness"])
+            self.hardware = Hardware()
 
         screens: list[Screen[Any]] = [
-            MBTA(self.config["screens"]["mbta"], self.panel),
-            Spotify(self.config["screens"]["spotify"], self.panel),
-            Weather(self.config["screens"]["weather"], self.panel),
-            Forecast(self.config["screens"]["forecast"], self.panel),
-            BlueBikes(self.config["screens"]["bluebikes"], self.panel),
-            # Octoprint(self.config["screens"]["octoprint"], self.panel),
+            MBTA(),
+            Spotify(),
+            Weather(),
+            Forecast(),
+            BlueBikes(),
+            # Octoprint(),
         ]
         self.modes: dict[ModeType, BaseMode] = {
-            ModeType.MAIN: Main(self.change_mode, self.panel, screens, self.config),
-            ModeType.MENU: Menu(self.change_mode, self.panel),
-            ModeType.SCREENS: Screens(self.change_mode, self.panel, screens),
-            ModeType.OFF: Off(self.change_mode, self.panel),
+            ModeType.MAIN: Main(self.change_mode, screens),
+            ModeType.MENU: Menu(self.change_mode),
+            ModeType.SCREENS: Screens(self.change_mode, screens),
+            ModeType.OFF: Off(self.change_mode),
         }
 
         if self.hardware is not None:
-            brightness = Brightness(self.change_mode, self.panel, hardware=self.hardware)
+            brightness = Brightness(self.change_mode, hardware=self.hardware)
             self.modes[ModeType.BRIGHTNESS] = brightness
-            if self.config["panel"].get("matter"):
+            if not self.config.is_simulated and self.config.screens.matter:
                 self.matter = Matter(brightness)
                 self.matter.start()
             self.hardware.dial.when_rotated_clockwise = self.handle_rotation_clockwise
@@ -73,12 +64,12 @@ class App:
             self.hardware.button.when_pressed = self.handle_press
 
         if sys.platform == "linux":
-            self.modes[ModeType.NETWORK] = Network(self.change_mode, self.panel)
+            self.modes[ModeType.NETWORK] = Network(self.change_mode)
 
         self.active_mode: ModeType = ModeType.MAIN
 
         self.ui = WebUI(
-            port=8080 if self.config["panel"]["simulation"] else 80,
+            port=8080 if self.config.is_simulated else 80,
             on_rotation_clockwise=self.handle_rotation_clockwise,
             on_rotation_counterclockwise=self.handle_rotation_counterclockwise,
             on_press=self.handle_press,
@@ -112,7 +103,7 @@ class App:
                     image = mode.get_image()
                 except Exception as e:
                     logger.exception("Exception when drawing image: %s", e)
-                    image = get_image_no_connection(self.panel)
+                    image = get_image_no_connection()
 
                 if image != prev_image and image is not None:  # Only send the image if it's different
                     self.ui.send_frame(image)
