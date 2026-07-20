@@ -8,6 +8,7 @@ from threading import Thread
 
 from matrix.modes.brightness import MAX_BRIGHTNESS, Brightness
 from matrix.modes.mode import ModeType
+from matrix.utils.bun import find_bun
 
 log = getLogger(__name__)
 
@@ -85,7 +86,4 @@ class Matter:
 
     def start(self):
         Thread(target=self.listen).start()
-        Popen(
-            ["/home/pi/.bun/bin/bun", "run", "start"],
-            cwd="./matter",
-        )
+        Popen([find_bun(), "run", "start"], cwd="./matter")

@@ -7,6 +7,7 @@ from PIL import Image, ImageDraw
 
 from matrix.resources.fonts import font
 from matrix.screens.screen import Screen
+from matrix.utils.bun import find_bun
 from matrix.utils.config import get_config
 
 
@@ -18,7 +19,10 @@ class MakeAFish(Screen[tuple[Image.Image, Image.Image]]):
         match provider:
             case "amy":
                 svg = subprocess.run(
-                    ["/home/pi/.bun/bin/bun", "scripts/amy_fish.js"], capture_output=True, text=True, check=True
+                    [find_bun(), "scripts/amy_fish.js"],
+                    capture_output=True,
+                    text=True,
+                    check=True,
                 ).stdout
                 data = svg2png(bytestring=svg.encode("utf-8"))
 
