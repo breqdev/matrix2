@@ -68,7 +68,7 @@ class WebUI:
             on_press()
             return "", 204
 
-        self.thread = threading.Thread(target=self.run, args=(port,))
+        self.thread = threading.Thread(target=self.run, args=(port,), daemon=True)
         self.thread.start()
 
     def run(self, port: int) -> None:

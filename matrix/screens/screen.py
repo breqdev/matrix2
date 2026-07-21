@@ -31,7 +31,7 @@ class Screen(ABC, Drawable, Generic[T]):
         self.has_data = threading.Event()
         self.cancel_timer = threading.Event()
 
-        self.thread = threading.Thread(target=self.background_fetcher)
+        self.thread = threading.Thread(target=self.background_fetcher, daemon=True)
         self.thread.start()
 
         self.is_enabled = True

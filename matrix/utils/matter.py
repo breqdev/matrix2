@@ -85,5 +85,5 @@ class Matter:
                             self.socks.discard(s)
 
     def start(self):
-        Thread(target=self.listen).start()
+        Thread(target=self.listen, daemon=True).start()
         Popen([find_bun(), "run", "start"], cwd="./matter")
