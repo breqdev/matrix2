@@ -68,27 +68,37 @@ class BlueBikes(Screen[tuple[Any, Any] | None]):
 
         for i, (sta_id, info) in enumerate(status.items()):
             draw.text((1, 10 + 18 * i), text=self.stations[sta_id], font=font, fill="#999999")
-            image.paste(Image.open("icons/bike.png"), (1, 18 + 18 * i))
-            draw.text(
-                (12, 19 + 18 * i),
-                text=f"{info['num_bikes_available']:0>2}",
-                font=font,
-                fill="#2CA3E1",
-            )
-            image.paste(Image.open("icons/ebike.png"), (25, 18 + 18 * i))
-            draw.text(
-                (31, 19 + 18 * i),
-                text=f"{info['num_ebikes_available']:0>2}",
-                font=font,
-                fill="#b6d3d4",
-            )
-            image.paste(Image.open("icons/parking.png"), (45, 18 + 18 * i))
-            draw.text(
-                (53, 19 + 18 * i),
-                text=f"{info['num_docks_available']:0>2}",
-                font=font,
-                fill="#4254f5",
-            )
+
+            if not info["is_renting"] or not info["is_returning"]:
+                # Station out of service
+                draw.text(
+                    (1, 19 + 18 * i),
+                    text="out of service",
+                    font=smallfont,
+                    fill="#ff4444",
+                )
+            else:
+                image.paste(Image.open("icons/bike.png"), (1, 18 + 18 * i))
+                draw.text(
+                    (12, 19 + 18 * i),
+                    text=f"{info['num_bikes_available']:0>2}",
+                    font=font,
+                    fill="#2CA3E1",
+                )
+                image.paste(Image.open("icons/ebike.png"), (25, 18 + 18 * i))
+                draw.text(
+                    (31, 19 + 18 * i),
+                    text=f"{info['num_ebikes_available']:0>2}",
+                    font=font,
+                    fill="#b6d3d4",
+                )
+                image.paste(Image.open("icons/parking.png"), (45, 18 + 18 * i))
+                draw.text(
+                    (53, 19 + 18 * i),
+                    text=f"{info['num_docks_available']:0>2}",
+                    font=font,
+                    fill="#4254f5",
+                )
 
         return image
 
