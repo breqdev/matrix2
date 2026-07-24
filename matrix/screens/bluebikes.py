@@ -72,7 +72,7 @@ class BlueBikes(Screen[tuple[Any, Any] | None]):
             if not info["is_renting"] or not info["is_returning"]:
                 # Station out of service
                 draw.text(
-                    (1, 19 + 18 * i),
+                    (4, 19 + 18 * i),
                     text="out of service",
                     font=smallfont,
                     fill="#ff4444",
