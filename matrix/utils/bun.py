@@ -8,14 +8,14 @@ def find_bun() -> Path:
         return Path(bun_on_path)
 
     # If this user has an installation of Bun, use it
-    if (Path.home() / ".bun").exists():
+    if (Path.home() / ".bun" / "bin").exists():
         return Path.home() / ".bun" / "bin" / "bun"
 
     # If the owner of the current working directory has an
     # installation of Bun, use it
     # (Useful when bun is installed as "pi" but script is "root")
     owner_path = Path(f"~{Path.cwd().owner()}").expanduser()
-    if (owner_path / ".bun").exists():
+    if (owner_path / ".bun" / "bin").exists():
         return owner_path / ".bun" / "bin" / "bun"
 
     raise RuntimeError("Failed to find Bun executable")
