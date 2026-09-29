@@ -98,7 +98,7 @@ class BlueBikes(Screen[tuple[Any, Any] | None]):
 
         if self.data is None:
             for i, sta_id in enumerate(self.stations):
-                draw.text((1, 1 + 16 * i), text=self.stations[sta_id], font=font, fill="#999999")
+                draw.text((1, 1 + 16 * i), text=self.stations[sta_id], font=smallfont, fill="#999999")
                 image.paste(Image.open("icons/bike.png"), (1, 8 + 16 * i))
                 draw.text((12, 9 + 16 * i), text="??", font=font, fill="#2CA3E1")
                 image.paste(Image.open("icons/ebike.png"), (25, 8 + 16 * i))
