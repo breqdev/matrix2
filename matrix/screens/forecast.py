@@ -64,7 +64,7 @@ class Forecast(Screen[ForecastData | None]):
 
         daily = self.data["daily"]
 
-        if datetime.datetime.now().hour < 12:
+        if datetime.datetime.now().hour < 12:  # noqa: SIM108
             # morning, show the current day + following days
             day_indices = [0, 1, 2]
         else:
@@ -112,7 +112,7 @@ class Forecast(Screen[ForecastData | None]):
 
         daily = self.data["daily"]
 
-        if datetime.datetime.now().hour < 12:
+        if datetime.datetime.now().hour < 12:  # noqa: SIM108
             # morning, show the current day + following days
             day_indices = [0, 1]
         else:
