@@ -64,8 +64,14 @@ class Forecast(Screen[ForecastData | None]):
 
         daily = self.data["daily"]
 
-        # Indices 1-3 skip today
-        for i, day_index in enumerate([1, 2, 3]):
+        if datetime.datetime.now().hour < 12:  # noqa: SIM108
+            # morning, show the current day + following days
+            day_indices = [0, 1, 2]
+        else:
+            # afternoon/evening, show the following days only
+            day_indices = [1, 2, 3]
+
+        for i, day_index in enumerate(day_indices):
             y = 10 + i * 18
 
             date_str = daily["time"][day_index]
@@ -106,7 +112,14 @@ class Forecast(Screen[ForecastData | None]):
 
         daily = self.data["daily"]
 
-        for i, day_index in enumerate([1, 2]):
+        if datetime.datetime.now().hour < 12:  # noqa: SIM108
+            # morning, show the current day + following days
+            day_indices = [0, 1]
+        else:
+            # afternoon/evening, show the following days only
+            day_indices = [1, 2]
+
+        for i, day_index in enumerate(day_indices):
             y = i * 16
 
             date_str = daily["time"][day_index]
